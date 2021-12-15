@@ -1,0 +1,141 @@
+//------------------------------------------------------------------------------------
+// MIT License
+//
+// Copyright (c) 2021 vzroman
+// Author: Vozzhenikov Roman, vzroman@gmail.com
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+//     The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+//     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//------------------------------------------------------------------------------------
+
+import {types} from "../types/index.js";
+import {Type as Parent} from "../types/type.js";
+
+
+export class View extends Parent{
+
+    static options = {
+        $container:{type:types.primitives.Any,required:true},
+        enable:{type:types.primitives.Bool, default:true},
+        focus:{type:types.primitives.Bool, default:false},
+        widgets:{type:types.primitives.Set}
+    };
+
+    static markup = undefined;
+
+    static widgets = {};
+
+    constructor( options ){
+        super( options );
+
+        this.$markup = $( this.constructor.markup ).appendTo( this._options.$container );
+
+        // init widgets
+        const $widgets = Object.keys( this.constructor.widgets ).reduce((acc,id)=>{
+            const $container = this.$markup.find(`[name="${ id }"]`);
+            if (!$container.length){
+                console.warn("undefined container for widget", id);
+            }else{
+                acc[id] = $container;
+            }
+            return acc;
+        },{});
+
+        this._widgets = Object.entries($widgets).reduce((acc,[id, $container])=>{
+
+            // Initialize the widget with default options
+            const {view, ...options} = this.constructor.widgets[id];
+
+            // init the widget with default (static) options
+            const widget = new view({$container,...options});
+
+            // Initialize default links
+            widget.link( this._controller );
+
+            // If options for the widget are overridden
+            if (this._options.widgets && this._options.widget[id]){
+
+                // update the widget with defined externally options.
+                // IMPORTANT! New links and events for the widget also
+                // come from somewhere
+                widget.options( this._options.widget[id] );
+            }
+
+            acc[id] = widget;
+            return acc;
+        },{});
+
+        this._controller.bind("focus", value=>{
+            if (value){
+                this.focus();
+                this._controller.set({focus:false});
+            }
+        });
+
+        this._controller.bind("enable", value=>{
+            this.enable( value );
+        });
+    }
+
+    link( controller ){
+
+        // Init own links and events to the external data
+        super.link( controller );
+
+        // Link the widgets to the external data
+        if ( this._widgets ){
+            Object.values(this._widgets).forEach(widget=>{
+                widget.link( controller );
+            })
+        }
+    }
+
+
+    focus(){
+        const options = this.constructor.options;
+        for (let p in options){
+            if (
+                options[p].required
+                && options[p].focus
+                && this._widgets[ options[p].focus ]
+                && this._options[p] === undefined){
+                this._widgets[p].set({focus:true});
+                break;
+            }
+        }
+    }
+
+    enable( value ){
+        if (this._widgets){
+            Object.values(this._widgets).forEach(widget => {
+                widget.set({enable:value});
+            });
+        }
+    }
+
+
+    destroy(){
+        if (this._widgets){
+            Object.values(this._widgets).forEach(widget =>{
+                widget.destroy();
+            });
+            this._widgets = undefined;
+        }
+        this.$markup.remove();
+    }
+}
