@@ -30,7 +30,7 @@ import {Type as Parent} from "../types/type.js";
 export class View extends Parent{
 
     static options = {
-        $container:{type:types.primitives.Any,required:true},
+        $container:{type:types.primitives.Any,required:true, virtual:true },
         enable:{type:types.primitives.Bool, default:true},
         focus:{type:types.primitives.Bool, default:false},
         widgets:{type:types.primitives.Set}

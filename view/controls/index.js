@@ -22,7 +22,8 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
+import {Control} from "./control.js";
 
 export const controls = {
-
+    Control
 };

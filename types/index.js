@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 import {types as primitives} from "./primitives/index.js";
-import {types as complex} from "./item/index.js";
+import {types as complex} from "./complex/index.js";
 
 export const types = {
     primitives,
