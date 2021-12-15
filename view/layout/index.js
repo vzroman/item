@@ -23,8 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Layout as Tabstrip} from "./tabstrip.js";
 
 export const layout = {
-    Tabstrip
+
 };
