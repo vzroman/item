@@ -97,6 +97,7 @@ export class Type {
         if (sources instanceof Type){
             sources = {data: sources};
         }
+        const defaultSource = sources.data || sources.parent;
 
         // Links
         Object.entries(this._options.links).forEach(([ property, link])=>{
@@ -105,14 +106,28 @@ export class Type {
             // { source, event, handler }
             // By default the source is data
             if (typeof link === "string"){
-                link = {source: sources.data, event: link}
+                link = {source: defaultSource, event: link}
             }else if(typeof link === "object" && typeof link.event === "string"){
-                link.source = link.source || sources.data;
+                if (typeof link.source === "string"){
+                    // The source is defined
+                    if ( !sources[link.source] ){
+                        // The source is not provided
+                        console.warn("skip the link for not provided source", link.source);
+                        link = undefined;
+                    }else{
+                        link.source = sources[link.source];
+                    }
+                }else{
+                    link.source = defaultSource;
+                }
             }else{
-                throw new Error("invalid link settings");
+                console.error("invalid link settings", link);
+                link = undefined;
             }
 
-            new Link({...link, target:this, property})
+            if (link){
+                new Link({...link, target:this, property});
+            }
 
         });
 
@@ -125,17 +140,28 @@ export class Type {
                 params = {handler:params }  // No target
             }else if (typeof params === "string"){
                 // Just name of the property in data item
-                params = { target:sources.data, property:params }
+                params = { target:defaultSource, property:params }
             }else if(typeof params === "object" && (params.handler || params.property)){
                 if (params.property){
-                    params.target = params.target || sources.data;
+                    if (typeof params.target === "string"){
+                        if (!sources[params.target]){
+                            console.warn("skip the event for not provided target", params.target);
+                            params = undefined;
+                        }else{
+                            params.target = sources[params.target];
+                        }
+                    }else{
+                        params.target = defaultSource;
+                    }
                 }else if (params.target){
-                    throw new Error("undefined target property in the event");
+                    console.error("invalid event settings", params);
+                    params = undefined;
                 }
             }
 
-            new Link({...params, source:this, event});
-
+            if (params){
+                new Link({...params, source:this, event});
+            }
         });
 
         return sources;

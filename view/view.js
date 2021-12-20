@@ -90,13 +90,20 @@ export class View extends Parent{
     link( sources ){
 
         // Init own links and events to the external data
-        sources = {...super.link( sources ), parent:this};
+        sources = super.link( sources );
+
+        this.linkWidgets( sources );
+    }
+
+    linkWidgets( sources ){
+
+        sources = {...sources,parent:this};
 
         // Link the widgets to the external data
         if ( this._widgets ){
             Object.values(this._widgets).forEach(widget=>{
                 widget.link( sources );
-            })
+            });
         }
     }
 
