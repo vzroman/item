@@ -25,8 +25,10 @@
 
 import * as css from "./css.js";
 import * as data from "./data.js";
+import * as errors from "./errors.js";
 
 export const util = {
     css,
-    data
+    data,
+    errors
 };

@@ -23,11 +23,22 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type as Any} from "./any.js";
+import {Type as Parent} from "../type.js";
+import {types} from "../index.js";
+import {View} from "../../view/view.js";
 
-export class Type extends Any{
+export class Type extends Parent{
+
+    static options = this.extend({
+        view:{type:types.primitives.Any, required: true, default:View}
+    });
 
     coerce( value ){
-        return "" + value;
+        if ( value instanceof this._options.view){
+            return value;
+        }else{
+            return undefined;
+        }
     }
 }
+

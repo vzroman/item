@@ -30,7 +30,7 @@ export class Type extends Parent{
 
     constructor( options ){
         super( options );
-        this._schema = new Schema( this.constructor.override() );
+        this._schema = new Schema( this.constructor.options );
     }
 
     coerce( value ){

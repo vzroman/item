@@ -23,11 +23,15 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type as Any} from "./any.js";
+import {Type as Parent} from "../type.js";
 
-export class Type extends Any{
+export class Type extends Parent{
 
     coerce( value ){
-        return "" + value;
+        if ( typeof value === "function" ){
+            return value;
+        }else{
+            return undefined;
+        }
     }
 }

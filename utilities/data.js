@@ -149,8 +149,9 @@ export function patchMerge(P1, P2) {
     if (! (P2 instanceof Object)){
         return P1;
     }
-    Object.entries(P2).forEach(([k,[v0,v1]])=>{
-        P1[k] = [ P1[k] ? P1[k][0] : v0, v1 ];
+    return Object.entries(P2).reduce((acc,[k,[v0,v1]])=>{
+        acc[k] = [ P1[k] ? P1[k][0] : v0, v1 ];
+        return acc;
     });
 }
 

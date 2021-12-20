@@ -29,6 +29,7 @@ import {Type as String} from "./string.js";
 import {Type as Integer} from "./integer.js";
 import {Type as Set} from "./set.js";
 import {Type as Array} from "./array.js";
+import {Type as Fun} from "./fun.js";
 
 
 export const types = {
@@ -37,5 +38,6 @@ export const types = {
     Integer,
     String,
     Set,
-    Array
+    Array,
+    Fun
 };

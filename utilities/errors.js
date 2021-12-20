@@ -23,11 +23,23 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type as Any} from "./any.js";
+export class InvalidOptions extends Error{
+    constructor(Type, Options){
 
-export class Type extends Any{
+        super("invalid options");
 
-    coerce( value ){
-        return "" + value;
+        this.type = Type;
+        this.options = Options;
+        this.expected = Type.options;
+    }
+}
+
+export class InvalidEvent extends Error{
+    constructor(Type, event){
+
+        super("invalid event: " + event);
+
+        this.type = Type;
+        this.event = event;
     }
 }

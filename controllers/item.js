@@ -23,26 +23,58 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
+import {types} from "../types/index.js";
+import {Attribute} from "./schema.js";
 import * as util from "../utilities/data.js";
 import {Schema} from "./schema.js";
 
-export class Controller {
-    constructor( options ){
+export class Controller extends types.Type{
 
-        this._options = { ...{
-            schema: undefined,
-            autoCommit:true,
-        }, ...options};
+    static options = this.extend({
+        schema:{type:types.complex.Set, options:{ schema:Attribute.options }, required:true },
+        autoCommit:{type:types.primitives.Bool, default:true }
+    });
+
+    static events = {
+        init:types.primitives.Any,
+        beforeChange:types.primitives.Any,
+        change:types.primitives.Any,
+        commit:types.primitives.Any,
+    };
+
+    constructor( options ){
+        super( options );
 
         // Initialize the schema
-        this._schema = undefined;
-        if (this._options.schema){
-            this._schema = new Schema( this._options.schema );
-        }
-
+        this._schema = new Schema({ attributes:this._options.schema});
 
         this._data = undefined;
         this._changes = undefined;
+
+        this._controller.bind("autoCommit", value =>{
+            if (value){  this.commit(); }
+        });
+
+        // TODO. Do we need to subscribe to schema changes?
+    }
+
+    bind(event, callback){
+
+        if (this.constructor.events[event]){
+            // Subscriptions to events overlap subscriptions to properties
+            return this._bind(event, callback);
+
+        } else if (this._options.schema[event]){
+
+            // Unlike other types Controller subscribes
+            // to the controlled item changes but not to it's own
+            return this._bind( event, callback );
+        }
+    }
+
+    unbind( id ){
+        // Unbind item changes
+        this._unbind( id );
     }
 
     //-------------------------------------------------------------------
@@ -109,9 +141,7 @@ export class Controller {
     _set( properties ){
 
         // Validate & parse values
-        if ( this._schema ){
-            properties = this._schema.set( properties );
-        }
+        properties = this._schema.set( properties );
 
         // ATTENTION! The properties are passed by reference,
         // the event's callbacks are able to change values
@@ -119,15 +149,15 @@ export class Controller {
         // TODO. Do we need to validate the properties after executing the callbacks?
 
         // Calculated the changes for the actual version of the data
-        const changes = util.diff( this._get(), properties );
+        const changes = util.diff( this._get( Object.keys( properties ) ), properties );
 
         // No real changes - no triggering events, no commit
         if ( !changes ){ return }
 
         // Add new changes
-        util.patchMerge( this._changes, changes );
+        this._changes = util.patchMerge( this._changes, changes );
 
-        // Trigger events related to subscriptions to properties.
+        // Trigger events related to item properties.
         Object.entries( changes ).forEach(([prop, change])=>{
             this._trigger(prop, change);
         });
@@ -147,11 +177,11 @@ export class Controller {
                     reject("inconsistent data");
                 }
                 this._commit().then(()=>{
-
                     this._data = util.patch(this._data, this._changes);
+                    const changes = util.patch2value(this._changes, 0);
                     this._changes = undefined;
 
-                    this._trigger("commit", util.deepCopy(this._data));
+                    this._trigger("commit",changes);
 
                     resolve();
                 }, reject);
@@ -165,65 +195,13 @@ export class Controller {
     }
 
     //-------------------------------------------------------------------
-    // Events API
-    //-------------------------------------------------------------------
-    bind(type, handler){
-
-        if (typeof handler!=="function") { return }
-
-        this.__events=this.__events||{
-            id:0,
-            callbacks:{},
-            index:{}
-        };
-
-        // Unique id for the handler. The is an increment
-        // it makes possible to run callbacks in the same order
-        // they subscribed
-        const id=this.__events.id++;
-
-        this.__events.index[id]=type;
-        this.__events.callbacks[type]={...this.__events[type],...{[id]:handler}};
-
-        return id;
-    }
-
-    unbind(id){
-        const type=this.__events?this.__events.index[id]:undefined;
-        if (type){
-            delete this.__events.index[id];
-            delete this.__events.callbacks[type][id];
-        }
-    }
-
-    _trigger(type, params) {
-        const callbacks=this.__events?this.__events.callbacks[type]:undefined;
-
-        if (callbacks){
-            if (!Array.isArray(params)){
-                params = [params];
-            }
-            Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
-                try{
-                    callbacks[id].apply(this, params);
-                }catch(e){
-                    console.error("invalid event callback",e.stack);
-                }
-            });
-        }
-    }
-
-    //-------------------------------------------------------------------
     // Clean UP
     //-------------------------------------------------------------------
     destroy(){
-        this.__events = undefined;
-        if (this._schema){
-            this._schema.destroy();
-            this._schema = undefined;
-        }
+        super.destroy();
+        this._schema.destroy();
+        this._schema = undefined;
         this._data = undefined;
         this._changes = undefined;
-        this._options = undefined;
     }
 }

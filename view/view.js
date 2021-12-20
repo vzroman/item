@@ -25,16 +25,17 @@
 
 import {types} from "../types/index.js";
 import {Type as Parent} from "../types/type.js";
+import {deepMerge} from "../utilities/data";
 
 
 export class View extends Parent{
 
-    static options = {
+    static options = this.extend({
         $container:{type:types.primitives.Any,required:true, virtual:true },
-        enable:{type:types.primitives.Bool, default:true},
-        focus:{type:types.primitives.Bool, default:false},
+        enable:{type:types.primitives.Bool, default:true, virtual:true},
+        focus:{type:types.primitives.Bool, default:false, virtual:true},
         widgets:{type:types.primitives.Set}
-    };
+    });
 
     static markup = undefined;
 
@@ -59,31 +60,25 @@ export class View extends Parent{
         this._widgets = Object.entries($widgets).reduce((acc,[id, $container])=>{
 
             // Initialize the widget with default options
-            const {view, ...options} = this.constructor.widgets[id];
-
-            // init the widget with default (static) options
-            const widget = new view({$container,...options});
-
-            // Initialize default links
-            widget.link( this._controller );
+            let {view, ...options} = this.constructor.widgets[id];
 
             // If options for the widget are overridden
-            if (this._options.widgets && this._options.widget[id]){
+            if (this._options.widgets && this._options.widgets[id]){
 
                 // update the widget with defined externally options.
                 // IMPORTANT! New links and events for the widget also
                 // come from somewhere
-                widget.options( this._options.widget[id] );
+                options = deepMerge( options, this._options.widgets[id] );
             }
 
-            acc[id] = widget;
+            acc[id] = new view({$container,...options});;
             return acc;
         },{});
 
         this._controller.bind("focus", value=>{
             if (value){
                 this.focus();
-                this._controller.set({focus:false});
+                this.set({focus:false});
             }
         });
 
@@ -92,15 +87,15 @@ export class View extends Parent{
         });
     }
 
-    link( controller ){
+    link( sources ){
 
         // Init own links and events to the external data
-        super.link( controller );
+        sources = {...super.link( sources ), parent:this};
 
         // Link the widgets to the external data
         if ( this._widgets ){
             Object.values(this._widgets).forEach(widget=>{
-                widget.link( controller );
+                widget.link( sources );
             })
         }
     }

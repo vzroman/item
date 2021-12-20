@@ -45,13 +45,13 @@ export class Schema{
         for (let p in this._attributes){
 
             // TODO. Virtual fields are not returned, because they cannot be committed and saved?
-            if (this._attributes[p].virtual ){ continue }
+            if (this._attributes[p].get("virtual") ){ continue }
 
             result[ p ] = this._attributes[ p ].coerce( properties[p] );
 
             // If one of the required properties is not defined then the whole result
             // is undefined
-            if ( result[ p ] === undefined && this._attributes[ p ].isRequired() ){
+            if ( result[ p ] === undefined && this._attributes[ p ].get("required") ){
                 result = undefined;
                 break;
             }
@@ -91,28 +91,38 @@ export class Schema{
 
 export class Attribute extends Parent{
 
-    static options = {
+    static options = this.extend({
         type:{type:Parent, required:true, default: types.primitives.Any},
         required:{type:types.primitives.Any},
         default:{type:types.primitives.Any},
         virtual:{type:types.primitives.Bool, default:false }
-    };
+    });
 
     constructor( options ){
         // We extracted our own options
         super( options );
 
+        this._initType();
         // Types has a static schema, they extract only their own options
-        this._type = new this._options.type( options );
 
-        // validate the default value
-        this._options.default = this._type.coerce( this._options.default );
 
-        this.virtual = this._options.virtual;
 
-        this.isRequired = typeof this._options.required === "function"
-            ? this._options.required
-            : () => !!this._options.required
+        this.bind("commit",changes=>{
+            if (changes.type){
+                this._initType();
+            }else if(changes.hasOwnProperty("default")){
+                this.set({default: this._type.coerce(this._options.default)})
+            }
+        });
+    }
+
+    _initType(){
+        if (this._type){
+            this._type.destroy();
+        }
+        this._type = new this._options.type( this._options.options );
+
+        this.set({default: this._type.coerce( this._options.default )});
     }
 
     coerce( value ){
@@ -128,5 +138,11 @@ export class Attribute extends Parent{
         } else {
             return value;
         }
+    }
+
+    destroy(){
+        this._type.destroy();
+        this._type = undefined;
+        super.destroy();
     }
 }

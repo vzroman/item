@@ -28,9 +28,9 @@ import {Schema,Attribute} from "../../controllers/schema.js";
 
 export class Type extends types.primitives.Set{
 
-    static options = {
-        schema:{type:Type, schema:Attribute.override(), required: true}
-    };
+    static options = this.extend({
+        schema:{type:Type, options:{schema:Attribute.options}, required: true}
+    });
 
     constructor( options ){
         super( options );

@@ -24,23 +24,16 @@
 //------------------------------------------------------------------------------------
 
 import {Controller as Item} from "../item.js";
+import {Attribute} from "../schema.js";
+import {types} from "../../types/index.js";
 
 export class Controller extends Item{
-    constructor( options ){
 
-        options = {...{
-                connection: undefined,   // required!
-                timeout: 60000,
-                subscribe: false         // TODO. the data is synchronized with database
-            }, ...options };
-
-        if ( !options.connection ){ throw "connection is required"}
-
-        super( options );
-
-        this._data = undefined;
-        this._changes = undefined;
-    }
+    static options = this.extend({
+        connection:{type:types.primitives.Any, options:{ schema:Attribute.options }, required:true },
+        timeout:{type:types.primitives.Integer, default:60000 },
+        subscribe:{type:types.primitives.Bool }
+    });
 
     //-------------------------------------------------------------------
     // Data access API
@@ -52,7 +45,7 @@ export class Controller extends Item{
             if (!ID){ return resolve( undefined ) }
 
             this._ID = ID;
-            const fields = this._requestFields();
+            const fields = Object.keys( this._options.schema ).join(",");
 
             this._options.connection().query(`get ${ fields } from * where .oid = $oid('${ ID }') format $to_json`,([H,...Items])=>{
                 if (Items.length === 0){
@@ -88,28 +81,6 @@ export class Controller extends Item{
                     resolve( ID );
                 },reject, this._options.timeout);
             }
-        });
-    }
-
-    _requestFields(){
-        const schema = this._options.schema || {};
-        return Object.keys({
-
-            // All fields in the schema for which default values are defined
-            ...Object.entries(schema).reduce((acc,[f,settings])=>{
-                if (settings.hasOwnProperty("default")){
-                    acc[f] = true;
-                }
-                return acc;
-            },{}),
-
-            // All key in schema which are bound
-            ...Object.keys(schema).reduce((acc,f)=>{
-                if (this.__events.callbacks[f]){
-                    acc[f] = true;
-                }
-                return acc;
-            },{}),
         });
     }
 }

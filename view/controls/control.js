@@ -29,16 +29,16 @@ import {types} from "../../types/primitives/index.js";
 // The control is the point where external widgets to be attached
 export class Control extends View{
 
-    static options = {
+    static options = this.extend({
         value:{type:types.Any}
-    };
+    });
 
     constructor( options ){
         super( options );
 
         this._widget = undefined;
 
-        this._controller.bind("value",value=>{
+        this.bind("value",value=>{
             this._updateValue( value )
         });
     }
@@ -55,7 +55,7 @@ export class Control extends View{
     }
 
     getValue(){
-        return this._controller.get("value");
+        return this.get("value");
     }
 
     setValue(value){

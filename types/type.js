@@ -25,53 +25,128 @@
 
 import {types} from "./index.js";
 import {deepMerge,deepCopy} from "../utilities/data.js";
+import * as errors from "../utilities/errors.js";
 import {Controller} from "../controllers/item.js";
 
 export class Type {
 
     // The options are described as attributes
     static options = {
-        links:{type:types.primitives.Set, virtual:true },
-        events:{type:types.primitives.Set, virtual:true }
+        links:{type:types.primitives.Set, virtual:true, default:{} },
+        events:{type:types.primitives.Set, virtual:true, default:{} }
     };
 
+    static events = {
+        destroy:types.primitives.Any
+    };
 
-    constructor( options ){
-
-        // Options are linkable to data
-        this._controller = new Controller({
-            schema: this.constructor.override(),
-            autoCommit:true,
-        });
-
-        this._controller.init( options );
-
-        this._options = this._controller.get();
-
-        this._controller.bind("commit", options =>{
-            this._options = options;
-        });
-
-    }
-
-    static override(){
+    static extend( options ){
         if (Type.isPrototypeOf( this ) ){
             // I'm a successor of Type.
             // !Attention the strict inheritance the successor can extend the predecessor's options
             // But not to override them
-            return deepMerge( this.options, Object.getPrototypeOf(this).override() );
+
+            // Implicitly inherit events
+            this.events = deepMerge(this.events, Object.getPrototypeOf(this).events);
+
+            // Inherit options
+            return deepMerge( options, Object.getPrototypeOf(this).options );
         }else{
             // I'm the Type
             return deepCopy( this.options );
         }
     }
 
-    options( options ){
-        if ( Array.isArray( options ) || options === undefined ){
-            return this._controller.get( options );
-        }else{
-            return this._controller.set( options );
+
+    constructor( options ){
+
+        // Options are linkable to data
+        this._controller = new Controller({
+            schema: this.constructor.options,
+        });
+
+        this._controller.init( options );
+
+        this._options = this._controller.get();
+
+        if (!this._options){
+            throw new errors.InvalidOptions(this.constructor, options);
         }
+
+        // It's safe not to keep binding's id because I'll destroy
+        // my controller on own destroying
+        this._controller.bind("commit",changes =>{
+            this._options = {...this._options, ...changes};
+        });
+    }
+
+    //-------------------------------------------------------------------
+    // Link to external data
+    //-------------------------------------------------------------------
+
+    link( sources ){
+
+        // Normally sources id a set:
+        // {
+        //  data,
+        //  parent,
+        //  <some_source>
+        //  ...
+        // }
+        // By default the source is data
+        if (sources instanceof Type){
+            sources = {data: sources};
+        }
+
+        // Links
+        Object.entries(this._options.links).forEach(([ property, link])=>{
+
+            // Normally link has format:
+            // { source, event, handler }
+            // By default the source is data
+            if (typeof link === "string"){
+                link = {source: sources.data, event: link}
+            }else if(typeof link === "object" && typeof link.event === "string"){
+                link.source = link.source || sources.data;
+            }else{
+                throw new Error("invalid link settings");
+            }
+
+            new Link({...link, target:this, property})
+
+        });
+
+        // Events
+        Object.entries( this.options.events ).forEach(([event, params])=>{
+            // Normally params have format:
+            // { handler, target, property }
+            if (typeof params === "function"){
+                // No target just handler is defined - callback
+                params = {handler:params }  // No target
+            }else if (typeof params === "string"){
+                // Just name of the property in data item
+                params = { target:sources.data, property:params }
+            }else if(typeof params === "object" && (params.handler || params.property)){
+                if (params.property){
+                    params.target = params.target || sources.data;
+                }else if (params.target){
+                    throw new Error("undefined target property in the event");
+                }
+            }
+
+            new Link({...params, source:this, event});
+
+        });
+
+        return sources;
+    }
+
+    get( property ){
+        return this._controller.get( property );
+    }
+
+    set( properties ){
+        return this._controller.set( properties );
     }
 
     coerce( value ){
@@ -80,7 +155,7 @@ export class Type {
         }else if(typeof value === "string"){
 
             // The value of the type can be defined as a string "types.primitives.Any"
-            let index = types;
+            let index = {types};
             for (const i of value.split(".")){
                 if ( index[i] ){
                     index = index[i];
@@ -97,68 +172,128 @@ export class Type {
         }
     }
 
-    link( controller ){
 
-        // Links
-        const links = this._controller.get("links");
-        if ( links ){
-            Object.entries(links).forEach(([prop, params])=>{
-
-                // Properties go from up to down
-                link(controller, params , value =>{
-                    this._controller.set({[prop]:value});
-                });
-            })
+    //-------------------------------------------------------------------
+    // Events API
+    //-------------------------------------------------------------------
+    bind(event, callback){
+        if (this.constructor.events[event]){
+            // Subscriptions to events overlap subscriptions to properties
+            return [event, this._bind(event, callback)];
+        } else{
+            // Subscriptions to property changes
+            return [event, this._controller.bind(event, callback)];
         }
+    }
 
-        // Events
-        const events = this._controller.get("events");
-        if ( events ){
+    unbind( [event,id] ){
+        if (this.constructor.events[event]){
+            this._unbind( id );
+        } else{
+            this._controller.unbind( id );
+        }
+    }
 
-            Object.entries( events ).forEach(([event, params])=>{
+    _bind(type, callback){
 
-                // Events go from down to up
-                link(this._controller, params , value =>{
-                    controller.set({[event]:value});
-                })
-            })
+        if (typeof callback!=="function") { throw new Error("invalid callback") }
+
+        this.__events=this.__events||{
+            id:0,
+            callbacks:{},
+            index:{}
+        };
+
+        // Unique id for the handler. The is an increment
+        // it makes possible to run callbacks in the same order
+        // they subscribed
+        const id=this.__events.id++;
+
+        this.__events.index[id]=type;
+        this.__events.callbacks[type]={...this.__events[type],...{[id]:callback}};
+
+        return id;
+    }
+
+    _unbind(id){
+        const type=this.__events?this.__events.index[id]:undefined;
+        if (type){
+            delete this.__events.index[id];
+            delete this.__events.callbacks[type][id];
+        }
+    }
+
+    _trigger(type, params) {
+        const callbacks=this.__events?this.__events.callbacks[type]:undefined;
+
+        if (callbacks){
+            if (!Array.isArray(params)){
+                params = [params];
+            }
+            Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
+                try{
+                    callbacks[id].apply(this, params);
+                }catch(e){
+                    console.error("invalid event callback",e.stack);
+                }
+            });
         }
     }
 
     destroy(){
+        this._trigger("destroy");
+        this.__events = undefined;
         this._controller.destroy();
         this._controller = undefined;
         this._options = undefined;
     }
 }
 
-function link( controller, params, callback ) {
-    if (typeof params === "string"){
-        // simple direct link
-        controller.bind( params, callback );
+class Link{
+    constructor({source, event, handler, target, property}){
+        this._source = source;
+        this._sourceSubscriptions = [];
 
-        // The first init
-        return (async function () {
-            const value = await controller.get( params );
-            if (value !== undefined){
-                callback( value )
+        this._target = target;
+        this._targetSubscriptions = [];
+
+        // Self-destruction
+        this._sourceSubscriptions.push( this._source.bind("destroy",() => this.destroy()) );
+        if (this._target){
+            this._targetSubscriptions.push( this._target.bind("destroy",() => this.destroy()) );
+        }
+
+        // Default handler
+        handler = handler || (v=>v);
+
+        // The subscription
+        this._sourceSubscriptions.push( source.bind(event, async value=>{
+
+            // Handler can be asynchronous
+            value = await handler(value);
+
+            // The link could be destroyed while waiting for the handler
+            // or the link may don't have a target
+            if (this._target){
+                this._target.set({ [property]:value });
             }
-        })();
-    }else{
-        // Transformation
-        let {vars, value} = params;
+        }));
 
-        if (typeof vars === "string"){
-            vars = [vars];
-        }
+    }
 
-        vars.forEach(prop => controller.bind( prop, onChange ));
+    destroy(){
+        this._sourceSubscriptions.forEach( id =>{
+            this._source.unbind( id );
+        });
+        this._targetSubscriptions.forEach( id =>{
+            this._target.unbind( id );
+        });
 
-        async function onChange() {
-            callback( value.apply(this, await controller.get(vars) ) );
-        }
+        this._sourceSubscriptions = undefined;
+        this._targetSubscriptions = undefined;
 
-        // The first init
-        return onChange();
+        this._source = undefined;
+        this._target = undefined;
+
     }
 }
