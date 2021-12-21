@@ -23,7 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type as Parent} from "../type.js";
+import {Type as Parent} from "./any.js";
 
 export class Type extends Parent{
 
@@ -35,3 +35,4 @@ export class Type extends Parent{
         }
     }
 }
+Type.extend();

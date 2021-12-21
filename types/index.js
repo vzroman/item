@@ -23,7 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type} from "type.js";
+import {Type} from "./type.js";
 import {types as primitives} from "./primitives/index.js";
 import {types as complex} from "./complex/index.js";
 

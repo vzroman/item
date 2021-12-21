@@ -28,12 +28,12 @@ import {Attribute} from "./schema.js";
 import * as util from "../utilities/data.js";
 import {Schema} from "./schema.js";
 
-export class Controller extends types.Type{
+export class Controller extends types.complex.Item{
 
-    static options = this.extend({
+    static options = {
         schema:{type:types.complex.Set, options:{ schema:Attribute.options }, required:true },
         autoCommit:{type:types.primitives.Bool, default:true }
-    });
+    };
 
     static events = {
         init:types.primitives.Any,
@@ -46,7 +46,7 @@ export class Controller extends types.Type{
         super( options );
 
         // Initialize the schema
-        this._schema = new Schema({ attributes:this._options.schema});
+        this._schema = new Schema( this._options.schema );
 
         this._data = undefined;
         this._changes = undefined;
@@ -58,17 +58,28 @@ export class Controller extends types.Type{
         // TODO. Do we need to subscribe to schema changes?
     }
 
+
+    coerce( value ){
+        return this._schema.coerce( value );
+    }
+
+    link( sources ){
+        sources = super.link( sources );
+        this._schema.link({...sources, parent:this});
+        return sources;
+    }
+
+
     bind(event, callback){
 
-        if (this.constructor.events[event]){
-            // Subscriptions to events overlap subscriptions to properties
+        if (this.constructor.events[event] || this._options.schema[event]){
+            /// Unlike other types Controller subscribes
+            // to the controlled item changes but not to it's own
             return this._bind(event, callback);
 
-        } else if (this._options.schema[event]){
-
-            // Unlike other types Controller subscribes
-            // to the controlled item changes but not to it's own
-            return this._bind( event, callback );
+        } else{
+            console.warn("invalid event to bind", event);
+            return undefined;
         }
     }
 
@@ -198,10 +209,11 @@ export class Controller extends types.Type{
     // Clean UP
     //-------------------------------------------------------------------
     destroy(){
-        super.destroy();
         this._schema.destroy();
         this._schema = undefined;
         this._data = undefined;
         this._changes = undefined;
+        super.destroy();
     }
 }
+Controller.extend();

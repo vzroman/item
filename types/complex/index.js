@@ -26,11 +26,9 @@
 import {Type as Item} from "./item.js";
 import {Type as Collection} from "./collection.js";
 import {Type as Set} from "./set.js";
-import {Type as View} from "./view.js";
 
 export const types = {
     Item,
     Collection,
-    Set,
-    View
+    Set
 };

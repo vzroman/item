@@ -23,11 +23,43 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type as Parent} from "../type.js";
+import {deepMerge} from "../../utilities/data";
 
-export class Type extends Parent{
+export class Type{
+
+    static options ={};
+
+    static extend(){
+        if (Type.isPrototypeOf( this ) ){
+            // I'm a successor of Type.
+            // !Attention the strict inheritance the successor can extend the predecessor's options
+            // But not to override them
+
+            // Implicitly inherit events
+            this.events = deepMerge( this.events, Object.getPrototypeOf(this).events );
+
+            // Inherit options
+            this.options =  deepMerge( this.options, Object.getPrototypeOf(this).options );
+        }
+    }
+
+    constructor( options ){
+        options = options ||{};
+        this._options = Object.entries( this.constructor.options ).reduce((acc,[p, defaultValue])=>{
+            if (options.hasOwnProperty(p)){
+                acc[p] = options[p];
+            }else{
+                acc[p] = defaultValue
+            }
+            return acc;
+        },{});
+    }
 
     coerce( value ){
         return value;
+    }
+
+    destroy(){
+        this._options = undefined;
     }
 }

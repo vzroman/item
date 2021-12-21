@@ -31,3 +31,4 @@ export class Type extends Any{
         return "" + value;
     }
 }
+Type.extend();

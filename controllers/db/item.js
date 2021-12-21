@@ -32,7 +32,7 @@ export class Controller extends Item{
     static options = this.extend({
         connection:{type:types.primitives.Any, options:{ schema:Attribute.options }, required:true },
         timeout:{type:types.primitives.Integer, default:60000 },
-        subscribe:{type:types.primitives.Bool }
+        subscribe:{type:types.primitives.Bool, default:false }
     });
 
     //-------------------------------------------------------------------

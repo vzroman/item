@@ -25,7 +25,7 @@
 
 import {types} from "../types/index.js";
 import {Type as Parent} from "../types/type.js";
-import {deepMerge} from "../utilities/data";
+import {deepMerge} from "../utilities/data.js";
 
 
 export class View extends Parent{

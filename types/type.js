@@ -24,7 +24,6 @@
 //------------------------------------------------------------------------------------
 
 import {types} from "./index.js";
-import {deepMerge,deepCopy} from "../utilities/data.js";
 import * as errors from "../utilities/errors.js";
 import {Controller} from "../controllers/item.js";
 
@@ -39,24 +38,6 @@ export class Type {
     static events = {
         destroy:types.primitives.Any
     };
-
-    static extend( options ){
-        if (Type.isPrototypeOf( this ) ){
-            // I'm a successor of Type.
-            // !Attention the strict inheritance the successor can extend the predecessor's options
-            // But not to override them
-
-            // Implicitly inherit events
-            this.events = deepMerge(this.events, Object.getPrototypeOf(this).events);
-
-            // Inherit options
-            return deepMerge( options, Object.getPrototypeOf(this).options );
-        }else{
-            // I'm the Type
-            return deepCopy( this.options );
-        }
-    }
-
 
     constructor( options ){
 
@@ -176,7 +157,7 @@ export class Type {
     }
 
     coerce( value ){
-        if (value instanceof this.constructor){
+        if (this.constructor === value || this.constructor.isPrototypeOf( value )){
             return value;
         }else if(typeof value === "string"){
 

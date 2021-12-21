@@ -22,15 +22,14 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-
+import {types} from "./types/index.js";
 import {view} from "./view/index.js";
 import {util} from "./utilities/index.js";
-import {types} from "./types/index.js";
 import {controllers} from "./controllers/index.js";
 
 export const item = {
+    types,
     view,
     util,
-    types,
     controllers
 };

@@ -24,88 +24,22 @@
 //------------------------------------------------------------------------------------
 
 import {types} from "../types/index.js";
-import {Type as Parent} from "../types/type.js";
 import {deepCopy} from "../utilities/data.js";
 
-export class Schema{
+export class Attribute extends types.complex.Item{
 
-    constructor( Attributes ){
-
-        this._attributes = Object.entries( Attributes ).reduce((acc,[p, options])=>{
-            acc[p] = new Attribute( options );
-            return acc;
-        },{});
-
-    }
-
-    get( properties ){
-
-        // Return only properties that are defined in the schema
-        let result = {};
-        for (let p in this._attributes){
-
-            // TODO. Virtual fields are not returned, because they cannot be committed and saved?
-            if (this._attributes[p].get("virtual") ){ continue }
-
-            result[ p ] = this._attributes[ p ].coerce( properties[p] );
-
-            // If one of the required properties is not defined then the whole result
-            // is undefined
-            if ( result[ p ] === undefined && this._attributes[ p ].get("required") ){
-                result = undefined;
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    set( properties ){
-
-        for (const p in properties){
-
-            // Remove the property if it is not in the schema
-            if (!this._attributes.hasOwnProperty( p )){
-                delete properties[ p ];
-                continue;
-            }
-
-            properties[p] = this._attributes[p].coerce( properties[p] );
-        }
-
-        return properties;
-    }
-
-    validate( properties ){
-        return this.get( this.set( properties ) );
-    }
-
-    destroy(){
-        if (!this._schema){ return; }
-
-        Object.values( this._schema ).forEach( t=> t.destroy() );
-
-        this._schema = undefined;
-    }
-}
-
-export class Attribute extends Parent{
-
-    static options = this.extend({
-        type:{type:Parent, required:true, default: types.primitives.Any},
+    static options = {
+        type:{type:types.Type, required:true, default: types.primitives.Any},
         required:{type:types.primitives.Any},
         default:{type:types.primitives.Any},
         virtual:{type:types.primitives.Bool, default:false }
-    });
+    };
 
     constructor( options ){
         // We extracted our own options
         super( options );
 
         this._initType();
-        // Types has a static schema, they extract only their own options
-
-
 
         this.bind("commit",changes=>{
             if (changes.type){
@@ -146,3 +80,78 @@ export class Attribute extends Parent{
         super.destroy();
     }
 }
+Attribute.extend();
+
+export class Schema extends types.complex.Item{
+
+    static options = {
+        attributes:{ type:types.complex.Set, options:{schema:Attribute.options} }
+    };
+
+    constructor( Attributes ){
+        super({attributes:Attributes});
+
+        this._attributes = Object.entries( this._options.attributes ).reduce((acc,[a, options])=>{
+            acc[a] = new Attribute( options );
+            return acc;
+        },{});
+
+    }
+
+    coerce( properties ){
+        return this.get( this.set( properties ) );
+    }
+
+    link( sources ){
+        sources = super.link( sources );
+        const attrSources = {...sources,parent:this};
+        Object.values( this._attributes ).forEach( a => a.link(attrSources) );
+        return sources;
+    }
+
+    get( properties ){
+
+        // Return only properties that are defined in the schema
+        let result = {};
+        for (let p in this._attributes){
+
+            // TODO. Virtual fields are not returned, because they cannot be committed and saved?
+            if (this._attributes[p].get("virtual") ){ continue }
+
+            result[ p ] = this._attributes[ p ].coerce( properties[p] );
+
+            // If one of the required properties is not defined then the whole result
+            // is undefined
+            if ( result[ p ] === undefined && this._attributes[ p ].get("required") ){
+                result = undefined;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    set( properties ){
+
+        for (const p in properties){
+
+            // Remove the property if it is not in the schema
+            if (!this._attributes.hasOwnProperty( p )){
+                delete properties[ p ];
+                continue;
+            }
+
+            properties[p] = this._attributes[p].coerce( properties[p] );
+        }
+
+        return properties;
+    }
+
+    destroy(){
+        Object.values( this._attributes ).forEach( a=> a.destroy() );
+        this._attributes = undefined;
+        super.destroy();
+    }
+}
+Schema.extend();
+
