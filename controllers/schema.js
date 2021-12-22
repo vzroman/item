@@ -23,16 +23,17 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {types} from "../types/index.js";
+import {Type as Item} from "../types/complex/item.js";
+import {types as primitives} from "../types/primitives/index.js";
 import {deepCopy} from "../utilities/data.js";
 
-export class Attribute extends types.complex.Item{
+export class Attribute extends Item{
 
     static options = {
-        type:{type:types.Type, required:true, default: types.primitives.Any},
-        required:{type:types.primitives.Any},
-        default:{type:types.primitives.Any},
-        virtual:{type:types.primitives.Bool, default:false }
+        type:{type:primitives.Type, options:{type:primitives.Any}, required:true, default: primitives.Any},
+        required:{type:primitives.Any},
+        default:{type:primitives.Any},
+        virtual:{type:primitives.Bool, default:false }
     };
 
     constructor( options ){
@@ -82,10 +83,11 @@ export class Attribute extends types.complex.Item{
 }
 Attribute.extend();
 
-export class Schema extends types.complex.Item{
+export class Schema extends Item{
 
     static options = {
-        attributes:{ type:types.complex.Set, options:{schema:Attribute.options} }
+        //TODO. complex.Set should be here but then we have the module cross-reference
+        attributes:{ type:primitives.Set, options:{schema:Attribute.options} }
     };
 
     constructor( Attributes ){

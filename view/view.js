@@ -24,18 +24,17 @@
 //------------------------------------------------------------------------------------
 
 import {types} from "../types/index.js";
-import {Type as Parent} from "../types/type.js";
 import {deepMerge} from "../utilities/data.js";
 
 
-export class View extends Parent{
+export class View extends types.complex.Item{
 
-    static options = this.extend({
+    static options = {
         $container:{type:types.primitives.Any,required:true, virtual:true },
         enable:{type:types.primitives.Bool, default:true, virtual:true},
         focus:{type:types.primitives.Bool, default:false, virtual:true},
         widgets:{type:types.primitives.Set}
-    });
+    };
 
     static markup = undefined;
 
@@ -93,6 +92,8 @@ export class View extends Parent{
         sources = super.link( sources );
 
         this.linkWidgets( sources );
+
+        return sources;
     }
 
     linkWidgets( sources ){
@@ -139,5 +140,7 @@ export class View extends Parent{
             this._widgets = undefined;
         }
         this.$markup.remove();
+        super.destroy();
     }
 }
+View.extend();

@@ -23,7 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {deepMerge} from "../../utilities/data";
+import {deepMerge} from "../../utilities/data.js";
 
 export class Type{
 

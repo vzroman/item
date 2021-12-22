@@ -23,22 +23,25 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type as Parent} from "../primitives/any.js";
-import {types} from "../index.js";
-import {Controller} from "../../controllers/item.js";
+import {types} from "../primitives/index.js";
 import * as errors from "../../utilities/errors.js";
 import {deepMerge} from "../../utilities/data.js";
 
-export class Type extends Parent{
+let Controller;
+import("../../controllers/item.js").then(module=>{
+    Controller = module.Controller
+});
+
+export class Type extends types.Any{
 
     // The options are described as attributes
     static options = {
-        links:{type:types.primitives.Set, virtual:true, default:{} },
-        events:{type:types.primitives.Set, virtual:true, default:{} }
+        links:{type:types.Set, virtual:true, default:{} },
+        events:{type:types.Set, virtual:true, default:{} }
     };
 
     static events = {
-        destroy:types.primitives.Any
+        destroy:types.Any
     };
 
     static extend(){
@@ -57,7 +60,7 @@ export class Type extends Parent{
             schema: this.constructor.options,
         });
 
-        this._controller.init( options );
+        this._controller.init( options || {} );
 
         this._options = this._controller.get();
 

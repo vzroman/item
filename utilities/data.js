@@ -26,15 +26,15 @@
 
 export function deepMerge(target, source) {
 
-    // null value resets the value in the target
-    if ( source === null ){ return undefined }
-
-    // If the source value is not an object it overrides the value in the target
-    if ( isLeaf( source ) ){
-        return deepCopy( target );
+    if ( source === null ){
+        // null value resets the value in the target
+        return undefined
+    }else if(source === undefined){
+        // There is nothing to merge with
+        return deepCopy( target )
     }
 
-    if ( isLeaf( target ) ){
+    if ( isLeaf( target ) || isLeaf( source )){
         return deepCopy( source );
     }
 
