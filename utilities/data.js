@@ -163,8 +163,6 @@ export function patch2value( Patch, i ) {
 }
 
 export function isLeaf(value) {
-    return (value === null)
-        || (typeof value === "function")
-        || Array.isArray( value )
-        || !( value instanceof Object);
+    return !( value instanceof Object)
+        || value.constructor !== Object
 }

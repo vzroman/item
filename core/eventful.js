@@ -22,42 +22,54 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
+export class Eventful{
 
-export class Type{
+    bind(event, callback){
+        if (typeof callback!=="function") { throw new Error("invalid callback") }
 
-    static options ={};
+        this.__events=this.__events||{
+            id:0,
+            callbacks:{},
+            index:{}
+        };
 
-    static extend(){
-        if (Type.isPrototypeOf( this ) ){
-            // I'm a successor of Type.
-            // !Attention the strict inheritance the successor can extend the predecessor's options
-            // But not to override them
-            // Inherit options
-            this.options = {...this.options, ...Object.getPrototypeOf(this).options};
+        // Unique id for the handler. The is an increment
+        // it makes possible to run callbacks in the same order
+        // they subscribed
+        const id=this.__events.id++;
+
+        this.__events.index[id]=event;
+        this.__events.callbacks[event]={...this.__events[event],...{[id]:callback}};
+
+        return id;
+    }
+
+    unbind(id){
+        const type=this.__events?this.__events.index[id]:undefined;
+        if (type){
+            delete this.__events.index[id];
+            delete this.__events.callbacks[type][id];
         }
     }
 
-    static coerce( value ){
-        return value;
-    }
+    _trigger(type, params) {
+        const callbacks=this.__events?this.__events.callbacks[type]:undefined;
 
-    constructor( options ){
-        options = options ||{};
-        this._options = Object.entries( this.constructor.options ).reduce((acc,[p, defaultValue])=>{
-            if (options.hasOwnProperty(p)){
-                acc[p] = options[p];
-            }else{
-                acc[p] = defaultValue
+        if (callbacks){
+            if (!Array.isArray(params)){
+                params = [params];
             }
-            return acc;
-        },{});
-    }
-
-    coerce( value ){
-        return this.constructor.coerce( value );
+            Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
+                try{
+                    callbacks[id].apply(this, params);
+                }catch(e){
+                    console.error("invalid event callback",e.stack);
+                }
+            });
+        }
     }
 
     destroy(){
-        this._options = undefined;
+        this.__events = undefined;
     }
 }

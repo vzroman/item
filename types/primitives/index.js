@@ -30,7 +30,7 @@ import {Type as Integer} from "./integer.js";
 import {Type as Set} from "./set.js";
 import {Type as Array} from "./array.js";
 import {Type as Fun} from "./fun.js";
-import {Type as Type} from "./type.js";
+import {Type as Class} from "./class.js";
 
 
 export const types = {
@@ -41,5 +41,5 @@ export const types = {
     Set,
     Array,
     Fun,
-    Type
+    Class
 };

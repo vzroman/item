@@ -26,10 +26,12 @@ import {types} from "./types/index.js";
 import {view} from "./view/index.js";
 import {util} from "./utilities/index.js";
 import {controllers} from "./controllers/index.js";
+import {Item} from "./core/item.js";
 
 export const item = {
     types,
     view,
     util,
-    controllers
+    controllers,
+    Item
 };

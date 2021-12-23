@@ -23,11 +23,12 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
+import {Item} from "../core/item.js";
 import {types} from "../types/index.js";
 import {deepMerge} from "../utilities/data.js";
 
 
-export class View extends types.complex.Item{
+export class View extends Item{
 
     static options = {
         $container:{type:types.primitives.Any,required:true, virtual:true },

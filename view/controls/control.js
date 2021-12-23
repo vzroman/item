@@ -29,9 +29,9 @@ import {types} from "../../types/index.js";
 // The control is the point where external widgets to be attached
 export class Control extends View{
 
-    static options = this.extend({
+    static options = {
         value:{type:types.primitives.Any}
-    });
+    };
 
     constructor( options ){
         super( options );
@@ -87,3 +87,4 @@ export class Control extends View{
         this.$container.empty();
     }
 }
+Control.extend();

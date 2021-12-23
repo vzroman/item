@@ -28,11 +28,11 @@ import {Type as Parent} from "./any.js";
 export class Type extends Parent{
 
     static options = {
-        type:Parent
+        class:Parent
     };
 
     coerce( value ){
-        if ( this._options.type === value || this._options.type.isPrototypeOf(value) ){
+        if ( this._options.class === value || this._options.class.isPrototypeOf(value) ){
             return value;
         }else{
             return undefined;

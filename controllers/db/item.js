@@ -24,17 +24,22 @@
 //------------------------------------------------------------------------------------
 
 import {Controller as Item} from "../item.js";
-import {Attribute} from "../schema.js";
-import {types} from "../../types/index.js";
+import {patch2value} from "../../utilities/data.js";
 
 export class Controller extends Item{
 
-    static options = this.extend({
-        connection:{type:types.primitives.Any, options:{ schema:Attribute.options }, required:true },
-        timeout:{type:types.primitives.Integer, default:60000 },
-        subscribe:{type:types.primitives.Bool, default:false }
-    });
+    static options = {
+        connection:undefined,
+        timeout: 60000,
+        subscribe:false
+    };
 
+    constructor( options ){
+        super( options );
+
+        if (typeof this._options.connection !== "function")
+            throw new Error("invalid connection: " + this._options.connection);
+    }
     //-------------------------------------------------------------------
     // Data access API
     //-------------------------------------------------------------------
@@ -73,14 +78,18 @@ export class Controller extends Item{
         return new Promise((resolve, reject)=>{
             if (this._data){
                 // the object already exits
-                this._options.connection().edit_object(this._ID, this._changes, resolve, reject, 60000);
+                const changes = this._schema.get( patch2value(this._changes, 0), {virtual:false} );
+                this._options.connection().edit_object(this._ID, changes, resolve, reject, 60000);
             }else{
                 // new object
-                this._options.connection().create_object(this.get(), ID=>{
+                const fields = this._schema.get( this.get(), {virtual:false} );
+                this._options.connection().create_object(fields, ID=>{
                     this._ID = ID;
                     resolve( ID );
                 },reject, this._options.timeout);
             }
         });
     }
+
 }
+Controller.extend();

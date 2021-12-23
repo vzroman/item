@@ -26,7 +26,7 @@
 import {Type as Parent} from "./any.js";
 
 export class Type extends Parent{
-    coerce( value ){
+    static coerce( value ){
         if (value !== undefined){
             return +value;
         }else{

@@ -23,17 +23,18 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type as Item} from "../types/complex/item.js";
+import {Linkable} from "./linkable.js";
 import {types as primitives} from "../types/primitives/index.js";
 import {deepCopy} from "../utilities/data.js";
 
-export class Attribute extends Item{
+export class Attribute extends Linkable{
 
     static options = {
-        type:{type:primitives.Type, options:{type:primitives.Any}, required:true, default: primitives.Any},
-        required:{type:primitives.Any},
-        default:{type:primitives.Any},
-        virtual:{type:primitives.Bool, default:false }
+        type:primitives.Class,
+        options:{class:primitives.Any},
+        required:false,
+        default:undefined,
+        virtual:false
     };
 
     constructor( options ){
@@ -42,8 +43,8 @@ export class Attribute extends Item{
 
         this._initType();
 
-        this.bind("commit",changes=>{
-            if (changes.type){
+        this.bind("change",changes=>{
+            if (changes.type || changes.options){
                 this._initType();
             }else if(changes.hasOwnProperty("default")){
                 this.set({default: this._type.coerce(this._options.default)})
@@ -52,6 +53,10 @@ export class Attribute extends Item{
     }
 
     _initType(){
+
+        if ( primitives.Any !== this._options.type && !primitives.Any.isPrototypeOf(this._options.type) )
+            throw new Error("invalid type: " + this._options.type);
+
         if (this._type){
             this._type.destroy();
         }
@@ -60,7 +65,7 @@ export class Attribute extends Item{
         this.set({default: this._type.coerce( this._options.default )});
     }
 
-    coerce( value ){
+    validate( value ){
         // Type validation
         value  = this._type.coerce( value );
 
@@ -75,6 +80,17 @@ export class Attribute extends Item{
         }
     }
 
+    filter( filter ){
+        let result = true;
+        for (const p in filter){
+            if (this._options[p] !== filter[p]){
+                result = false;
+                break;
+            }
+        }
+        return result;
+    }
+
     destroy(){
         this._type.destroy();
         this._type = undefined;
@@ -83,15 +99,17 @@ export class Attribute extends Item{
 }
 Attribute.extend();
 
-export class Schema extends Item{
+export class Schema extends Linkable{
 
     static options = {
-        //TODO. complex.Set should be here but then we have the module cross-reference
-        attributes:{ type:primitives.Set, options:{schema:Attribute.options} }
+        attributes:undefined
     };
 
     constructor( Attributes ){
         super({attributes:Attributes});
+
+        if (typeof this._options.attributes !== "object")
+            throw new Error("invalid schema attributes: " + this._options.attributes);
 
         this._attributes = Object.entries( this._options.attributes ).reduce((acc,[a, options])=>{
             acc[a] = new Attribute( options );
@@ -100,7 +118,7 @@ export class Schema extends Item{
 
     }
 
-    coerce( properties ){
+    validate( properties ){
         return this.get( this.set( properties ) );
     }
 
@@ -111,16 +129,15 @@ export class Schema extends Item{
         return sources;
     }
 
-    get( properties ){
+    get( properties, filter ){
 
         // Return only properties that are defined in the schema
         let result = {};
         for (let p in this._attributes){
 
-            // TODO. Virtual fields are not returned, because they cannot be committed and saved?
-            if (this._attributes[p].get("virtual") ){ continue }
+            if (filter && !this._attributes[p].filter(filter)) continue;
 
-            result[ p ] = this._attributes[ p ].coerce( properties[p] );
+            result[ p ] = this._attributes[ p ].validate( properties[p] );
 
             // If one of the required properties is not defined then the whole result
             // is undefined
@@ -143,7 +160,7 @@ export class Schema extends Item{
                 continue;
             }
 
-            properties[p] = this._attributes[p].coerce( properties[p] );
+            properties[p] = this._attributes[p].validate( properties[p] );
         }
 
         return properties;

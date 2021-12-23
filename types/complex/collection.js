@@ -23,35 +23,20 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {types as primitives} from "../primitives/index.js";
-import {Type as Set} from "./set.js";
-import {Attribute,Schema} from "../../controllers/schema.js";
+import {Type as Item} from "./item.js";
+import {Type as Array} from "../primitives/array.js";
 
-export class Type extends primitives.Array{
-
-    static options = {
-        schema:{type:Set, options:{ schema:Attribute.options }, required: true}
-    };
-
-    constructor( options ){
-        super( options );
-        this._schema = new Schema( this._options.schema );
-    }
+export class Type extends Item{
 
     coerce( value ){
-        value = super.coerce( value );
+        value = Array.coerce( value );
         if ( value ){
             return value.map( item => {
-                return this._schema.coerce( item );
+                return super.coerce( item );
             });
         }
     }
 
-    destroy(){
-        this._schema.destroy();
-        this._schema = undefined;
-        super.destroy();
-    }
 }
 Type.extend();
 

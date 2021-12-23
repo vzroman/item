@@ -27,7 +27,7 @@ import {Type as Any} from "./any.js";
 
 export class Type extends Any{
 
-    coerce( value ){
+    static coerce( value ){
         return "" + value;
     }
 }
