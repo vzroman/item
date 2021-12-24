@@ -23,7 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import * as db from "./db/index.js";
+import {db} from "./db/index.js";
 import {Controller as Item} from "./item.js";
 
 export const controllers ={

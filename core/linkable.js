@@ -118,12 +118,13 @@ export class Linkable extends Eventful{
         // No real changes - no triggering events
         if ( !changes ){ return }
 
+        this._trigger("change", changes);
+
         // Trigger events related to item properties.
         Object.entries( changes ).forEach(([prop, change])=>{
             this._trigger(prop, change);
         });
 
-        this._trigger("change", changes);
 
         return changes;
     }

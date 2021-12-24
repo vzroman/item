@@ -46,8 +46,10 @@ export class View extends Item{
 
         this.$markup = $( this.constructor.markup ).appendTo( this._options.$container );
 
+        this._widgets = this.widgets();
+
         // init widgets
-        const $widgets = Object.keys( this.constructor.widgets ).reduce((acc,id)=>{
+        const $widgets = Object.keys( this._widgets ).reduce((acc,id)=>{
             const $container = this.$markup.find(`[name="${ id }"]`);
             if (!$container.length){
                 console.warn("undefined container for widget", id);
@@ -60,7 +62,7 @@ export class View extends Item{
         this._widgets = Object.entries($widgets).reduce((acc,[id, $container])=>{
 
             // Initialize the widget with default options
-            let {view, ...options} = this.constructor.widgets[id];
+            let {view, ...options} = this._widgets[id];
 
             // If options for the widget are overridden
             if (this._options.widgets && this._options.widgets[id]){
@@ -71,7 +73,7 @@ export class View extends Item{
                 options = deepMerge( options, this._options.widgets[id] );
             }
 
-            acc[id] = new view({$container,...options});;
+            acc[id] = new view({$container,...options});
             return acc;
         },{});
 
@@ -85,6 +87,10 @@ export class View extends Item{
         this._controller.bind("enable", value=>{
             this.enable( value );
         });
+    }
+
+    widgets(){
+        return {};
     }
 
     link( sources ){

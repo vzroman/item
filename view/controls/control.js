@@ -38,8 +38,8 @@ export class Control extends View{
 
         this._widget = undefined;
 
-        this.bind("value",value=>{
-            this._updateValue( value )
+        this.bind("value",(value, prev)=>{
+            this.updateValue( value, prev )
         });
     }
 
@@ -62,7 +62,7 @@ export class Control extends View{
         this.set({value});
     }
 
-    _updateValue( value ){
+    updateValue( value, prev ){
         // Override it to update the value of the external widget
     }
 
@@ -79,12 +79,12 @@ export class Control extends View{
     }
 
     destroy(){
-        super.destroy();
         if (this._widget && typeof this._widget.destroy === "function"){
             this._widget.destroy();
             this._widget = undefined;
         }
-        this.$container.empty();
+        this._options.$container.empty();
+        super.destroy();
     }
 }
 Control.extend();

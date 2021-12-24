@@ -79,7 +79,7 @@ export function deepEqual(O1, O2) {
 export function deepCopy( value ){
     if (isLeaf(value)){
         if (Array.isArray(value)){
-            return [...value];
+            return value.map( deepCopy );
         }else{
             return value
         }

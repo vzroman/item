@@ -27,6 +27,7 @@ import {Linkable} from "./linkable.js";
 import {types} from "../types/primitives/index.js";
 import * as errors from "../utilities/errors.js";
 import {Controller} from "../controllers/item.js";
+import {patch2value} from "../utilities/data.js";
 
 export class Item extends Linkable{
 
@@ -57,8 +58,8 @@ export class Item extends Linkable{
 
         // It's safe not to keep binding's id because I'll destroy
         // my controller on own destroying
-        this._controller.bind("commit",changes =>{
-            this._options = {...this._options, ...changes};
+        this._controller.bind("change",changes =>{
+            this._options = {...this._options, ...patch2value(changes,0)};
         });
     }
 
@@ -98,7 +99,7 @@ export class Item extends Linkable{
     unbind( [event,id] ){
         if (this.constructor.events[event]){
             super.unbind( id );
-        } else{
+        } else if( this._controller ){
             this._controller.unbind( id );
         }
     }
