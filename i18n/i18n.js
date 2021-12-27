@@ -78,7 +78,7 @@ export function i18n( text, language ) {
     if ( languages[language] === undefined ){
         return text;
     }else{
-        return languages[language][text]
+        return languages[language][text] || text;
     }
 
 }

@@ -151,19 +151,18 @@ export class Schema extends Linkable{
     }
 
     set( properties ){
-
+        const result = {};
         for (const p in properties){
 
             // Remove the property if it is not in the schema
             if (!this._attributes.hasOwnProperty( p )){
-                delete properties[ p ];
                 continue;
             }
 
-            properties[p] = this._attributes[p].validate( properties[p] );
+            result[p] = this._attributes[p].validate( properties[p] );
         }
 
-        return properties;
+        return result;
     }
 
     destroy(){

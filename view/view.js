@@ -68,7 +68,14 @@ export class View extends Item{
         this._widgets = Object.entries($widgets).reduce((acc,[id, $container])=>{
 
             // Initialize the widget with default options
-            let {view, ...options} = this._widgets[id];
+            let {view, options} = this._widgets[id];
+
+            options = {
+                links:{
+                    enable:{source:"parent", event:"enable"}
+                },
+                ...options
+            };
 
             // If options for the widget are overridden
             if (this._options.widgets && this._options.widgets[id]){
@@ -102,7 +109,6 @@ export class View extends Item{
         // Init own links and events to the external data
         sources = super.link( sources );
 
-        this._controller.link( sources );
         this.linkWidgets( sources );
 
         return sources;
@@ -136,11 +142,7 @@ export class View extends Item{
     }
 
     enable( value ){
-        if (this._widgets){
-            Object.values(this._widgets).forEach(widget => {
-                widget.set({enable:value});
-            });
-        }
+        // override it
     }
 
 

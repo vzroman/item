@@ -48,38 +48,48 @@ export class View extends Parent{
         return {
             view: {
                 view: this._options.view,
-                ...this._options.options,
-                links:{
-                    focus:{ event:"change", handler:(_,{data})=> data.get() }
+                options:{
+                    ...this._options.options,
+                    links:{
+                        focus:{ event:"change", handler:(_,{data})=> data.get() }
+                    }
                 }
             },
             save: {
                 view: controls.Button,
-                text:i18n("save"),
-                links:{ enable:{ event:"change", handler:(_,{data})=>{
-                    if ( data.get() ){
-                        return true;
-                    }else{
-                        this._widgets.view.set({focus:true});
-                        return false;
-                    }
-                }}},
-                events:{ click:(_,{data})=>{
-                    // TODO. Waiting
-                    data.commit().then(()=>{
-                        // TODO. Remove waiting
-                    }, error =>{
-                        // TODO. Show the error
-                    })
-                }}
+                options:{
+                    text:i18n("save"),
+                    enable:false,
+                    links:{
+                        enable:{ event:"change", handler:(_,{data})=>{
+                            if ( data.isCommittable() ){
+                                return true;
+                            }else{
+                                this._widgets.view.set({focus:true});
+                                return false;
+                            }}
+                        }
+                    },
+                    events:{ click:(_,{data})=>{
+                        // TODO. Waiting
+                        data.commit().then(()=>{
+                            // TODO. Remove waiting
+                        }, error =>{
+                            // TODO. Show the error
+                        })
+                    }}
+                }
             },
             cancel: {
                 view: controls.Button,
-                text:i18n("cancel"),
-                links:{ enable:{ event:"change", handler:(_,{data})=> data.get()}},
-                events:{ click:(_,{data})=>{
-                    data.rollback();
-                }}
+                options:{
+                    text:i18n("cancel"),
+                    enable:false,
+                    links:{ enable:{ event:"change", handler:(_,{data})=> data.isCommittable() }},
+                    events:{ click:(_,{data})=>{
+                        data.rollback();
+                    }}
+                }
             }
         }
     }

@@ -63,9 +63,7 @@ export class Linkable extends Eventful{
             const id = super.bind( event, callback );
 
             // The first event with actual value
-            setTimeout(()=>{
-                this._trigger(event, [this._options[event], undefined]);
-            },1);
+            this._trigger(event, [this._options[event], undefined]);
 
             return id;
         }else{
@@ -98,15 +96,17 @@ export class Linkable extends Eventful{
 
         if (typeof properties !== "object"){ return }
 
+        const ownProperties = {};
         for (const p in properties){
             if ( !this._options.hasOwnProperty(p) ){
-                delete properties[ p ];
-            }else if( properties[p] === undefined ){
-                properties[ p ] = this.constructor.options[ p ];
+                continue
+            }
+            if( properties[p] === undefined ){
+                ownProperties[ p ] = this.constructor.options[ p ];
             }
         }
 
-        const changes = this._set( properties );
+        const changes = this._set( ownProperties );
 
         if (!changes) return;
 
@@ -118,11 +118,14 @@ export class Linkable extends Eventful{
 
     _set( properties ){
 
+        // Create a deep copy of the properties
+        properties = deepCopy( properties );
+
         // ATTENTION! The properties are passed by reference,
         // the event's callbacks are able to change values
         this._trigger( "beforeChange", properties );
 
-        const changes = diff( this.get(Object.keys( properties )), properties );
+        let changes = diff( this.get(Object.keys( properties )), properties );
 
         // No real changes - no triggering events
         if ( !changes ){ return }
@@ -267,12 +270,17 @@ class Link{
     }
 
     destroy(){
-        this._sourceSubscriptions.forEach( id =>{
-            this._source.unbind( id );
-        });
-        this._targetSubscriptions.forEach( id =>{
-            this._target.unbind( id );
-        });
+        if (this._sourceSubscriptions){
+            this._sourceSubscriptions.forEach( id =>{
+                this._source.unbind( id );
+            });
+        }
+
+        if (this._targetSubscriptions){
+            this._targetSubscriptions.forEach( id =>{
+                this._target.unbind( id );
+            });
+        }
 
         this._sourceSubscriptions = undefined;
         this._targetSubscriptions = undefined;

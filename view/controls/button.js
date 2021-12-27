@@ -24,14 +24,15 @@
 //------------------------------------------------------------------------------------
 
 import {Control as Parent} from "./control.js";
+import {types} from "../../types/index.js";
 
 // The control is the point where external widgets to be attached
 export class Control extends Parent{
 
     static options = {
-        text:{},
-        title:{},
-        icon:{}
+        text:{type:types.primitives.String},
+        title:{type:types.primitives.String},
+        icon:{type:types.primitives.String}
     };
     static markup = `<button class="horizontal" style="align-items: center">
         <div name="icon" style="display: none; width: 20px; height: 20px;"></div>
@@ -41,26 +42,22 @@ export class Control extends Parent{
     constructor( options ){
         super( options );
 
-        const text = value => this.$markup.find('[name="text"]').text( value );
+        this.bind("text", value => this.$markup.find('[name="text"]').text( value ));
 
-        const icon = value => {
+        this.bind("icon", value => {
             let css = value
-            ?{
-                "background-image":"",
-                "display":"none"
-            }
-            :{
-                "background-image":value,
-                "display":"block"
-            };
+                ?{
+                    "background-image":"",
+                    "display":"none"
+                }
+                :{
+                    "background-image":value,
+                    "display":"block"
+                };
             this.$markup.find('[name="icon"]').css( css );
-        };
+        });
 
-        const title = value => this.$markup.attr("title", value);
-
-        this.bind("text", text);
-        this.bind("icon", icon);
-        this.bind("title", title);
+        this.bind("title", value => this.$markup.attr("title", value));
     }
 
     enable( value ){

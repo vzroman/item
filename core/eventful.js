@@ -39,7 +39,7 @@ export class Eventful{
         const id=this.__events.id++;
 
         this.__events.index[id]=event;
-        this.__events.callbacks[event]={...this.__events[event],...{[id]:callback}};
+        this.__events.callbacks[event]={...this.__events.callbacks[event],...{[id]:callback}};
 
         return id;
     }
@@ -57,16 +57,18 @@ export class Eventful{
 
         if (callbacks){
             if (!Array.isArray(params)){
-                params = [params,this];
-            }else{
-                params.push( this );
+                params = [params];
             }
-            Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
-                try{
-                    callbacks[id].apply(this, params);
-                }catch(e){
-                    console.error("invalid event callback",e);
-                }
+
+            // IMPORTANT! Trigger works asynchronously
+            setTimeout(()=>{
+                Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
+                    try{
+                        callbacks[id].apply(this, [...params,this]);
+                    }catch(e){
+                        console.error("invalid event callback",e);
+                    }
+                })
             });
         }
     }

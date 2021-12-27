@@ -83,7 +83,7 @@ export class Controller extends Linkable{
         this._changes = util.patchMerge( this._changes, changes );
 
         return new Promise((resolve, reject)=>{
-            if (this._options.autoCommit && this.get()){
+            if (this._options.autoCommit && this.isCommittable()){
                 // The data is ready to be committed and the controller is autoCommit
                 this.commit().then(()=>{
 
@@ -122,9 +122,7 @@ export class Controller extends Linkable{
             const id = Eventful.prototype.bind.call(this, event, callback);
 
             // The first event with actual value
-            setTimeout(()=>{
-                this._trigger(event, [this.get(event), undefined]);
-            },1);
+            this._trigger(event, [this.get(event), undefined]);
 
             return id;
         }else{
@@ -168,6 +166,10 @@ export class Controller extends Linkable{
         this._set( util.patch2value(this._changes, 1));
 
         this._changes = undefined;
+    }
+
+    isCommittable(){
+        return !!(this._changes && this.get());
     }
 
     _commit(){
