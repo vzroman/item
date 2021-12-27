@@ -57,8 +57,17 @@ export class Linkable extends Eventful{
     }
 
     bind(event, callback){
-        if (this.constructor.events[event] || this.constructor.options[event]){
+        if (this.constructor.events[event]){
             return super.bind( event, callback );
+        }else if( this.constructor.options[event] ){
+            const id = super.bind( event, callback );
+
+            // The first event with actual value
+            setTimeout(()=>{
+                this._trigger(event, [this._options[event], undefined]);
+            },1);
+
+            return id;
         }else{
             console.warn("invalid event", event);
             return undefined;
@@ -132,20 +141,20 @@ export class Linkable extends Eventful{
     //-------------------------------------------------------------------
     // Link to external items
     //-------------------------------------------------------------------
-    link( sources ){
+    link( context ){
 
-        // Normally sources id a set:
+        // Normally context id a set:
         // {
         //  data,
         //  parent,
         //  <some_source>
         //  ...
         // }
-        if (sources instanceof Linkable){
-            sources = {data: sources};
+        if (context instanceof Linkable){
+            context = {data: context};
         }
-        sources.self = this;
-        sources.default = sources.data || sources.parent || sources.self;
+        context.self = this;
+        context.default = context.data || context.parent || context.self;
 
         // Links
         Object.entries(this._options.links).forEach(([ property, link])=>{
@@ -154,19 +163,19 @@ export class Linkable extends Eventful{
             // { source, event, handler }
             // By default the source is data
             if (typeof link === "string"){
-                link = {source: sources.default, event: link}
+                link = {source: context.default, event: link}
             }else if(typeof link === "object" && typeof link.event === "string"){
                 if (typeof link.source === "string"){
                     // The source is defined
-                    if ( !sources[link.source] ){
+                    if ( !context[link.source] ){
                         // The source is not provided
                         console.warn("skip the link for not provided source", link.source);
                         link = undefined;
                     }else{
-                        link.source = sources[link.source];
+                        link.source = context[link.source];
                     }
                 }else{
-                    link.source = sources.default;
+                    link.source = context.default;
                 }
             }else{
                 console.error("invalid link settings", link);
@@ -174,7 +183,7 @@ export class Linkable extends Eventful{
             }
 
             if (link){
-                new Link({...link, target:this, property});
+                new Link({...link, context, target:this, property});
             }
 
         });
@@ -188,18 +197,18 @@ export class Linkable extends Eventful{
                 params = {handler:params }  // No target
             }else if (typeof params === "string"){
                 // Just name of the property in data item
-                params = { target:sources.default, property:params }
+                params = { target:context.default, property:params }
             }else if(typeof params === "object" && (params.handler || params.property)){
                 if (params.property){
                     if (typeof params.target === "string"){
-                        if (!sources[params.target]){
+                        if (!context[params.target]){
                             console.warn("skip the event for not provided target", params.target);
                             params = undefined;
                         }else{
-                            params.target = sources[params.target];
+                            params.target = context[params.target];
                         }
                     }else{
-                        params.target = sources.default;
+                        params.target = context.default;
                     }
                 }else if (params.target){
                     console.error("invalid event settings", params);
@@ -208,11 +217,11 @@ export class Linkable extends Eventful{
             }
 
             if (params){
-                new Link({...params, source:this, event});
+                new Link({...params, context, source:this, event});
             }
         });
 
-        return sources;
+        return context;
     }
 
     destroy(){
@@ -227,7 +236,7 @@ export class Linkable extends Eventful{
 // Self-destroying link
 //-------------------------------------------------------------------
 class Link{
-    constructor({source, event, handler, target, property}){
+    constructor({source, event, context, handler, target, property}){
         this._source = source;
         this._sourceSubscriptions = [];
 
@@ -243,25 +252,18 @@ class Link{
         // Default handler
         handler = handler || (v=>v);
 
-        const update = async value => {
+        // The subscription
+        this._sourceSubscriptions.push( source.bind(event, async value => {
 
             // Handler can be asynchronous
-            value = await handler(value);
+            value = await handler(value, context);
 
             // The link could be destroyed while waiting for the handler
             // or the link may don't have a target
             if (this._target){
                 this._target.set({ [property]:value });
             }
-        };
-
-        // The subscription
-        this._sourceSubscriptions.push( source.bind(event, update));
-
-        // The first update
-        const v = source.get( event );
-        if (v !== undefined){ update(v) }
-
+        }));
     }
 
     destroy(){

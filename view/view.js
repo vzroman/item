@@ -37,9 +37,15 @@ export class View extends Item{
         widgets:{type:types.primitives.Set}
     };
 
+    static events = {
+        click:types.primitives.Any
+    };
+
     static markup = undefined;
 
-    static widgets = {};
+    widgets(){
+        return {};
+    }
 
     constructor( options ){
         super( options );
@@ -87,10 +93,8 @@ export class View extends Item{
         this._controller.bind("enable", value=>{
             this.enable( value );
         });
-    }
 
-    widgets(){
-        return {};
+        this.$markup.on("click",event => this._trigger("click", event) );
     }
 
     link( sources ){
@@ -98,6 +102,7 @@ export class View extends Item{
         // Init own links and events to the external data
         sources = super.link( sources );
 
+        this._controller.link( sources );
         this.linkWidgets( sources );
 
         return sources;

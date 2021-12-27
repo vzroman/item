@@ -22,8 +22,64 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {View as Form} from "./form.js";
+import {lang as en} from "./en.js";
 
-export const layout = {
-    Form
+const languages = {
+    en
 };
+
+let _language = "en";
+
+export function getLanguage(){
+    return _language;
+}
+
+export function setLanguage( language ){
+    if (languages[language]){
+        _language = language;
+    }else{
+        addLanguage( language, {} );
+        setLanguage( language );
+    }
+}
+
+export function addLanguage( language, dictionary ){
+    languages[ language ] = dictionary;
+}
+
+export function removeLanguage( language ){
+    delete languages[ language ];
+}
+
+export function addKey( key, value, language ){
+
+    language = language || _language;
+
+    if (languages[ language ]){
+        languages[ language ][ key ] = value;
+    }else{
+        addLanguage( language, {});
+        addKey( key, value, language );
+    }
+}
+
+export function removeKey( key, language ){
+    language = language || _language;
+    if (languages[ language ]){
+        delete languages[ language ][ key ];
+    }
+}
+
+export function i18n( text, language ) {
+    if (typeof text !== "string"){ return text }
+
+    language = language || _language;
+
+    if ( languages[language] === undefined ){
+        return text;
+    }else{
+        return languages[language][text]
+    }
+
+}
+

@@ -22,8 +22,53 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {View as Form} from "./form.js";
 
-export const layout = {
-    Form
-};
+import {Control as Parent} from "./control.js";
+
+// The control is the point where external widgets to be attached
+export class Control extends Parent{
+
+    static options = {
+        text:{},
+        title:{},
+        icon:{}
+    };
+    static markup = `<button class="horizontal" style="align-items: center">
+        <div name="icon" style="display: none; width: 20px; height: 20px;"></div>
+        <div name="text"></div>
+    </button>`;
+
+    constructor( options ){
+        super( options );
+
+        const text = value => this.$markup.find('[name="text"]').text( value );
+
+        const icon = value => {
+            let css = value
+            ?{
+                "background-image":"",
+                "display":"none"
+            }
+            :{
+                "background-image":value,
+                "display":"block"
+            };
+            this.$markup.find('[name="icon"]').css( css );
+        };
+
+        const title = value => this.$markup.attr("title", value);
+
+        this.bind("text", text);
+        this.bind("icon", icon);
+        this.bind("title", title);
+    }
+
+    enable( value ){
+        this.$markup.prop('disabled', !value);
+    }
+
+    focus(){
+        this.$markup.focus();
+    }
+}
+Control.extend();

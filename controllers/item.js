@@ -114,12 +114,20 @@ export class Controller extends Linkable{
 
 
     bind(event, callback){
-        if (this.constructor.events[event] || this._options.schema[event]){
-            /// Unlike other types Controller subscribes
+        if ( this.constructor.events[event] ){
+            return super.bind( event, callback );
+        } else if( this._options.schema[event] ){
+            // Unlike other types Controller subscribes
             // to the controlled item changes but not to it's own
-            return Eventful.prototype.bind.call(this, event, callback);
+            const id = Eventful.prototype.bind.call(this, event, callback);
 
-        } else{
+            // The first event with actual value
+            setTimeout(()=>{
+                this._trigger(event, [this.get(event), undefined]);
+            },1);
+
+            return id;
+        }else{
             console.warn("invalid event to bind", event);
             return undefined;
         }
@@ -152,6 +160,14 @@ export class Controller extends Linkable{
                 }, reject);
             }
         });
+    }
+
+    rollback(){
+        if ( !this._changes ) return;
+
+        this._set( util.patch2value(this._changes, 1));
+
+        this._changes = undefined;
     }
 
     _commit(){

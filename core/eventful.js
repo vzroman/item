@@ -57,13 +57,15 @@ export class Eventful{
 
         if (callbacks){
             if (!Array.isArray(params)){
-                params = [params];
+                params = [params,this];
+            }else{
+                params.push( this );
             }
             Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
                 try{
                     callbacks[id].apply(this, params);
                 }catch(e){
-                    console.error("invalid event callback",e.stack);
+                    console.error("invalid event callback",e);
                 }
             });
         }

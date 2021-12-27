@@ -23,7 +23,9 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Control} from "./control.js";
+import {Control as Button} from "./button.js";
 
 export const controls = {
-    Control
+    Control,
+    Button
 };
