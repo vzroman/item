@@ -28,7 +28,7 @@ import {Type as Parent} from "./any.js";
 export class Type extends Parent{
 
     static coerce( value ){
-        if ( typeof value === "object" && value !== null ){
+        if ( value instanceof Object && value.constructor === Object){
             return value;
         }else{
             return undefined;

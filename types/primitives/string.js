@@ -28,7 +28,11 @@ import {Type as Any} from "./any.js";
 export class Type extends Any{
 
     static coerce( value ){
-        return "" + value;
+        if (value === undefined || value === null){
+            return undefined;
+        }else {
+            return "" + value;
+        }
     }
 }
 Type.extend();
