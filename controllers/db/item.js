@@ -78,18 +78,20 @@ export class Controller extends Item{
         // TODO
     }
 
-    _commit(){
+    commit(){
         return new Promise((resolve, reject)=>{
             if ( this._ID ){
                 // the object already exits
                 const changes = this._schema.get( patch2value(this._changes, 0), {virtual:false} );
-                this._options.connection().edit_object(this._ID, changes, resolve, reject, 60000);
+                this._options.connection().edit_object(this._ID, changes, ()=>{
+                    super.commit().then(resolve, reject);
+                }, reject, this._options.timeout);
             }else{
                 // new object
                 const fields = this._schema.get( this.get(), {virtual:false} );
                 this._options.connection().create_object(fields, ID=>{
                     this._ID = ID;
-                    resolve( ID );
+                    super.commit().then(resolve, reject);
                 },reject, this._options.timeout);
             }
         });
