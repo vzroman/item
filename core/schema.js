@@ -129,13 +129,11 @@ export class Schema extends Linkable{
         return sources;
     }
 
-    get( properties, filter ){
+    get( properties ){
 
         // Return only properties that are defined in the schema
         let result = {};
         for (let p in this._attributes){
-
-            if (filter && !this._attributes[p].filter(filter)) continue;
 
             result[ p ] = this._attributes[ p ].validate( properties[p] );
 
@@ -160,6 +158,17 @@ export class Schema extends Linkable{
             }
 
             result[p] = this._attributes[p].validate( properties[p] );
+        }
+
+        return result;
+    }
+
+    filter( properties, filter ){
+        const result = {};
+        for (let p in properties){
+            if ( this._attributes[p] && this._attributes[p].filter(filter) ) {
+                result[ p ] = properties[ p ];
+            }
         }
 
         return result;

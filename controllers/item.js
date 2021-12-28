@@ -141,18 +141,17 @@ export class Controller extends Linkable{
 
     commit(){
         return new Promise((resolve, reject)=>{
-            if ( !this.isCommittable() ){
-                reject("not ready");
-            } else {
-                const changes = this._changes;
-                this._data = util.patch(this._data, changes);
-                this._changes = undefined;
 
-                this._trigger("commit", changes);
-                this._trigger("committable", this.isCommittable() );
+            if ( !this.isCommittable() ) return reject("not ready");
 
-                resolve( changes );
-            }
+            const changes = this._changes;
+            this._data = util.patch(this._data, changes);
+            this._changes = undefined;
+
+            this._trigger("commit", changes);
+            this._trigger("committable", this.isCommittable() );
+
+            resolve( changes );
         });
     }
 

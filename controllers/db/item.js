@@ -80,15 +80,24 @@ export class Controller extends Item{
 
     commit(){
         return new Promise((resolve, reject)=>{
+
+            if ( !this.isCommittable() ) return reject("not ready");
+
             if ( this._ID ){
                 // the object already exits
-                const changes = this._schema.get( patch2value(this._changes, 0), {virtual:false} );
-                this._options.connection().edit_object(this._ID, changes, ()=>{
+                const changes = this._schema.filter( patch2value(this._changes, 0), {virtual:false} );
+                if ( !Object.keys(changes).length ){
+                    // No changes in persistent fields
                     super.commit().then(resolve, reject);
-                }, reject, this._options.timeout);
+                }else{
+                    // Send a query to the database
+                    this._options.connection().edit_object(this._ID, changes, ()=>{
+                        super.commit().then(resolve, reject);
+                    }, reject, this._options.timeout);
+                }
             }else{
                 // new object
-                const fields = this._schema.get( this.get(), {virtual:false} );
+                const fields = this._schema.filter( this.get(), {virtual:false} );
                 this._options.connection().create_object(fields, ID=>{
                     this._ID = ID;
                     super.commit().then(resolve, reject);
