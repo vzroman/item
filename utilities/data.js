@@ -149,10 +149,17 @@ export function patchMerge(P1, P2) {
     if (! (P2 instanceof Object)){
         return P1;
     }
-    return Object.entries(P2).reduce((acc,[k,[v0,v1]])=>{
-        acc[k] = [ P1[k] ? P1[k][0] : v0, v1 ];
+    const result = Object.entries(P2).reduce((acc,[k,[v0,v1]])=>{
+        const change = [ v0, P1[k] ? P1[k][1] : v1 ];
+        if ( !deepEqual(change[0], change[1]) ) acc[k] = change;
         return acc;
-    });
+    },{});
+
+    if (Object.keys(result).length === 0){
+        return undefined;
+    }
+
+    return result;
 }
 
 export function patch2value( Patch, i ) {

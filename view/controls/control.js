@@ -39,7 +39,9 @@ export class Control extends View{
         this._widget = undefined;
 
         this.bind("value",(value, prev)=>{
-            this.updateValue( value, prev )
+            // We do it asynchronously because descendants should be
+            // able to init their widget
+            setTimeout(()=>this.updateValue( value, prev ));
         });
     }
 

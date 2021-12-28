@@ -35,7 +35,7 @@ export class Controller extends Linkable{
     };
 
     static events = {
-        init:true,
+        committable:true,
         commit:true,
         rollback:true
     };
@@ -51,6 +51,7 @@ export class Controller extends Linkable{
 
         this._data = undefined;
         this._changes = undefined;
+        this._isValid = false;
     }
 
     get( property ){
@@ -72,39 +73,37 @@ export class Controller extends Linkable{
     }
 
     set( properties ){
+        if ( this._data ){
+            return super.set( properties );
+        }else{
+            // The controller is not initialized yet
+            return undefined;
+        }
 
-        properties = this._schema.set( properties );
+    }
 
-        const changes = this._set( properties );
+    _set( properties ){
+        return this._schema.set( properties );
+    }
 
-        if (!changes) return;
+    _update( changes ){
 
         // Add new changes
         this._changes = util.patchMerge( this._changes, changes );
 
-        return new Promise((resolve, reject)=>{
-            if (this._options.autoCommit && this.isCommittable()){
-                // The data is ready to be committed and the controller is autoCommit
-                this.commit().then(()=>{
+        this._isValid = !!this.get();
 
-                    this._trigger("commit",changes);
+        this._trigger("committable", this.isCommittable());
 
-                    resolve( changes );
-                }, error=>{
+        if (this._options.autoCommit && this.isCommittable()){
+            // The data is ready to be committed and the controller is autoCommit
+            this.commit().then(()=>{}, error=>{
 
-                    // The commit failed, redo the last changes
-                    this._changes = util.patchMerge(this._changes, this._set( util.patch2value(changes,1)));
-
-                    this._trigger("rollback",error);
-
-                    reject( error );
-                });
-            }else{
-                resolve( changes );
-            }
-        });
+                // The commit failed, redo the last changes
+                this.rollback( changes, error );
+            });
+        }
     }
-
 
     link( sources ){
         sources = super.link( sources );
@@ -135,46 +134,60 @@ export class Controller extends Linkable{
     // Data access API
     //-------------------------------------------------------------------
     init( Data ){
-        const changes = this._set( this._schema.set( Data ) );
+        const changes = super.set( Data );
         this._data = util.patch(this._data, changes);
         this._changes = undefined;
-        this._trigger("init");
     }
 
-
     commit(){
+        const changes = this._changes;
+
         return new Promise((resolve, reject)=>{
-            if ( !this._changes ){
-                resolve();
-            }else{
-                if (!this.get()){
-                    // The data is inconsistent
-                    reject("inconsistent data");
-                }
+            if ( !this.isCommittable() ){
+                reject("not ready");
+            } else {
                 this._commit().then(()=>{
-                    this._data = util.patch(this._data, this._changes);
+
+                    this._data = util.patch(this._data, changes);
                     this._changes = undefined;
-                    resolve();
+
+                    this._trigger("commit", changes);
+                    this._trigger("committable", this.isCommittable() );
+
+                    resolve( changes );
                 }, reject);
             }
         });
     }
 
-    rollback(){
-        if ( !this._changes ) return;
-
-        this._set( util.patch2value(this._changes, 1));
-
-        this._changes = undefined;
-    }
-
-    isCommittable(){
-        return !!(this._changes && this.get());
-    }
-
     _commit(){
         // To be overridden
         return new Promise(resolve => resolve());
+    }
+
+    rollback( changes, error ){
+
+        changes = changes || this._changes;
+
+        // No changes to rollback
+        if ( !changes ){ return }
+
+        const rollback = util.diff( util.patch2value(changes,0), util.patch2value(changes,1) );
+
+        this._changes = util.patchMerge(this._changes, rollback);
+
+        this._onChange( rollback );
+
+        this._trigger("rollback", error );
+
+        this._trigger("committable", this.isCommittable() );
+    }
+
+    isCommittable(){
+        // 1. the controller is initialized
+        // 2. the controller has changes
+        // 3. the data is valid
+        return !!(this._data && this._changes && this._isValid);
     }
 
     //-------------------------------------------------------------------

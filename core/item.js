@@ -25,9 +25,8 @@
 
 import {Linkable} from "./linkable.js";
 import {types} from "../types/primitives/index.js";
-import * as errors from "../utilities/errors.js";
 import {Controller} from "../controllers/item.js";
-import {patch2value} from "../utilities/data.js";
+import * as errors from "../utilities/errors.js";
 
 export class Item extends Linkable{
 
@@ -52,15 +51,11 @@ export class Item extends Linkable{
 
         this._options = this._controller.get();
 
-        if (!this._options){
+        if ( !this._options ){
             throw new errors.InvalidOptions(this.constructor, options);
         }
 
-        // It's safe not to keep binding's id because I'll destroy
-        // my controller on own destroying
-        this._controller.bind("change",changes =>{
-            this._options = {...this._options, ...patch2value(changes,0)};
-        });
+        this._controller.bind("change", changes => this._update( changes ));
     }
 
     set( properties ){
@@ -69,6 +64,10 @@ export class Item extends Linkable{
 
     get( property ){
         return this._controller.get( property );
+    }
+
+    validate( properties ){
+        return this._controller.validate( properties );
     }
 
     //-------------------------------------------------------------------

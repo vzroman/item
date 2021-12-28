@@ -60,16 +60,13 @@ export class Eventful{
                 params = [params];
             }
 
-            // IMPORTANT! Trigger works asynchronously
-            setTimeout(()=>{
-                Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
-                    try{
-                        callbacks[id].apply(this, [...params,this]);
-                    }catch(e){
-                        console.error("invalid event callback",e);
-                    }
-                })
-            });
+            Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
+                try{
+                    callbacks[id].apply(this, [...params,this]);
+                }catch(e){
+                    console.error("invalid event callback",e);
+                }
+            })
         }
     }
 

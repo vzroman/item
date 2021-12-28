@@ -23,7 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Eventful} from "./eventful.js";
-import {deepMerge,deepCopy,diff,patch} from "../utilities/data.js";
+import {deepMerge,deepCopy,diff,patch2value} from "../utilities/data.js";
 
 export class Linkable extends Eventful{
 
@@ -94,41 +94,50 @@ export class Linkable extends Eventful{
 
     set( properties ){
 
-        if (typeof properties !== "object"){ return }
+        if (typeof properties !== "object" || properties.constructor !== Object){ return }
 
-        const ownProperties = {};
-        for (const p in properties){
-            if ( !this._options.hasOwnProperty(p) ){
-                continue
-            }
-            if( properties[p] === undefined ){
-                ownProperties[ p ] = this.constructor.options[ p ];
-            }
-        }
+        properties = this._set( deepCopy(properties) );
 
-        const changes = this._set( ownProperties );
+        // ATTENTION! The properties are passed by reference,
+        // the event's callbacks are able to change values
+        this._trigger( "beforeChange", properties );
 
-        if (!changes) return;
+        const changes = diff( this.get(Object.keys( properties )), properties );
 
-        this._options = patch(this._options, changes );
+        // No real changes - no triggering events
+        if ( !changes ){ return }
+
+        this._update( changes );
+
+        this._onChange( changes );
 
         return changes;
 
     }
 
     _set( properties ){
+        const result = {};
+        for (const p in properties){
+            if ( !this.constructor.options.hasOwnProperty(p) ){
+                continue
+            }
+            if( properties[p] === undefined ){
+                result[ p ] = this.constructor.options[ p ];
+            }else{
+                result[ p ] = properties[ p ];
+            }
+        }
+        return result;
+    }
 
-        // Create a deep copy of the properties
-        properties = deepCopy( properties );
+    _update( changes ){
+        this._options = {
+            ...this._options,
+            ...deepCopy( patch2value(changes, 0) )
+        };
+    }
 
-        // ATTENTION! The properties are passed by reference,
-        // the event's callbacks are able to change values
-        this._trigger( "beforeChange", properties );
-
-        let changes = diff( this.get(Object.keys( properties )), properties );
-
-        // No real changes - no triggering events
-        if ( !changes ){ return }
+    _onChange( changes ){
 
         this._trigger("change", changes);
 
@@ -136,9 +145,6 @@ export class Linkable extends Eventful{
         Object.entries( changes ).forEach(([prop, change])=>{
             this._trigger(prop, change);
         });
-
-
-        return changes;
     }
 
     //-------------------------------------------------------------------
@@ -155,8 +161,9 @@ export class Linkable extends Eventful{
         // }
         if (context instanceof Linkable){
             context = {data: context};
+        }else{
+            context = {...context, self:this };
         }
-        context.self = this;
         context.default = context.data || context.parent || context.self;
 
         // Links

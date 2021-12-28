@@ -44,27 +44,31 @@ export class Controller extends Item{
     // Data access API
     //-------------------------------------------------------------------
     init( ID ){
+
+        const onData = data => super.init( data || this._schema.get({}) );
+
         return new Promise((resolve, reject)=>{
 
             // New object
-            if (!ID){ return resolve( undefined ) }
+            if (!ID) return resolve( onData() );
 
-            this._ID = ID;
             const fields = Object.keys( this._options.schema ).join(",");
 
             this._options.connection().query(`get ${ fields } from * where .oid = $oid('${ ID }') format $to_json`,([H,...Items])=>{
                 if (Items.length === 0){
                     // The object doesn't exist yet
-                    resolve( undefined );
+                    resolve( onData() );
                 }else{
+                    // The object exists
+                    this._ID = ID;
+
                     let data = Items[0];
                     data = H.reduce((acc,n,i) => {
                         acc[n] = data[i];
                         return acc;
                     },{});
 
-                    super.init( data );
-                    resolve( data );
+                    resolve( onData( data ) );
                 }
             }, reject, this._options.timeout );
         });
@@ -76,7 +80,7 @@ export class Controller extends Item{
 
     _commit(){
         return new Promise((resolve, reject)=>{
-            if (this._data){
+            if ( this._ID ){
                 // the object already exits
                 const changes = this._schema.get( patch2value(this._changes, 0), {virtual:false} );
                 this._options.connection().edit_object(this._ID, changes, resolve, reject, 60000);

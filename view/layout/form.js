@@ -51,7 +51,7 @@ export class View extends Parent{
                 options:{
                     ...this._options.options,
                     links:{
-                        focus:{ event:"change", handler:(_,{data})=> data.get() }
+                        focus:"committable"
                     }
                 }
             },
@@ -60,21 +60,14 @@ export class View extends Parent{
                 options:{
                     text:i18n("save"),
                     enable:false,
-                    links:{
-                        enable:{ event:"change", handler:(_,{data})=>{
-                            if ( data.isCommittable() ){
-                                return true;
-                            }else{
-                                this._widgets.view.set({focus:true});
-                                return false;
-                            }}
-                        }
-                    },
+                    links:{ enable:"committable" },
                     events:{ click:(_,{data})=>{
                         // TODO. Waiting
                         data.commit().then(()=>{
+                            console.log("commit ok");
                             // TODO. Remove waiting
                         }, error =>{
+                            console.log("commit error",error);
                             // TODO. Show the error
                         })
                     }}
@@ -85,7 +78,7 @@ export class View extends Parent{
                 options:{
                     text:i18n("cancel"),
                     enable:false,
-                    links:{ enable:{ event:"change", handler:(_,{data})=> data.isCommittable() }},
+                    links:{ enable:"committable"},
                     events:{ click:(_,{data})=>{
                         data.rollback();
                     }}
