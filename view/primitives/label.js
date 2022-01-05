@@ -22,14 +22,25 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {View} from "./view.js";
-import {primitives} from "./primitives/index.js";
-import {controls} from "./controls/index.js";
-import {layout} from "./layout/index.js";
 
-export const view = {
-    View,
-    primitives,
-    controls,
-    layout
-};
+import {View as Parent} from "../view.js";
+import {types} from "../../types/index.js";
+
+// The control is the point where external widgets to be attached
+export class Primitive extends Parent{
+
+    static options = {
+        text:{type:types.primitives.String}
+    };
+
+    static markup = `<div></div>`;
+
+    constructor( options ){
+        super( options );
+
+        this.bind("text", value =>
+            this.$markup.text( value )
+        );
+    }
+}
+Primitive.extend();

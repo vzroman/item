@@ -22,14 +22,8 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {View} from "./view.js";
-import {primitives} from "./primitives/index.js";
-import {controls} from "./controls/index.js";
-import {layout} from "./layout/index.js";
+import {Primitive as Label} from "./label.js";
 
-export const view = {
-    View,
-    primitives,
-    controls,
-    layout
+export const primitives = {
+    Label
 };
