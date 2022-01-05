@@ -97,11 +97,7 @@ export class Controller extends Linkable{
 
         if (this._options.autoCommit && this.isCommittable()){
             // The data is ready to be committed and the controller is autoCommit
-            this.commit().then(()=>{}, error=>{
-
-                // The commit failed, redo the last changes
-                this.rollback( changes, error );
-            });
+            this.commit();
         }
     }
 

@@ -36,6 +36,12 @@ export class View extends Parent{
         options:{type: types.primitives.Set }
     };
 
+    static events = {
+        commit:types.primitives.Any,
+        error:types.primitives.Any,
+        cancel:types.primitives.Any
+    };
+
     static markup = `<div class="vertical">
         <div name="view"></div>
         <div class="horizontal" style="justify-content: flex-end">
@@ -64,11 +70,10 @@ export class View extends Parent{
                     events:{ click:(_,{data})=>{
                         // TODO. Waiting
                         data.commit().then(()=>{
-                            console.log("commit ok");
-                            // TODO. Remove waiting
+                            this._trigger("commit");
                         }, error =>{
-                            console.log("commit error",error);
-                            // TODO. Show the error
+                            data.rollback(undefined, error);
+                            this._trigger("error", error);
                         })
                     }}
                 }
