@@ -25,8 +25,10 @@
 
 import {db} from "./db/index.js";
 import {Controller as Item} from "./item.js";
+import {Controller as Collection} from "./collection.js";
 
 export const controllers ={
   Item,
+  Collection,
   db
 };

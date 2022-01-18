@@ -22,59 +22,56 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
+import {Controller as Item} from "./item.js";
 import {Linkable} from "../core/linkable.js";
-import {Eventful} from "../core/eventful.js";
 import * as util from "../utilities/data.js";
-import {Schema} from "../core/schema.js";
+import {Eventful} from "../core/eventful.js";
 
-export class Controller extends Linkable{
+export class Controller extends Item{
 
     static options = {
-        schema: undefined,
-        autoCommit:true
+        filter:undefined,
+        orderBy:undefined,
+        page:undefined
     };
 
     static events = {
-        committable:true,
-        commit:true,
-        rollback:true
+        add:true,
+        edit:true,
+        remove:true
     };
 
-    constructor( options ){
-        super( options );
-
-        if (typeof this._options.schema !== "object")
-            throw new Error("invalid schema: " + this._options.schema);
-
-        // Initialize the schema
-        this._schema = new Schema( this._options.schema );
-
-        this._data = undefined;
-        this._changes = undefined;
-        this._isValid = false;
-    }
-
-    get( property ){
-        if ( !property ){
-            return this._schema.get( super.get( Object.keys(this._options.schema) ) );
-        }else{
-            return super.get( property )
+    get( id ){
+        if ( !id ){
+            return this.get( Object.keys({...this._data, ...this._changes}) );
+        } else {
+            return Linkable.prototype.get.call(this, id);
         }
     }
 
-    _get( property ){
-        if (this._changes && this._changes[property]){
-            return util.deepCopy( this._changes[property][0] );
-        }else if (this._data){
-            return util.deepCopy( this._data[property] );
-        }else{
-            return undefined;
-        }
-    }
-
-    set( properties ){
+    _get( id ){
         if ( this._data ){
-            return super.set( properties );
+
+            // Get the item by its ID
+            let item = this._data[ id ];
+
+            // If item has uncommitted changes
+            if ( this._changes && this._changes[ id ]){
+                if ( this._changes[ id ][ 0 ]){
+                    // Item was changed or created
+                    item = {...item, ...this._changes[ id ][ 0 ]}
+                }else{
+                    // Item was deleted
+                    item = undefined;
+                }
+            }
+
+            // Make a copy of the item
+            if ( item ){
+                item = util.deepCopy( this._schema.get( item ) );
+            }
+
+            return item;
         }else{
             // The controller is not initialized yet
             return undefined;
@@ -82,36 +79,52 @@ export class Controller extends Linkable{
 
     }
 
-    _set( properties ){
-        return this._schema.set( properties );
+    _set( items ){
+        for (const id in items){
+            // Validate the item against the schema
+            items[ id ] = this._schema.set( items[id] );
+
+            // Check for real changes
+            const changes = util.diff( this.get( id ), items[ id ] );
+            if (!changes){
+                delete items[ id ];
+            }else{
+                // Keep changes only
+                items[ id ] = util.patch2value( items[ id ], 0 );
+            }
+        }
+        return items;
     }
 
-    _update( changes ){
 
-        // Add new changes
-        this._changes = util.patchMerge( this._changes, changes );
 
-        this._isValid = !!this.get();
-
-        this._trigger("committable", this.isCommittable());
-
-        if (this._options.autoCommit && this.isCommittable()){
-            // The data is ready to be committed and the controller is autoCommit
-            this.commit();
+    _merge( changes ){
+        for (const id in changes){
+            const patch = util.patchMerge( this._changes[ id ], changes[ id ] );
+            if ( patch ){
+                this._changes[ id ] = patch;
+            }else{
+                delete this._changes[ id ];
+            }
         }
     }
 
-    link( sources ){
-        sources = super.link( sources );
-        this._schema.link({...sources, parent:this});
-        return sources;
+    _validate(){
+        let isValid = true;
+        for (const id in this._changes){
+            if ( this._changes[ id ][0] && !this.get( id ) ){
+                isValid = false;
+                break;
+            }
+        }
+        return isValid;
     }
 
 
     bind(event, callback){
         if ( this.constructor.events[event] ){
             return super.bind( event, callback );
-        } else if( this._options.schema[event] ){
+        } else {
             // Unlike other types Controller subscribes
             // to the controlled item changes but not to it's own
             const id = Eventful.prototype.bind.call(this, event, callback);
@@ -120,72 +133,8 @@ export class Controller extends Linkable{
             this._trigger(event, [this.get(event), undefined]);
 
             return id;
-        }else{
-            console.warn("invalid event to bind", event);
-            return undefined;
         }
     }
 
-    //-------------------------------------------------------------------
-    // Data access API
-    //-------------------------------------------------------------------
-    init( Data ){
-        const changes = super.set( Data );
-        this._data = util.patch(this._data, changes);
-        this._changes = undefined;
-    }
-
-    commit(){
-        return new Promise((resolve, reject)=>{
-
-            if ( !this.isCommittable() ) return reject("not ready");
-
-            const changes = this._changes;
-            this._data = util.patch(this._data, changes);
-            this._changes = undefined;
-
-            this._trigger("commit", changes);
-            this._trigger("committable", this.isCommittable() );
-
-            resolve( changes );
-        });
-    }
-
-
-    rollback( changes, error ){
-
-        changes = changes || this._changes;
-
-        // No changes to rollback
-        if ( !changes ){ return }
-
-        const rollback = util.diff( util.patch2value(changes,0), util.patch2value(changes,1) );
-
-        this._changes = util.patchMerge(this._changes, rollback);
-
-        this._onChange( rollback );
-
-        this._trigger("rollback", error );
-
-        this._trigger("committable", this.isCommittable() );
-    }
-
-    isCommittable(){
-        // 1. the controller is initialized
-        // 2. the controller has changes
-        // 3. the data is valid
-        return !!(this._data && this._changes && this._isValid);
-    }
-
-    //-------------------------------------------------------------------
-    // Clean UP
-    //-------------------------------------------------------------------
-    destroy(){
-        this._schema.destroy();
-        this._schema = undefined;
-        this._data = undefined;
-        this._changes = undefined;
-        super.destroy();
-    }
 }
 Controller.extend();

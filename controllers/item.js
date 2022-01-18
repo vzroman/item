@@ -89,9 +89,9 @@ export class Controller extends Linkable{
     _update( changes ){
 
         // Add new changes
-        this._changes = util.patchMerge( this._changes, changes );
+        this._merge( changes );
 
-        this._isValid = !!this.get();
+        this._isValid = this._validate();
 
         this._trigger("committable", this.isCommittable());
 
@@ -99,6 +99,14 @@ export class Controller extends Linkable{
             // The data is ready to be committed and the controller is autoCommit
             this.commit();
         }
+    }
+
+    _merge( changes ){
+        this._changes = util.patchMerge( this._changes, changes );
+    }
+
+    _validate(){
+        return !!this.get();
     }
 
     link( sources ){
