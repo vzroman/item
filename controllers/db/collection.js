@@ -22,11 +22,10 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
+import {Controller as Collection} from "../collection.js";
+import {patch2value} from "../../utilities/data";
 
-import {Controller as Item} from "../item.js";
-import {patch2value} from "../../utilities/data.js";
-
-export class Controller extends Item{
+export class Controller extends Collection{
 
     static options = {
         connection:undefined,
@@ -35,38 +34,30 @@ export class Controller extends Item{
     };
 
     constructor( options ){
-        super( options );
+        // id is always oid
+        super( {...options, id:".oid"} );
 
         if (typeof this._options.connection !== "function")
             throw new Error("invalid connection: " + this._options.connection);
     }
+
     //-------------------------------------------------------------------
     // Data access API
     //-------------------------------------------------------------------
-    init( ID ){
+    init( filter ){
 
-        const onData = data => super.init( data || this._schema.get({}) );
+        filter = this.constructor.filter2query( filter );
 
         return new Promise((resolve, reject)=>{
 
-            // New object
-            if (!ID) return resolve( onData() );
+            const fields = [this._options.id,...this._schema.filter({virtual:false})].join(",");
 
-            const fields = this._schema.filter({virtual:false}).join(",");
+            this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`, data=>{
 
-            this._options.connection().get(`get ${ fields } from * where .oid = $oid('${ ID }') format $to_json`,Items=>{
-                if (Items[0]){
-                    this._ID = ID;
-                }
-
-                resolve( onData( Items[0] ) );
+                resolve( super.init( data ) );
 
             }, reject, this._options.timeout );
         });
-    }
-
-    refresh(){
-
     }
 
     setSubscribe( value ){
@@ -101,5 +92,32 @@ export class Controller extends Item{
         });
     }
 
+    static filter2query( filter ){
+        if ( filter[0] === "and" || filter[0] === "or"){
+            return `${ filter[0] }(${ filter[1].map( this.filter2query ).join(",") })`;
+        }else if(filter[0] === "andnot"){
+            return `andnot(${ this.filter2query(filter[1][0]) }, ${ this.filter2query(filter[1][1]) })`;
+        }else{
+            let [ field, operator, value ] = filter;
+
+            if (operator === "[]"){
+                let [from, to] = value;
+                if (typeof from === "string"){ from = `'${ from }'`}
+                if (typeof to === "string"){ to = `'${ to }'`}
+
+                return field +" [" +from+":"+to+"]";
+            }else{
+                if (typeof value === "string"){
+                    if ( value.startsWith("'") ){
+                        value = value.substr(1);
+                    }else if ( !value.startsWith("$") ){
+                        value = `'${ value }'`;
+                    }
+                }
+
+                return `${ field } ${ operator } ${ value }`;
+            }
+        }
+    }
 }
 Controller.extend();

@@ -26,6 +26,7 @@
 import {Linkable} from "./linkable.js";
 import {types as primitives} from "../types/primitives/index.js";
 import {deepCopy} from "../utilities/data.js";
+import {addKey} from "../i18n/i18n";
 
 export class Attribute extends Linkable{
 
@@ -163,12 +164,25 @@ export class Schema extends Linkable{
         return result;
     }
 
-    filter( properties, filter ){
-        const result = {};
+    filter( filter, properties ){
+
+        let attributes = properties;
+        if (!attributes){
+            attributes = {};
+            for (const a in this._attributes){
+                attributes[ a ] = true;
+            }
+        }
+
+        let result = {};
         for (let p in properties){
             if ( this._attributes[p] && this._attributes[p].filter(filter) ) {
                 result[ p ] = properties[ p ];
             }
+        }
+
+        if (!properties){
+            result = Object.keys( result );
         }
 
         return result;
