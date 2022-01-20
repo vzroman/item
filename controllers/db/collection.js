@@ -23,7 +23,6 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Controller as Collection} from "../collection.js";
-import {patch2value} from "../../utilities/data";
 
 export class Controller extends Collection{
 
@@ -46,17 +45,28 @@ export class Controller extends Collection{
     //-------------------------------------------------------------------
     init( filter ){
 
-        filter = this.constructor.filter2query( filter );
+        return new Promise((resolve, reject) => {
+
+            const filter = this.constructor.filter2query( filter );
+
+            this.query( filter ).then(data => {
+
+                this._filter = filter;
+
+                resolve( super.init(data) );
+
+            }, reject);
+        });
+    }
+
+
+    query( filter ){
 
         return new Promise((resolve, reject)=>{
 
-            const fields = [this._options.id,...this._schema.filter({virtual:false})].join(",");
+            const fields = [this._options.id, ...this._schema.filter({virtual:false})].join(",");
 
-            this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`, data=>{
-
-                resolve( super.init( data ) );
-
-            }, reject, this._options.timeout );
+            this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`, resolve, reject, this._options.timeout );
         });
     }
 
@@ -67,29 +77,27 @@ export class Controller extends Collection{
     commit(){
         return new Promise((resolve, reject)=>{
 
+            // This is a refreshing, the changes came from the database, there is no need to commit them back
+            if (this._isRefresh) return super.commit().then(resolve,reject);
+
             if ( !this.isCommittable() ) return reject("not ready");
 
-            if ( this._ID ){
-                // the object already exits
-                const changes = this._schema.filter( {virtual:false}, patch2value(this._changes, 0) );
-                if ( !Object.keys(changes).length ){
-                    // No changes in persistent fields
-                    super.commit().then(resolve, reject);
-                }else{
-                    // Send a query to the database
-                    this._options.connection().edit_object(this._ID, changes, ()=>{
-                        super.commit().then(resolve, reject);
-                    }, reject, this._options.timeout);
-                }
-            }else{
-                // new object
-                const fields = this._schema.filter( {virtual:false}, this.get() );
-                this._options.connection().create_object(fields, ID=>{
-                    this._ID = ID;
-                    super.commit().then(resolve, reject);
-                },reject, this._options.timeout);
-            }
+            this.constructor.transaction(this._changes,  this._options.connection(), this._options.timeout)
+                .then(()=>{
+                    super.commit(). then(resolve, reject);
+                    this.refresh();
+                }, reject);
         });
+    }
+
+    _refresh( data ){
+        Object.keys({...this._data,...this._changes}).forEach(id => {
+
+            // The item doesn't exist anymore or do not satisfies the query conditions
+            if (!data.hasOwnProperty(id)) data[id] = null;
+        });
+
+        return super._refresh( data );
     }
 
     static filter2query( filter ){
@@ -117,6 +125,55 @@ export class Controller extends Collection{
 
                 return `${ field } ${ operator } ${ value }`;
             }
+        }
+    }
+
+    static async transaction( changes, connection, timeout ){
+        const query = query => {
+            return new Promise((resolve, reject)=>{
+                connection.query(query, resolve, reject, timeout);
+            })
+        };
+
+        const create = fields => {
+            return new Promise((resolve, reject)=>{
+                connection.create_object(fields, resolve, reject, timeout);
+            })
+        };
+
+        const update = (id,fields) => {
+            return new Promise((resolve, reject)=>{
+                connection.edit_object(id, fields, resolve, reject, timeout);
+            })
+        };
+
+        const remove = (id) => {
+            return new Promise((resolve, reject)=>{
+                connection.delete_object(id, resolve, reject, timeout);
+            })
+        };
+
+        try{
+            await query("TRANSACTION_START");
+
+            for(const id in changes){
+                if(changes[id][0] && !changes[id][1]){
+                    await create( changes[id][0] );
+                }else if(!changes[id][0] && changes[id][1]){
+                    await remove( id );
+                }else{
+                    await update(id, changes[id][0]);
+                }
+            }
+
+            await query("TRANSACTION_COMMIT");
+        }catch (e){
+            connection.query("TRANSACTION_ROLLBACK",()=>{}, error=>{
+
+                console.error("error on transaction rollback", error, e);
+
+                throw e
+            });
         }
     }
 }

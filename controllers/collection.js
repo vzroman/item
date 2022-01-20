@@ -144,6 +144,10 @@ export class Controller extends Item{
 
     _set( items ){
         for (const id in items){
+
+            // The item is being deleted
+            if (!items[id]) continue;
+
             const item = this._get( id );
 
             // Validate the item against the schema
@@ -155,7 +159,7 @@ export class Controller extends Item{
                 delete items[ id ];
             }else{
                 // Keep changes only
-                items[ id ] = util.patch2value( items[ id ], 0 );
+                items[ id ] = util.patch2value( changes, 0 );
             }
         }
         return items;

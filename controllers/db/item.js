@@ -25,6 +25,7 @@
 
 import {Controller as Item} from "../item.js";
 import {patch2value} from "../../utilities/data.js";
+import * as util from "../../utilities/data";
 
 export class Controller extends Item{
 
@@ -39,34 +40,81 @@ export class Controller extends Item{
 
         if (typeof this._options.connection !== "function")
             throw new Error("invalid connection: " + this._options.connection);
+
+        this._isRefresh = false;
     }
     //-------------------------------------------------------------------
     // Data access API
     //-------------------------------------------------------------------
     init( ID ){
 
-        const onData = data => super.init( data || this._schema.get({}) );
+        const defaults = this._schema.get({});
 
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve, reject) => {
 
-            // New object
-            if (!ID) return resolve( onData() );
+            if ( ID===undefined ) return resolve( super.init( defaults ) );
 
-            const fields = this._schema.filter({virtual:false}).join(",");
+            const filter = `.oid = $oid('${ ID }')`;
 
-            this._options.connection().get(`get ${ fields } from * where .oid = $oid('${ ID }') format $to_json`,Items=>{
-                if (Items[0]){
+            this.query( filter ).then(data => {
+
+                if ( data ) {
                     this._ID = ID;
+                    this._filter = filter;
+                }else{
+                    data = defaults;
                 }
 
-                resolve( onData( Items[0] ) );
+                resolve( super.init( data ) );
 
-            }, reject, this._options.timeout );
+            }, reject);
         });
     }
 
     refresh(){
+        return new Promise((resolve, reject) => {
+            if (this._filter === undefined) return reject("not initialized");
 
+            this.query( this._filter) .then(data => {
+
+                this._isRefresh = true;
+
+                try{
+
+                    this._refresh( data );
+
+                    // No active changes after refresh
+                    if (this._changes){
+                        this._data = util.patch(this._data, this._changes);
+                        this._changes = undefined;
+                    }
+
+                    resolve();
+                }catch (e){
+                    reject( e );
+                }finally {
+                    this._isRefresh = false;
+                }
+
+            }, reject);
+        });
+    }
+
+    _refresh( data ){
+        this.set( data );
+    }
+
+    query( filter ){
+        return new Promise((resolve, reject) => {
+
+            const fields = this._schema.filter({virtual:false}).join(",");
+
+            this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`,Items=>{
+
+                resolve( Items[0] );
+
+            }, reject, this._options.timeout );
+        });
     }
 
     setSubscribe( value ){
@@ -75,6 +123,9 @@ export class Controller extends Item{
 
     commit(){
         return new Promise((resolve, reject)=>{
+
+            // This is a refreshing, the changes came from the database, there is no need to commit them back
+            if (this._isRefresh) return super.commit().then(resolve,reject);
 
             if ( !this.isCommittable() ) return reject("not ready");
 
@@ -87,15 +138,27 @@ export class Controller extends Item{
                 }else{
                     // Send a query to the database
                     this._options.connection().edit_object(this._ID, changes, ()=>{
+
                         super.commit().then(resolve, reject);
+
+                        // Request the updated item from the database
+                        this.refresh();
+
                     }, reject, this._options.timeout);
                 }
             }else{
                 // new object
                 const fields = this._schema.filter( {virtual:false}, this.get() );
                 this._options.connection().create_object(fields, ID=>{
+
                     this._ID = ID;
+
+                    this._filter = `.oid = $oid('${ ID }')`;
+
                     super.commit().then(resolve, reject);
+
+                    this.refresh();
+
                 },reject, this._options.timeout);
             }
         });
