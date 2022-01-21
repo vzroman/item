@@ -23,7 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {View} from "../view.js";
+import {View} from "../item.js";
 import {types} from "../../types/index.js";
 
 // The control is the point where external widgets to be attached

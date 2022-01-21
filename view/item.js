@@ -103,7 +103,7 @@ export class View extends Item{
         });
 
         this._controller.bind("visible", value=>{
-            const visibility = value === false ? "hidden" : "visible" ;
+            const visibility = value ? "visible" : "hidden";
             this.$markup.css({visibility});
         });
 
@@ -130,6 +130,8 @@ export class View extends Item{
                 widget.link( sources );
             });
         }
+
+        return sources;
     }
 
 

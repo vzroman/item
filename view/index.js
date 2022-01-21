@@ -22,13 +22,13 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {View} from "./view.js";
+import {View as Item} from "./item.js";
 import {primitives} from "./primitives/index.js";
 import {controls} from "./controls/index.js";
 import {layout} from "./layout/index.js";
 
 export const view = {
-    View,
+    Item,
     primitives,
     controls,
     layout

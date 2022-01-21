@@ -23,7 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {View as Parent} from "../view.js";
+import {View as Parent} from "../item.js";
 import {types} from "../../types/index.js";
 import {controls} from "../controls/index.js";
 import {i18n} from "../../i18n/i18n.js";
