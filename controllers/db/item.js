@@ -70,8 +70,11 @@ export class Controller extends Item{
         });
     }
 
-    refresh(){
+    rollback(changes, error){
         return new Promise((resolve, reject) => {
+
+            if (changes) return resolve( super.rollback(changes, error) );
+
             if (this._filter === undefined) return reject("not initialized");
 
             this.query( this._filter) .then(data => {
@@ -93,6 +96,10 @@ export class Controller extends Item{
                     reject( e );
                 }finally {
                     this._isRefresh = false;
+
+                    this._trigger("rollback", error);
+
+                    this._trigger("committable", this.isCommittable() );
                 }
 
             }, reject);

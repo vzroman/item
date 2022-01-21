@@ -174,9 +174,9 @@ export class Schema extends Linkable{
         }
 
         let result = {};
-        for (let p in properties){
-            if ( this._attributes[p] && this._attributes[p].filter(filter) ) {
-                result[ p ] = properties[ p ];
+        for (const a in attributes){
+            if ( this._attributes[a] && this._attributes[a].filter(filter) ) {
+                result[ a ] = attributes[ a ];
             }
         }
 

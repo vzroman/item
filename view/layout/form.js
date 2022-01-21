@@ -86,6 +86,7 @@ export class View extends Parent{
                     links:{ enable:"committable"},
                     events:{ click:(_,{data})=>{
                         data.rollback();
+                        this._trigger("cancel");
                     }}
                 }
             }

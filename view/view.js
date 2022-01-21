@@ -33,6 +33,7 @@ export class View extends Item{
     static options = {
         $container:{type:types.primitives.Any,required:true, virtual:true },
         enable:{type:types.primitives.Bool, default:true, virtual:true},
+        visible:{type:types.primitives.Bool, default:true, virtual:true},
         focus:{type:types.primitives.Bool, default:false, virtual:true},
         widgets:{type:types.primitives.Set}
     };
@@ -99,6 +100,11 @@ export class View extends Item{
 
         this._controller.bind("enable", value=>{
             this.enable( value );
+        });
+
+        this._controller.bind("visible", value=>{
+            const visibility = value === false ? "hidden" : "visible" ;
+            this.$markup.css({visibility});
         });
 
         this.$markup.on("click",event => this._trigger("click", event) );
