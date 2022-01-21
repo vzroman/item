@@ -138,7 +138,7 @@ export class Controller extends Linkable{
     // Data access API
     //-------------------------------------------------------------------
     init( Data ){
-        const changes = super.set( Data );
+        const changes = super.set( this._schema.get(Data) );
         this._data = util.patch(this._data, changes);
         this._changes = undefined;
     }
