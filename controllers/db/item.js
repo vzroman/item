@@ -24,8 +24,7 @@
 //------------------------------------------------------------------------------------
 
 import {Controller as Item} from "../item.js";
-import {patch2value} from "../../utilities/data.js";
-import * as util from "../../utilities/data";
+import * as util from "../../utilities/data.js";
 
 export class Controller extends Item{
 
@@ -131,7 +130,7 @@ export class Controller extends Item{
 
             if ( this._ID ){
                 // the object already exits
-                const changes = this._schema.filter( {virtual:false}, patch2value(this._changes, 0) );
+                const changes = this._schema.filter( {virtual:false}, util.patch2value(this._changes, 0) );
                 if ( !Object.keys(changes).length ){
                     // No changes in persistent fields
                     super.commit().then(resolve, reject);

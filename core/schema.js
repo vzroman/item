@@ -26,7 +26,6 @@
 import {Linkable} from "./linkable.js";
 import {types as primitives} from "../types/primitives/index.js";
 import {deepCopy} from "../utilities/data.js";
-import {addKey} from "../i18n/i18n";
 
 export class Attribute extends Linkable{
 
