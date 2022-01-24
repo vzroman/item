@@ -24,20 +24,9 @@
 //------------------------------------------------------------------------------------
 
 import {View as Item} from "./item.js";
-import {types} from "../types/index.js";
+import {Controller} from "../controllers/collection.js";
 
 export class View extends Item{
-
-    static options = {
-        item:{type:types.complex.Item, options:{schema:{
-            view:{type: types.primitives.Class, options:{class:Item}, required:true },
-            options:{type: types.primitives.Set }
-        }}, required:true},
-        wrapper:{type:types.complex.Item, options:{schema:{
-            view:{type: types.primitives.Class, options:{class:Item}, required:true },
-            options:{type: types.primitives.Set }
-        }}}
-    };
 
     constructor( options ){
         super( options );
@@ -46,9 +35,6 @@ export class View extends Item{
         this._subscriptions = [];
     }
 
-    $itemsContainer(){
-        return this.$markup;
-    }
 
     link( sources ){
 
@@ -64,7 +50,7 @@ export class View extends Item{
 
         const {data} = sources;
 
-        if (data){
+        if (data && data instanceof Controller){
             data.forEach( id => {
                 this._items[id] = this.addItem( data.fork(id) );
             });
@@ -83,28 +69,18 @@ export class View extends Item{
 
     addItem( data ){
 
-        let item;
-        if (this._options.wrapper){
-            // The wrapper should create the item
-            item = new this._options.wrapper.view({
-                ...this._options.wrapper.options,
-                $container:this.$itemsContainer(),
-                item:this._options.item
-            });
-        }else{
-            // No wrapper
-            item = new this._options.item.view({
-                ...this._options.item.options,
-                $container:this.$itemsContainer()
-            });
-        }
+        const item = this.newItem( data );
 
         // Link the item to the data
-        if (data){
+        if ( data ){
             item.link( {data, parent:this} );
         }
 
         return item;
+    }
+
+    newItem( data ){
+        throw new Error("not implemented");
     }
 
     destroy(){
