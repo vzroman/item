@@ -23,12 +23,14 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {View as Item} from "./item.js";
+import {View as Collection} from "./collection.js";
 import {primitives} from "./primitives/index.js";
 import {controls} from "./controls/index.js";
 import {layout} from "./layout/index.js";
 
 export const view = {
     Item,
+    Collection,
     primitives,
     controls,
     layout

@@ -44,6 +44,10 @@ export class View extends Item{
 
     static markup = undefined;
 
+    markup(){
+        return this.constructor.markup;
+    }
+
     widgets(){
         return {};
     }
@@ -51,7 +55,7 @@ export class View extends Item{
     constructor( options ){
         super( options );
 
-        this.$markup = $( this.constructor.markup ).appendTo( this._options.$container );
+        this.$markup = $( this.markup() ).appendTo( this._options.$container );
 
         this._widgets = this.widgets();
 

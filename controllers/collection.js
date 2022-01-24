@@ -42,6 +42,12 @@ export class Controller extends Item{
         remove:true
     };
 
+    constructor(options){
+        super(options);
+
+        this._view = new util.AVLTree();
+    }
+
     init( Data ){
         if (this._options.id !== undefined){
             if (typeof Data === "object" && Data.constructor === Object){
@@ -110,6 +116,16 @@ export class Controller extends Item{
         } else {
             return Linkable.prototype.get.call(this, id);
         }
+    }
+
+    forEach( callback ){
+        this._view.forEach(n => callback( n.key[1] ));
+    }
+
+    view(){
+        const data = [];
+        this.forEach(id => data.push([id,this.get(id)]) );
+        return data;
     }
 
     _get( id ){
@@ -194,13 +210,30 @@ export class Controller extends Item{
 
         Object.entries( changes ).forEach(([id,[item, previous]])=>{
             if ( !previous ){
+
+                this._view.insert([this._orderKey(id, item), id]);
                 this._trigger("add", [id, item]);
             }else if( !item ){
+                this._view.remove([this._orderKey(id, previous), id] );
                 this._trigger("remove", [id, previous]);
             }else{
+                this._view.remove([this._orderKey(id, previous), id] );
+                this._view.insert([this._orderKey(id, item), id]);
                 this._trigger("edit", [id, item, previous]);
             }
         });
+    }
+
+    _orderKey(id, item){
+        let key = id;
+        if ( this._options.orderBy ){
+            if (item.hasOwnProperty(this._options.orderBy)){
+                key = item[this._options.orderBy];
+            }else{
+                key = this._get(id)[this._options.orderBy];
+            }
+        }
+        return key;
     }
 
 
