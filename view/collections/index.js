@@ -23,7 +23,9 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {View as Flex} from "./flex.js";
+import {View as ItemList} from "./itemList.js";
 
 export const collections = {
-    Flex
+    Flex,
+    ItemList
 };

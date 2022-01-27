@@ -27,11 +27,13 @@ import {View as Collection} from "./collection.js";
 import {primitives} from "./primitives/index.js";
 import {controls} from "./controls/index.js";
 import {layout} from "./layout/index.js";
+import {collections} from "./collections/index.js";
 
 export const view = {
     Item,
     Collection,
     primitives,
     controls,
-    layout
+    layout,
+    collections
 };

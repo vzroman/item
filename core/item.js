@@ -32,6 +32,7 @@ export class Item extends Linkable{
 
     // The options are described as attributes
     static options = {
+        id:{type:types.String, virtual:true},
         links:{type:types.Set, virtual:true, default:{} },
         events:{type:types.Set, virtual:true, default:{} }
     };

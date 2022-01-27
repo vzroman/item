@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------------
 // MIT License
 //
-// Copyright (c) 2021 vzroman
+// Copyright (c) 2022 vzroman
 // Author: Vozzhenikov Roman, vzroman@gmail.com
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,12 +25,14 @@
 
 import {View as Item} from "./item.js";
 import {Controller} from "../controllers/collection.js";
+import {util} from "../utilities/index.js";
 
 export class View extends Item{
 
     constructor( options ){
         super( options );
 
+        this._collection = undefined;
         this._items = {};
         this._subscriptions = [];
     }
@@ -51,36 +53,54 @@ export class View extends Item{
         const {data} = sources;
 
         if (data && data instanceof Controller){
+
+            this._collection = data;
+
             data.forEach( id => {
-                this._items[id] = this.addItem( data.fork(id) );
+                this._items[id] = this._addItem( id );
             });
 
-            this._subscriptions.push(data.unbind(data.bind("add", id=>{
-                this._items[id] = this.addItem( data.fork(id) );
-            })));
+            const addId = data.bind("add", id=>{
+                this._items[id] = this._addItem( id );
+            });
+            this._subscriptions.push(()=>data.unbind( addId ));
 
-            this._subscriptions.push(data.unbind(data.bind("remove", id=>{
-                this._items[id].destroy();
-            })));
+            const removeId = data.bind("remove", id=>{
+                this._removeItem( id );
+            });
+            this._subscriptions.push(()=>data.unbind(removeId));
         }
 
         return sources;
     }
 
-    addItem( data ){
+    addItem( item ){
+        const id = util.data.GUID();
+        item = item || {};
+        return this._collection.set({ [id]: item });
+    }
 
-        const item = this.newItem( data );
+    _addItem( id ){
+
+        const item = this.newItem( id );
 
         // Link the item to the data
-        if ( data ){
-            item.link( {data, parent:this} );
-        }
+        item.link( {data:this._collection.fork( id ), parent:this} );
 
         return item;
     }
 
-    newItem( data ){
+    newItem( id ){
+        // To be overridden
         throw new Error("not implemented");
+    }
+
+    removeItem( id ){
+        return this._collection.set({ [id]:null });
+    }
+
+    _removeItem( id ){
+        this._items[id].destroy();
     }
 
     destroy(){
@@ -93,6 +113,8 @@ export class View extends Item{
 
         this._subscriptions.forEach(s => s());
         this._subscriptions = [];
+
+        this._collection = undefined;
 
         super.destroy();
     }

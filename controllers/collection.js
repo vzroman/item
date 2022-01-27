@@ -71,7 +71,10 @@ export class Controller extends Item{
             throw new Error("Invalid data");
         }
 
-        return super.init( Data );
+        this._data = {};
+        const changes = super.set( Data );
+        this._data = util.patch(this._data, changes);
+        this._changes = undefined;
     }
 
     bind(event, callback){
@@ -169,6 +172,9 @@ export class Controller extends Item{
             // Validate the item against the schema
             items[ id ] = this._schema.set({...item, ...items[id]});
 
+            // The item is being added
+            if (!item) continue;
+
             // Check for real changes
             const changes = util.diff( item, items[ id ] );
             if (!changes){
@@ -179,19 +185,6 @@ export class Controller extends Item{
             }
         }
         return items;
-    }
-
-
-
-    _merge( changes ){
-        for (const id in changes){
-            const patch = util.patchMerge( this._changes[ id ], changes[ id ] );
-            if ( patch ){
-                this._changes[ id ] = patch;
-            }else{
-                delete this._changes[ id ];
-            }
-        }
     }
 
     _validate(){

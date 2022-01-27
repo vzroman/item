@@ -23,6 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Controller as Collection} from "../collection.js";
+import {diff,patch2value} from "../../utilities/data.js";
 
 export class Controller extends Collection{
 
@@ -47,7 +48,7 @@ export class Controller extends Collection{
 
         return new Promise((resolve, reject) => {
 
-            const filter = this.constructor.filter2query( filter );
+            filter = this.constructor.filter2query( filter );
 
             this.query( filter ).then(data => {
 
@@ -162,7 +163,9 @@ export class Controller extends Collection{
                 }else if(!changes[id][0] && changes[id][1]){
                     await remove( id );
                 }else{
-                    await update(id, changes[id][0]);
+                    let changedFields = diff( changes[id][0], changes[id][1] );
+                    changedFields = patch2value(changedFields, 0);
+                    await update(id, changedFields);
                 }
             }
 

@@ -49,7 +49,6 @@ export class Controller extends Linkable{
         // Initialize the schema
         this._schema = new Schema( this._options.schema );
 
-        this._data = undefined;
         this._changes = undefined;
         this._isValid = false;
     }

@@ -91,7 +91,7 @@ export class View extends Item{
                 options = deepMerge( options, this._options.widgets[id] );
             }
 
-            acc[id] = new view({$container,...options});
+            acc[id] = new view({$container, id, ...options});
             return acc;
         },{});
 
