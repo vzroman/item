@@ -108,22 +108,26 @@ export class Controller extends Collection{
         // TODO
     }
 
-    commit(){
-        return new Promise((resolve, reject)=>{
+    commit( idList ){
+        if ( idList ){
+            return super.commit( idList );
+        }else{
+            return new Promise((resolve, reject)=>{
 
-            if ( !this.isCommittable() ) return reject("not ready");
+                if ( !this.isCommittable() ) return reject("not ready");
 
-            this.constructor.transaction(this._changes,  this._options.connection(), this._options.timeout)
-                .then(()=>{
+                this.constructor.transaction(this._changes,  this._options.connection(), this._options.timeout)
+                    .then(()=>{
 
-                    // The changes settled to the database
-                    super.commit().then(resolve, reject);
+                        // The changes settled to the database
+                        super.commit().then(resolve, reject);
 
-                    // Refresh the data after successful commit
-                    this.refresh();
+                        // Refresh the data after successful commit
+                        this.refresh();
 
-                }, reject);
-        });
+                    }, reject);
+            });
+        }
     }
 
 

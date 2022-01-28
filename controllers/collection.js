@@ -121,6 +121,47 @@ export class Controller extends Item{
         }
     }
 
+    commit( idList ){
+        if ( idList === undefined) {
+            return super.commit( id );
+        }else if( !Array.isArray( idList ) ){
+            return this.commit( [idList] );
+        }else{
+            return new Promise((resolve, reject) => {
+                if ( !this._changes ) return reject("no changes");
+
+                const toCommit = idList.reduce((acc, id)=>{
+                    acc[id] = this._changes[id];
+                    return acc;
+                },{});
+
+                if ( !Object.keys( toCommit ).length ) return reject("no changes");
+
+                // Get a copy of changes
+                const changes = util.deepCopy( this._changes );
+
+                // Set only requested changes
+                this._changes = toCommit;
+                this.commit().then(result =>{
+
+                    // The commit is successful, redeem not committed changes
+                    idList.forEach(id => delete changes[id]);
+                    this._changes = changes;
+
+                    if ( this.isCommittable() ){
+                        this._trigger("committable", true );
+                    }
+
+                    resolve( result )
+                }, error =>{
+                    // The changes are not committed, recover from the copy
+                    this._changes = changes;
+                    reject( error );
+                })
+            });
+        }
+    }
+
     forEach( callback ){
         this._view.forEach(n => callback( n.key[1] ));
     }
