@@ -33,9 +33,11 @@ import {controls} from "../controls/index.js";
 export class View extends Flex{
 
     markup(){
-        return `<div style="display: flex; flex-direction: column; align-items: flex-start">
+        return `<div style="display: flex; flex-direction: column; align-items: stretch">
             <div name="items"></div>
-            <div name="addItem"></div>
+            <div style="display: flex; justify-content: flex-start">
+                <div name="addItem"></div>
+            </div>
         </div>`;
     };
 

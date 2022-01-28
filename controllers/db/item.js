@@ -39,8 +39,6 @@ export class Controller extends Item{
 
         if (typeof this._options.connection !== "function")
             throw new Error("invalid connection: " + this._options.connection);
-
-        this._isRefresh = false;
     }
     //-------------------------------------------------------------------
     // Data access API
@@ -73,41 +71,35 @@ export class Controller extends Item{
     rollback(changes, error){
         return new Promise((resolve, reject) => {
 
-            if (changes) return resolve( super.rollback(changes, error) );
-
-            if (this._filter === undefined) return reject("not initialized");
-
-            this.query( this._filter) .then(data => {
-
-                this._isRefresh = true;
-
-                try{
-
-                    this._refresh( data );
-
-                    // No active changes after refresh
-                    if (this._changes){
-                        this._data = util.patch(this._data, this._changes);
-                        this._changes = undefined;
-                    }
-
-                    resolve();
-                }catch (e){
-                    reject( e );
-                }finally {
-                    this._isRefresh = false;
+            if (changes) {
+                resolve( super.rollback(changes, error) );
+            }else{
+                this.refresh().then(result =>{
 
                     this._trigger("rollback", error);
 
-                    this._trigger("committable", this.isCommittable() );
-                }
+                    resolve( result );
 
-            }, reject);
+                }, reject);
+            }
         });
     }
 
-    _refresh( data ){
-        this.set( data );
+    refresh( data ){
+        if ( !data ){
+            return new Promise((resolve, reject) => {
+
+                if (this._filter === undefined) return reject("not initialized");
+
+                this.query( this._filter) .then(data => {
+
+                    super.refresh( data ).then( resolve, reject );
+
+                }, reject);
+            });
+        }else{
+            return super.refresh( data );
+        }
     }
 
     query( filter ){
@@ -129,9 +121,6 @@ export class Controller extends Item{
 
     commit(){
         return new Promise((resolve, reject)=>{
-
-            // This is a refreshing, the changes came from the database, there is no need to commit them back
-            if (this._isRefresh) return super.commit().then(resolve,reject);
 
             if ( !this.isCommittable() ) return reject("not ready");
 

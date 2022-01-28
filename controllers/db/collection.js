@@ -60,6 +60,39 @@ export class Controller extends Collection{
         });
     }
 
+    rollback(changes, error){
+        return new Promise((resolve, reject) => {
+
+            if (changes) {
+                resolve( super.rollback(changes, error) );
+            }else{
+                this.refresh().then(result =>{
+
+                    this._trigger("rollback", error);
+
+                    resolve( result );
+
+                }, reject);
+            }
+        });
+    }
+
+    refresh( data ){
+        if ( !data ){
+            return new Promise((resolve, reject) => {
+
+                if (this._filter === undefined) return reject("not initialized");
+
+                this.query( this._filter) .then(data => {
+
+                    super.refresh( data ).then( resolve, reject );
+
+                }, reject);
+            });
+        }else{
+            return super.refresh( data );
+        }
+    }
 
     query( filter ){
 
@@ -78,28 +111,21 @@ export class Controller extends Collection{
     commit(){
         return new Promise((resolve, reject)=>{
 
-            // This is a refreshing, the changes came from the database, there is no need to commit them back
-            if (this._isRefresh) return super.commit().then(resolve,reject);
-
             if ( !this.isCommittable() ) return reject("not ready");
 
             this.constructor.transaction(this._changes,  this._options.connection(), this._options.timeout)
                 .then(()=>{
-                    super.commit(). then(resolve, reject);
+
+                    // The changes settled to the database
+                    super.commit().then(resolve, reject);
+
+                    // Refresh the data after successful commit
                     this.refresh();
+
                 }, reject);
         });
     }
 
-    _refresh( data ){
-        Object.keys({...this._data,...this._changes}).forEach(id => {
-
-            // The item doesn't exist anymore or do not satisfies the query conditions
-            if (!data.hasOwnProperty(id)) data[id] = null;
-        });
-
-        return super._refresh( data );
-    }
 
     static filter2query( filter ){
         if ( filter[0] === "and" || filter[0] === "or"){

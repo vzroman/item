@@ -198,6 +198,16 @@ export class Controller extends Item{
         return isValid;
     }
 
+    _refresh( data ){
+        Object.keys({...this._data,...this._changes}).forEach(id => {
+
+            // The item doesn't exist anymore
+            if (!data.hasOwnProperty(id)) data[id] = null;
+        });
+
+        return super._refresh( data );
+    }
+
     _onChange( changes ){
         super._onChange( changes );
 

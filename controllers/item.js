@@ -51,6 +51,7 @@ export class Controller extends Linkable{
 
         this._changes = undefined;
         this._isValid = false;
+        this._isRefresh = false;
     }
 
     get( property ){
@@ -94,7 +95,7 @@ export class Controller extends Linkable{
 
         this._trigger("committable", this.isCommittable());
 
-        if (this._options.autoCommit && this.isCommittable()){
+        if (this._options.autoCommit && !this._isRefresh && this.isCommittable()){
             // The data is ready to be committed and the controller is autoCommit
             this.commit();
         }
@@ -175,6 +176,37 @@ export class Controller extends Linkable{
         this._trigger("rollback", error );
 
         this._trigger("committable", this.isCommittable() );
+    }
+
+    refresh( data ) {
+        if ( !data ) {
+            return this.refresh( util.patch2value(this._changes,0) );
+        }else{
+            return new Promise((resolve, reject)=>{
+                this._isRefresh = true;
+                this._refresh( data )
+                    .then(result => {
+
+                        // No active changes after refresh
+                        if (this._changes){
+                            this._data = util.patch(this._data, this._changes);
+                            this._changes = undefined;
+                        }
+
+                        this._trigger("committable", this.isCommittable() );
+
+                        resolve(result);
+
+                    }, reject)
+                    .finally(()=> this._isRefresh = false);
+            });
+        }
+    }
+
+    _refresh( data ){
+        return new Promise(resolve => {
+            resolve( this.set( data ) );
+        });
     }
 
     isCommittable(){
