@@ -43,14 +43,29 @@ export class Controller extends Item{
     //-------------------------------------------------------------------
     // Data access API
     //-------------------------------------------------------------------
-    init( ID ){
+    init( Data ){
+        return new Promise((resolve, reject)=>{
+            let ID = undefined;
+            if (typeof Data === "string"){
+                ID = Data;
+            }else if(typeof Data === "object" && Data.constructor === Object){
+                if (Data[".oid"]){
+                    ID = Data[".oid"];
+                }else{
 
-        const defaults = this._schema.get({});
+                    // This is an object creation with a predefined data
+                    return resolve( super.init( Data ) );
+                }
+            }
 
-        return new Promise((resolve, reject) => {
+            const defaults = this._schema.get({});
 
-            if ( ID===undefined ) return resolve( super.init( defaults ) );
+            if ( ID === undefined ) {
+                // This is an object creation with defaults
+                return resolve( super.init( defaults ) );
+            }
 
+            // Obtain the actual data from the database
             const filter = `.oid = $oid('${ ID }')`;
 
             this.query( filter ).then(data => {
@@ -66,6 +81,7 @@ export class Controller extends Item{
 
             }, reject);
         });
+
     }
 
     rollback(changes, error){
