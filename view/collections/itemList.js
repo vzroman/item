@@ -67,6 +67,7 @@ export class View extends Flex{
         });
     }
 }
+View.extend();
 
 class Wrapper extends Item{
 
@@ -123,5 +124,5 @@ class Wrapper extends Item{
     }
 
 }
+Wrapper.extend();
 
-View.extend();
