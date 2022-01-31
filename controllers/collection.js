@@ -92,14 +92,19 @@ export class Controller extends Item{
         }
     }
 
-    fork( id ){
+    fork( id, settings ){
+
         const data = this._get( id );
         if (!data) return;
 
-        const item = new Item({
-            schema: util.deepCopy( this._options.schema ),
-            autoCommit: true
-        });
+        const {controller, options} = util.deepMerge({
+            controller: Item,
+            options:{
+                autoCommit: true,
+                schema: util.deepCopy( this._options.schema )
+            }}, settings);
+
+        const item = new controller( options );
 
         item.init( data );
 

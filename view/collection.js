@@ -24,10 +24,18 @@
 //------------------------------------------------------------------------------------
 
 import {View as Item} from "./item.js";
-import {Controller} from "../controllers/collection.js";
+import {controllers} from "../controllers/index.js";
 import {util} from "../utilities/index.js";
+import {types} from "../types/index.js";
 
 export class View extends Item{
+
+    static options = {
+        itemController: { type:types.complex.Item, options:{ schema:{
+            controller:{ type:types.primitives.Class, options:{ class:controllers.Item }},
+            options:{ type:types.primitives.Set }
+        }}},
+    };
 
     constructor( options ){
         super( options );
@@ -52,7 +60,7 @@ export class View extends Item{
 
         const {data} = sources;
 
-        if (data && data instanceof Controller){
+        if (data && data instanceof controllers.Collection){
 
             this._collection = data;
 
@@ -85,7 +93,8 @@ export class View extends Item{
         const item = this.newItem( id );
 
         // Link the item to the data
-        item.link( {data:this._collection.fork( id ), parent:this} );
+        const controller = this._collection.fork( id, this._options.itemController );
+        item.link( {data:controller, parent:this} );
 
         return item;
     }
