@@ -97,6 +97,10 @@ export class Controller extends Item{
         const data = this._get( id );
         if (!data) return;
 
+        if ( this._options.id ){
+            data[ this._options.id ] = id;
+        }
+
         const {controller, options} = util.deepMerge({
             controller: Item,
             options:{
