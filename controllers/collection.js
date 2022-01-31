@@ -95,10 +95,12 @@ export class Controller extends Item{
     fork( id, settings ){
 
         const data = this._get( id );
-        if (!data) return;
-
-        if ( this._options.id ){
-            data[ this._options.id ] = id;
+        if ( util.deepEqual({}, this._data) || this._data[ id ] ){
+            // This is an object edit operation
+            // Add item id if it is not in the schema
+            if (data && this._options.id && !data.hasOwnProperty( this._options.id )){
+                data[ this._options.id ] = id;
+            }
         }
 
         const {controller, options} = util.deepMerge({
@@ -112,12 +114,21 @@ export class Controller extends Item{
 
         item.init( data );
 
-        const parent = [this.bind(id, changes => item.set( changes ))];
-        const child = [item.bind("change",changes => this.set({ [id]:util.patch2value(changes, 0) }))];
+        const parent = [this.bind(id, changes => {
+            if (changes){
+                item.set( changes )
+            }else{
+                item.destroy();
+            }
+        })];
+        const child = [
+            item.bind("change",changes => this.set({ [id]:util.patch2value(changes, 0) })),
+            item.bind("commit",()=> this.refresh())
+        ];
 
         // self-destroying bond
         parent.push(this.bind("destroy",() => child.forEach(id => child.unbind( id ))));
-        parent.push(item.bind("destroy",() => parent.forEach(id => parent.unbind( id ))));
+        child.push(item.bind("destroy",() => parent.forEach(id => this.unbind( id ))));
 
         return item;
     }
@@ -182,33 +193,26 @@ export class Controller extends Item{
     }
 
     _get( id ){
-        if ( this._data ){
 
-            // Get the item by its ID
-            let item = this._data[ id ];
+        let item = this._data ? this._data[ id ] : undefined;
 
-            // If item has uncommitted changes
-            if ( this._changes && this._changes[ id ]){
-                if ( this._changes[ id ][ 0 ]){
-                    // Item was changed or created
-                    item = {...item, ...this._changes[ id ][ 0 ]}
-                }else{
-                    // Item was deleted
-                    item = undefined;
-                }
+        // If item has uncommitted changes
+        if ( this._changes && this._changes[ id ]){
+            if ( this._changes[ id ][ 0 ]){
+                // Item was changed or created
+                item = {...item, ...this._changes[ id ][ 0 ]}
+            }else{
+                // Item was deleted
+                item = undefined;
             }
-
-            // Make a copy of the item
-            if ( item ){
-                item = util.deepCopy( this._schema.get( item ) );
-            }
-
-            return item;
-        }else{
-            // The controller is not initialized yet
-            return undefined;
         }
 
+        // Make a copy of the item
+        if ( item ){
+            item = util.deepCopy( this._schema.get( item ) );
+        }
+
+        return item;
     }
 
     _set( items ){
@@ -259,7 +263,6 @@ export class Controller extends Item{
     }
 
     _onChange( changes ){
-        super._onChange( changes );
 
         Object.entries( changes ).forEach(([id,[item, previous]])=>{
             if ( !previous ){
@@ -275,6 +278,8 @@ export class Controller extends Item{
                 this._trigger("edit", [id, item, previous]);
             }
         });
+
+        super._onChange( changes );
     }
 
     _orderKey(id, item){
