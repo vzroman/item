@@ -113,7 +113,7 @@ export class Controller extends Item{
         item.init( data );
 
         const parent = [this.bind(id, changes => item.set( changes ))];
-        const child = [item.bind("change",changes => this.set({ [id]:changes }))];
+        const child = [item.bind("change",changes => this.set({ [id]:util.patch2value(changes, 0) }))];
 
         // self-destroying bond
         parent.push(this.bind("destroy",() => child.forEach(id => child.unbind( id ))));
