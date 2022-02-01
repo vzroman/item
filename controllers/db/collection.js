@@ -199,9 +199,13 @@ export class Controller extends Collection{
                 }
             }
 
-            await query("TRANSACTION_COMMIT");
+            return await query("TRANSACTION_COMMIT");
         }catch (e){
-            connection.query("TRANSACTION_ROLLBACK",()=>{}, error=>{
+            connection.query("TRANSACTION_ROLLBACK",()=>{
+
+                throw e;
+
+            }, error=>{
 
                 console.error("error on transaction rollback", error, e);
 

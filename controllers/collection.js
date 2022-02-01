@@ -143,7 +143,7 @@ export class Controller extends Item{
 
     commit( idList ){
         if ( idList === undefined) {
-            return super.commit( id );
+            return super.commit();
         }else if( !Array.isArray( idList ) ){
             return this.commit( [idList] );
         }else{

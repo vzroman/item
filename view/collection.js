@@ -34,7 +34,12 @@ export class View extends Item{
         itemController: { type:types.complex.Item, options:{ schema:{
             controller:{ type:types.primitives.Class, options:{ class:controllers.Item }},
             options:{ type:types.primitives.Set }
-        }}},
+        }}}
+    };
+
+    static events ={
+        addItem:types.primitives.Any,
+        removeItem:types.primitives.Any
     };
 
     constructor( options ){
@@ -75,6 +80,7 @@ export class View extends Item{
 
             const removeId = data.bind("remove", id=>{
                 this._removeItem( id );
+                delete this._items[id];
             });
             this._subscriptions.push(()=>data.unbind(removeId));
         }
@@ -85,6 +91,7 @@ export class View extends Item{
     addItem( item ){
         const id = util.data.GUID();
         item = item || {};
+        setTimeout(()=> this._trigger("addItem",[id, item]));
         return this._collection.set({ [id]: item });
     }
 
@@ -105,6 +112,7 @@ export class View extends Item{
     }
 
     removeItem( id ){
+        setTimeout(()=> this._trigger("removeItem",id));
         return this._collection.set({ [id]:null });
     }
 

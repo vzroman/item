@@ -26,7 +26,7 @@
 import {View as Parent} from "../item.js";
 import {types} from "../../types/index.js";
 import {controls} from "../controls/index.js";
-import {i18n} from "../../i18n/i18n.js";
+import {text as i18n} from "../../i18n/i18n.js";
 
 
 export class View extends Parent{

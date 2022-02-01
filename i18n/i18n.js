@@ -70,7 +70,7 @@ export function removeKey( key, language ){
     }
 }
 
-export function i18n( text, language ) {
+export function text( text, language ) {
     if (typeof text !== "string"){ return text }
 
     language = language || _language;

@@ -32,6 +32,10 @@ import {controls} from "../controls/index.js";
 
 export class View extends Flex{
 
+    static options = {
+        confirm:{ type:types.primitives.Fun }
+    };
+
     markup(){
         return `<div style="display: flex; flex-direction: column; align-items: stretch">
             <div name="items"></div>
@@ -65,7 +69,13 @@ export class View extends Flex{
             id,
             $container:this.$items,
             item: this._options.item,
-            events:{remove:() => this.removeItem( id ) }
+            events:{remove:() => {
+                if ( this._options.confirm ){
+                    this._options.confirm( id ).then(() => this.removeItem( id ),()=>{})
+                }else{
+                    this.removeItem( id )
+                }
+            }}
         });
     }
 }
