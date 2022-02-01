@@ -111,7 +111,7 @@ export class Controller extends Linkable{
 
     link( sources ){
         sources = super.link( sources );
-        this._schema.link({...sources, parent:this});
+        this._schema.link( sources );
         return sources;
     }
 

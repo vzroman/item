@@ -22,12 +22,48 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {Control} from "./control.js";
-import {Control as Button} from "./button.js";
-import {Control as TextInput} from "./textInput.js";
 
-export const controls = {
-    Control,
-    Button,
-    TextInput
-};
+import {Control as Parent} from "./control.js";
+import {types} from "../../types/index.js";
+
+// The control is the point where external widgets to be attached
+export class Control extends Parent{
+
+    static options = {
+        length:{type: types.primitives.Integer}
+    };
+
+    static markup = `<input type="text"/>`;
+
+    constructor( options ){
+        super( options );
+
+        this.bind("value", value => this.$markup.val( value ));
+
+        const onChange = ()=> this.set({ value:this.$markup.val() });
+        this.$markup.on("change", onChange).on("keypress", event=>{
+            if (event.which === 13){
+                event.preventDefault();
+                onChange();
+            }
+        });
+
+        this.bind("length",length => {
+            if (length){
+                console.log("set length", length);
+                this.$markup.prop("maxlength",length);
+            }else{
+                this.$markup.removeAttr("maxlength");
+            }
+        });
+    }
+
+    enable( value ){
+        this.$markup.prop('disabled', !value);
+    }
+
+    focus(){
+        this.$markup.focus();
+    }
+}
+Control.extend();

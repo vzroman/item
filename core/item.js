@@ -78,7 +78,7 @@ export class Item extends Linkable{
 
         sources = super.link( sources );
 
-        this._controller.link( sources );
+        this._controller.link({...sources, parent:this });
 
         return sources;
     }
