@@ -26,8 +26,9 @@
 import {View as Flex} from "./flex.js";
 import {View as Item} from "../item.js";
 import {types} from "../../types/index.js";
-import {util} from "../../utilities/index.js";
 import {controls} from "../controls/index.js";
+import mainCss from "../../css/main.css";
+import style from "./itemList.css";
 
 
 export class View extends Flex{
@@ -37,7 +38,7 @@ export class View extends Flex{
     };
 
     markup(){
-        return `<div style="display: flex; flex-direction: column; align-items: stretch">
+        return `<div class="${ mainCss.vertical }">
             <div name="items"></div>
             <div style="display: flex; justify-content: flex-start">
                 <div name="addItem"></div>
@@ -95,26 +96,7 @@ class Wrapper extends Item{
     };
 
     markup(){
-        const id = util.data.GUID();
-        return `<div id="${id}" style="item-list">
-            <style>
-                #${id} {
-                    position: relative;
-                }
-                #${id} [name="remove"] {
-                    position: absolute;
-                    top:0;
-                    right: 0;
-                    opacity:0.1
-                }
-                #${id}:hover [name="remove"]{
-                    opacity: 1;
-                }
-                #${id} [name="item"]{
-                    height: 100%;
-                    width: 100%;
-                }
-            </style>
+        return `<div class="${ style.item }">
             <div name="remove"></div>
             <div name="item"></div>
         </div>`;
