@@ -7,6 +7,7 @@ module.exports = {
     output: {
         filename: 'item.js',
         path: path.resolve(__dirname, 'dist'),
+        clean:true
     },
     module: {
         rules: [
@@ -24,5 +25,7 @@ module.exports = {
                 ]
             },
         ],
-    }
+    },
+    devtool: devMode? 'inline-source-map' : 'source-map',
+    plugins: [].concat(devMode ? [] : [new MiniCssExtractPlugin()])
 };
