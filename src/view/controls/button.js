@@ -25,6 +25,7 @@
 
 import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
+import mainCss from "../../css/main.css";
 
 // The control is the point where external widgets to be attached
 export class Control extends Parent{
@@ -34,7 +35,7 @@ export class Control extends Parent{
         title:{type:types.primitives.String},
         icon:{type:types.primitives.String}
     };
-    static markup = `<button class="horizontal" style="align-items: center">
+    static markup = `<button class="${ mainCss.horizontal }" style="align-items: center">
         <div name="icon" style="display: none; width: 20px; height: 20px;"></div>
         <div name="text"></div>
     </button>`;

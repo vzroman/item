@@ -27,7 +27,7 @@ import {View as Parent} from "../item.js";
 import {types} from "../../types/index.js";
 import {controls} from "../controls/index.js";
 import {text as i18n} from "../../i18n/i18n.js";
-
+import mainCss from "../../css/main.css";
 
 export class View extends Parent{
 
@@ -42,9 +42,9 @@ export class View extends Parent{
         cancel:types.primitives.Any
     };
 
-    static markup = `<div class="vertical">
+    static markup = `<div class="${ mainCss.vertical }">
         <div name="view"></div>
-        <div class="horizontal" style="justify-content: flex-end">
+        <div class="${ mainCss.horizontal }" style="justify-content: flex-end">
             <div name="save"></div>
             <div name="cancel"></div>
         </div>

@@ -26,6 +26,7 @@
 import {View as Collection} from "../collection.js";
 import {View as Item} from "../item.js";
 import {types} from "../../types/index.js";
+import mainCss from "../../css/main.css";
 
 export class View extends Collection{
 
@@ -39,7 +40,7 @@ export class View extends Collection{
 
 
     markup(){
-        return `<div class="${ this._options.direction }"></div>`;
+        return `<div class="${ mainCss[this._options.direction] }"></div>`;
     };
 
     newItem( id ){
