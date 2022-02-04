@@ -4,9 +4,15 @@ const devMode = process.env.NODE_ENV !== "production";
 
 module.exports = {
     entry: './src/index.js',
+    experiments: {
+        outputModule: true,
+    },
     output: {
         filename: 'item.js',
         path: path.resolve(__dirname, 'dist'),
+        library: {
+            type: 'module'
+        },
         clean:true
     },
     module: {
