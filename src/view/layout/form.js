@@ -28,6 +28,7 @@ import {types} from "../../types/index.js";
 import {controls} from "../controls/index.js";
 import {text as i18n} from "../../i18n/i18n.js";
 import mainCss from "../../css/main.css";
+import {deepMerge} from "../../utilities/data.js";
 
 export class View extends Parent{
 
@@ -54,12 +55,11 @@ export class View extends Parent{
         return {
             view: {
                 view: this._options.view,
-                options:{
-                    ...this._options.options,
+                options: deepMerge({
                     links:{
                         focus:"committable"
                     }
-                }
+                }, this._options.options)
             },
             save: {
                 view: controls.Button,

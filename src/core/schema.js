@@ -122,6 +122,17 @@ export class Schema extends Linkable{
         return this.get( this.set( properties ) );
     }
 
+    coerce( properties ){
+
+        // Return only properties that are defined in the schema
+        let result = {};
+        for (let p in this._attributes){
+            result[ p ] = this._attributes[ p ].validate( properties[p] );
+        }
+
+        return result;
+    }
+
     link( sources ){
         sources = super.link( sources );
         const attrSources = {...sources,parent:this};
