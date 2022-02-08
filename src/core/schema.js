@@ -128,6 +128,9 @@ export class Schema extends Linkable{
         let result = {};
         for (let p in this._attributes){
             result[ p ] = this._attributes[ p ].validate( properties[p] );
+            if (result[p] === null){
+                result[p] = undefined;
+            }
         }
 
         return result;

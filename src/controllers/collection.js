@@ -71,6 +71,11 @@ export class Controller extends Item{
             throw new Error("Invalid data");
         }
 
+        // Coerce items
+        for (const k in Data){
+            Data[k] = this._schema.coerce( Data[k] );
+        }
+
         this._data = {};
         const changes = super.set( Data );
         this._data = util.patch(this._data, changes);
