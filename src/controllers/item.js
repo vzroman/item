@@ -93,11 +93,14 @@ export class Controller extends Linkable{
 
         this._isValid = this._validate();
 
-        this._trigger("committable", this.isCommittable());
+        if (!this._isRefresh){
 
-        if (this._options.autoCommit && !this._isRefresh && this.isCommittable()){
-            // The data is ready to be committed and the controller is autoCommit
-            this.commit();
+            this._trigger("committable", this.isCommittable());
+
+            if (this._options.autoCommit && this.isCommittable()){
+                // The data is ready to be committed and the controller is autoCommit
+                this.commit();
+            }
         }
     }
 
@@ -138,9 +141,14 @@ export class Controller extends Linkable{
     // Data access API
     //-------------------------------------------------------------------
     init( Data ){
-        const changes = super.set( this._schema.coerce( Data ) );
-        this._data = util.patch(this._data, changes);
-        this._changes = undefined;
+        this._isRefresh = true;
+        try {
+            const changes = super.set( this._schema.coerce( Data ) );
+            this._data = util.patch(this._data, changes);
+            this._changes = undefined;
+        }finally {
+            this._isRefresh = false;
+        }
     }
 
     commit(){
@@ -180,7 +188,8 @@ export class Controller extends Linkable{
 
     refresh( data ) {
         if ( !data ) {
-            return this.refresh( util.patch2value(this._changes,0) );
+            data = this._changes ? util.patch2value(this._changes,0) : undefined;
+            return this.refresh( data );
         }else{
             return new Promise((resolve, reject)=>{
                 this._isRefresh = true;

@@ -76,10 +76,15 @@ export class Controller extends Item{
             Data[k] = this._schema.coerce( Data[k] );
         }
 
-        this._data = {};
-        const changes = super.set( Data );
-        this._data = util.patch(this._data, changes);
-        this._changes = undefined;
+        this._isRefresh = true;
+        try{
+            this._data = {};
+            const changes = super.set( Data );
+            this._data = util.patch(this._data, changes);
+            this._changes = undefined;
+        }finally {
+            this._isRefresh = false;
+        }
     }
 
     bind(event, callback){
