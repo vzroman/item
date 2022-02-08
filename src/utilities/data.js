@@ -63,7 +63,10 @@ export function deepEqual(O1, O2) {
             return eq;
         }
 
-        return O1 === O2;
+        return O1 === O2 || (
+            ( O1===null || O1 === undefined )
+            && ( O2===null || O2 === undefined )
+        );
     } else {
         let eq = true;
         for (let k in {...O1,...O2}){
