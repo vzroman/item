@@ -112,12 +112,12 @@ export class Controller extends Item{
 
         const item = new controller( options );
 
-        item.init( data );
+        item.init(data||{});
 
         const parent = [this.bind(id, changes => {
             if (changes){
                 item.set( changes )
-            }else{
+            }else if(changes === null){
                 item.destroy();
             }
         })];
@@ -136,8 +136,20 @@ export class Controller extends Item{
     get( id ){
         if ( !id ){
             return this.get( Object.keys({...this._data, ...this._changes}) );
-        } else {
-            return Linkable.prototype.get.call(this, id);
+        } else if (Array.isArray( id )) {
+            const items = Linkable.prototype.get.call(this, id);
+            for (const i in items){
+                if (items[i]){
+                    items[i] = this._schema.get( items[i] );
+                }
+            }
+            return items;
+        }else{
+            let item = Linkable.prototype.get.call(this, id);
+            if (item){
+                item = this._schema.get( item );
+            }
+            return item;
         }
     }
 
@@ -209,7 +221,7 @@ export class Controller extends Item{
 
         // Make a copy of the item
         if ( item ){
-            item = util.deepCopy( this._schema.get( item ) );
+            item = util.deepCopy( item );
         }
 
         return item;

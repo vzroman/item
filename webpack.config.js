@@ -20,7 +20,7 @@ module.exports = {
             {
                 test: /\.(sa|sc|c)ss$/i,
                 use: [
-                    devMode ? "style-loader" : MiniCssExtractPlugin.loader,
+                    MiniCssExtractPlugin.loader,
                     {
                         loader: "css-loader",
                         options: {
@@ -33,5 +33,5 @@ module.exports = {
         ],
     },
     devtool: devMode? 'inline-source-map' : 'source-map',
-    plugins: [].concat(devMode ? [] : [new MiniCssExtractPlugin()])
+    plugins: [new MiniCssExtractPlugin()]
 };
