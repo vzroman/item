@@ -194,7 +194,7 @@ export class Controller extends Collection{
                 }else if(!changes[id][0] && changes[id][1]){
                     await remove( id );
                 }else{
-                    let changedFields = diff( changes[id][0], changes[id][1] );
+                    let changedFields = diff( changes[id][1], changes[id][0] );
                     if (changedFields){
                         changedFields = patch2value(changedFields, 0);
                         await update(id, changedFields);
