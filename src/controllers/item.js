@@ -188,8 +188,12 @@ export class Controller extends Linkable{
 
     refresh( data ) {
         if ( !data ) {
-            data = this._changes ? util.patch2value(this._changes,0) : undefined;
-            return this.refresh( data );
+            if (this._changes){
+                data = util.patch2value(this._changes,0);
+                return this.refresh( data );
+            }else{
+                return new Promise( resolve => resolve());
+            }
         }else{
             return new Promise((resolve, reject)=>{
                 this._isRefresh = true;

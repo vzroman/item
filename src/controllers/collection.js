@@ -33,7 +33,8 @@ export class Controller extends Item{
         id:undefined,
         filter:undefined,
         orderBy:undefined,
-        page:undefined
+        page:undefined,
+        forkCommit:undefined
     };
 
     static events = {
@@ -132,9 +133,11 @@ export class Controller extends Item{
             }
         })];
         const child = [
-            item.bind("change",changes => this.set({ [id]:util.patch2value(changes, 0) })),
-            item.bind("commit",()=> this.refresh())
+            item.bind("change",changes => this.set({ [id]:util.patch2value(changes, 0) }))
         ];
+        if (this._options.forkCommit === "refresh" || this._options.forkCommit === "commit"){
+            child.push( item.bind("commit",()=> this[this._options.forkCommit]()) )
+        }
 
         // self-destroying bond
         parent.push(this.bind("destroy",() => child.forEach(id => child.unbind( id ))));
@@ -247,8 +250,14 @@ export class Controller extends Item{
                 // Previous value
                 const item = this._get( id );
 
-                // Validate the item against the schema
-                items[ id ] = this._schema.set({...item, ...items[id]});
+                if ( !item ){
+                    // Validate the item against the schema
+                    items[ id ] = this._schema.coerce( items[id] );
+                    continue;
+                }else{
+                    // Validate the item against the schema
+                    items[ id ] = this._schema.set({...item, ...items[id]});
+                }
 
                 // The item is being added
                 if ( !item ) continue;

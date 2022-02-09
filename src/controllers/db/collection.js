@@ -30,7 +30,8 @@ export class Controller extends Collection{
     static options = {
         connection:undefined,
         timeout: 60000,
-        subscribe:false
+        subscribe:false,
+        forkCommit:"refresh"
     };
 
     constructor( options ){
@@ -203,16 +204,10 @@ export class Controller extends Collection{
 
             return await query("TRANSACTION_COMMIT");
         }catch (e){
-            connection.query("TRANSACTION_ROLLBACK",()=>{
-
-                throw e;
-
-            }, error=>{
-
+            connection.query("TRANSACTION_ROLLBACK",()=>{}, error=>{
                 console.error("error on transaction rollback", error, e);
-
-                throw e
             });
+            throw e;
         }
     }
 }
