@@ -262,16 +262,22 @@ class Link{
         // Default handler
         handler = handler || (v=>v);
 
-        // The subscription
-        this._sourceSubscriptions.push( source.bind(event, async value => {
-
-            // Handler can be asynchronous
-            value = await handler(value, context);
-
+        const setTarget = value =>{
             // The link could be destroyed while waiting for the handler
             // or the link may don't have a target
-            if (this._target){
-                this._target.set({ [property]:value });
+            if (this._target) this._target.set({ [property]:value });
+        };
+
+        // The subscription
+        this._sourceSubscriptions.push( source.bind(event, value => {
+
+            // Handler can be asynchronous
+            value = handler(value, context);
+
+            if (value instanceof Promise){
+                value.then( setTarget )
+            }else{
+                setTarget( value )
             }
         }));
     }
