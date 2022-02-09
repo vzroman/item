@@ -149,16 +149,12 @@ export class Controller extends Item{
         } else if (Array.isArray( id )) {
             const items = Linkable.prototype.get.call(this, id);
             for (const i in items){
-                if (items[i]){
-                    items[i] = this._schema.get( items[i] );
-                }
+                if (items[i]) items[i] = this._schema.get( items[i] );
             }
             return items;
         }else{
             let item = Linkable.prototype.get.call(this, id);
-            if (item){
-                item = this._schema.get( item );
-            }
+            if (item) item = this._schema.get( item );
             return item;
         }
     }
@@ -222,10 +218,10 @@ export class Controller extends Item{
         if ( this._changes && this._changes[ id ]){
             if ( this._changes[ id ][ 0 ]){
                 // Item was changed or created
-                item = {...item, ...this._changes[ id ][ 0 ]}
+                item = {...item, ...this._changes[ id ][ 0 ]};
             }else{
                 // Item was deleted
-                item = undefined;
+                item = this._changes[ id ][ 0 ];
             }
         }
 
@@ -240,24 +236,31 @@ export class Controller extends Item{
     _set( items ){
         for (const id in items){
 
-            // The item is being deleted
-            if (!items[id]) continue;
-
-            const item = this._get( id );
-
-            // Validate the item against the schema
-            items[ id ] = this._schema.set({...item, ...items[id]});
-
-            // The item is being added
-            if (!item) continue;
-
-            // Check for real changes
-            const changes = util.diff( item, items[ id ] );
-            if (!changes){
-                delete items[ id ];
+            if (items[id] === null){
+                // The item is being deleted
+                continue;
+            }else if( items[id] === undefined ){
+                // The item is not valid
+                items[id] = false;
             }else{
-                // Keep changes only
-                items[ id ] = util.patch2value( changes, 0 );
+
+                // Previous value
+                const item = this._get( id );
+
+                // Validate the item against the schema
+                items[ id ] = this._schema.set({...item, ...items[id]});
+
+                // The item is being added
+                if ( !item ) continue;
+
+                // Check for real changes
+                const changes = util.diff( item, items[ id ] );
+                if (!changes){
+                    delete items[ id ];
+                }else{
+                    // Keep changes only
+                    items[ id ] = util.patch( items[ id ], changes );
+                }
             }
         }
         return items;
@@ -287,11 +290,10 @@ export class Controller extends Item{
     _onChange( changes ){
 
         Object.entries( changes ).forEach(([id,[item, previous]])=>{
-            if ( !previous ){
-
+            if ( previous === undefined ){
                 this._view.insert([this._orderKey(id, item), id]);
                 this._trigger("add", [id, item]);
-            }else if( !item ){
+            }else if( item === null ){
                 this._view.remove([this._orderKey(id, previous), id] );
                 this._trigger("remove", [id, previous]);
             }else{

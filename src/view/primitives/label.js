@@ -39,7 +39,7 @@ export class Primitive extends Parent{
         super( options );
 
         this.bind("text", value =>
-            this.$markup.text( value )
+            this.$markup.text( value ? value : "")
         );
     }
 }

@@ -104,7 +104,11 @@ export function diff(Source, Changes){
     }
 
     const result = Object.entries(Changes).reduce((acc,[k,v])=>{
-        if ( !deepEqual(Source[k], v) ){ acc[k] = [v, Source[k]] }
+        if ( !deepEqual(Source[k], v) ){
+            // If the new value is undefined we replace it with null,
+            // because the null explicitly claims that the value was reset
+            acc[k] = [v !== undefined ? v : null , Source[k]]
+        }
         return acc;
     },{});
 

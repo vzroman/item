@@ -154,7 +154,7 @@ export class Schema extends Linkable{
             // If one of the required properties is not defined then the whole result
             // is undefined
             if ( result[ p ] === undefined && this._attributes[ p ].get("required") ){
-                result = undefined;
+                result = false;
                 break;
             }
         }
