@@ -43,12 +43,6 @@ export class Controller extends Item{
         remove:true
     };
 
-    constructor(options){
-        super(options);
-
-        this._view = new util.AVLTree();
-    }
-
     init( Data ){
         if (this._options.id !== undefined){
             if (typeof Data === "object" && Data.constructor === Object){
@@ -68,6 +62,11 @@ export class Controller extends Item{
                 }
                 return acc;
             },{});
+        }else if(Array.isArray( Data )){
+            Data = Data.reduce((acc, item, i)=>{
+                acc[i] = item;
+                return acc;
+            },{});
         }else if(typeof Data !== "object"){
             throw new Error("Invalid data");
         }
@@ -79,6 +78,8 @@ export class Controller extends Item{
 
         this._isRefresh = true;
         try{
+            if (this._view) this._view.destroy();
+            this._view = new util.AVLTree();
             this._data = {};
             const changes = super.set( Data );
             this._data = util.patch(this._data, changes);
@@ -204,13 +205,23 @@ export class Controller extends Item{
     }
 
     forEach( callback ){
-        this._view.forEach(n => callback( n.key[1] ));
+        if (this._view){
+            this._view.forEach(n => callback( n.key[1] ));
+        }
     }
 
     view(){
         const data = [];
         this.forEach(id => data.push([id,this.get(id)]) );
         return data;
+    }
+
+    destroy(){
+        if (this._view){
+            this._view.destroy();
+            this._view = undefined;
+        }
+        super.destroy();
     }
 
     _get( id ){

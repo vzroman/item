@@ -31,7 +31,8 @@ export class Controller extends Linkable{
 
     static options = {
         schema: undefined,
-        autoCommit:true
+        autoCommit:true,
+        data:undefined
     };
 
     static events = {
@@ -49,9 +50,15 @@ export class Controller extends Linkable{
         // Initialize the schema
         this._schema = new Schema( this._options.schema );
 
+        this._data = undefined;
         this._changes = undefined;
+
         this._isValid = false;
         this._isRefresh = false;
+
+        if (this._options.data){
+            this.init( this._options.data )
+        }
     }
 
     get( property ){

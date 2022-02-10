@@ -23,25 +23,21 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type as Any} from "./any.js";
-import {Type as Bool} from "./bool.js";
-import {Type as String} from "./string.js";
-import {Type as Integer} from "./integer.js";
-import {Type as Set} from "./set.js";
-import {Type as Array} from "./array.js";
-import {Type as Fun} from "./fun.js";
-import {Type as Class} from "./class.js";
-import {Type as Instance} from "./instance.js";
+import {Type as Parent} from "./any.js";
 
+export class Type extends Parent{
 
-export const types = {
-    Any,
-    Bool,
-    Integer,
-    String,
-    Set,
-    Array,
-    Fun,
-    Class,
-    Instance
-};
+    static options = {
+        class:Parent
+    };
+
+    coerce( value ){
+        if ( value instanceof this._options.class ){
+            return value;
+        }else{
+            return undefined;
+        }
+    }
+}
+Type.extend();
+

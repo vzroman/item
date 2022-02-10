@@ -38,8 +38,6 @@ export class Control extends Parent{
     constructor( options ){
         super( options );
 
-        this.bind("value", value => this.$markup.val( value ));
-
         const onChange = ()=> this.set({ value:this.$markup.val() });
         this.$markup.on("change", onChange).on("keypress", event=>{
             if (event.which === 13){
@@ -56,6 +54,10 @@ export class Control extends Parent{
                 this.$markup.removeAttr("maxlength");
             }
         });
+    }
+
+    updateValue( value, prev ){
+        this.$markup.val( value )
     }
 
     enable( value ){
