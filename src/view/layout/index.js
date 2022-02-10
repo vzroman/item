@@ -23,7 +23,9 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {View as Form} from "./form.js";
+import {View as FormField} from "./formField.js";
 
 export const layout = {
-    Form
+    Form,
+    FormField
 };

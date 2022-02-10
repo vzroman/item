@@ -48,8 +48,10 @@ export class View extends Item{
         return this.constructor.markup;
     }
 
+    static widgets = {};
+
     widgets(){
-        return {};
+        return this.constructor.widgets;
     }
 
     constructor( options ){
@@ -126,7 +128,7 @@ export class View extends Item{
 
     linkWidgets( sources ){
 
-        sources = {...sources,parent:this};
+        sources = this.widgetsContext( sources );
 
         // Link the widgets to the external data
         if ( this._widgets ){
@@ -136,6 +138,10 @@ export class View extends Item{
         }
 
         return sources;
+    }
+
+    widgetsContext( context ){
+        return {...context, parent:this}
     }
 
 
