@@ -34,7 +34,8 @@ export class Item extends Linkable{
     static options = {
         id:{type:types.String, virtual:true},
         links:{type:types.Set, virtual:true, default:{} },
-        events:{type:types.Set, virtual:true, default:{} }
+        events:{type:types.Set, virtual:true, default:{} },
+        data:{type: types.Instance, options:{class:Controller} }
     };
 
     static events = {};
@@ -57,6 +58,11 @@ export class Item extends Linkable{
         }
 
         this._controller.bind("change", changes => this._update( changes ));
+
+        // If the data is defined we automatically perform the link
+        // procedure, but we do it asynchronously to allow the descendant
+        // to finish its constructor
+        if (this._options.data) setTimeout(()=>this.link( this._options.data ));
     }
 
     set( properties ){
@@ -79,6 +85,8 @@ export class Item extends Linkable{
         sources = super.link( sources );
 
         this._controller.link({...sources, parent:this });
+
+        if (sources.data) this.set({data:sources.data});
 
         return sources;
     }

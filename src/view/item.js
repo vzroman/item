@@ -63,7 +63,7 @@ export class View extends Item{
 
         // init widgets
         const $widgets = Object.keys( this._widgets ).reduce((acc,id)=>{
-            const $container = this.$markup.find(`[name="${ id }"]`);
+            const $container = this.$markup.find(`[name="${ id }"]`).addBack(`[name="${ id }"]`);
             if (!$container.length){
                 console.warn("undefined container for widget", id);
             }else{
