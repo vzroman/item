@@ -157,7 +157,7 @@ export class Control extends Parent{
     _destroyItemsController(){
 
         if (this._itemsController) {
-            if (this._subscription){
+            if (this._subscription !== undefined){
                 // The controller is external we cannot destroy it, just unsubscribe
                 this._itemsController.unbind( this._subscription );
                 this._subscription = undefined;
