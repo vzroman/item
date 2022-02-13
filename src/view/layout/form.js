@@ -43,9 +43,9 @@ export class View extends Parent{
         cancel:types.primitives.Any
     };
 
-    static markup = `<div class="${ mainCss.vertical }">
-        <div name="view"></div>
-        <div class="${ mainCss.horizontal }" style="justify-content: flex-end">
+    static markup = `<div class="${ mainCss.vertical }" style="height: 100%">
+        <div name="view" style="flex-grow: 1"></div>
+        <div class="${ mainCss.horizontal }" style="justify-content: flex-end; margin-top: 1em">
             <div name="save"></div>
             <div name="cancel"></div>
         </div>
