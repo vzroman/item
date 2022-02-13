@@ -4,7 +4,6 @@
 //-----------------------------------------------------------------
 import {types} from "../../types/index.js";
 import {View as Parent} from "../../view/item.js";
-import {Control} from "../controls/control.js";
 import {Primitive as Label} from "../primitives/label.js";
 import {text} from "../../i18n/i18n.js";
 import style from "./formField.css";
@@ -15,15 +14,18 @@ export class View extends Parent{
     static options = {
         name:{type: types.primitives.String },
         value:{type: types.complex.Item, options:{schema:{
-            view:{type:types.primitives.Class, options:{ class:Control } },
+            view:{type:types.primitives.Class, options:{ class:Parent } },
             options:{type: types.primitives.Set }
-        }}, required:true }
+        }}, required:true },
+        vertical:{type: types.primitives.Bool, default:true }
     };
 
-    static markup = `<div class="${ style.field }">
+    markup(){
+        return `<div class="${ style.field } ${ this._options.vertical?style.vertical:style.horizontal  }">
             <div class="${ style.name }" name="name"></div>
             <div class="${ style.value }" name="value"></div>
         </div>`;
+    }
 
     widgets() {
         return {

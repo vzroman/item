@@ -32,7 +32,7 @@ export class View extends Item{
 
     static options = {
         $container:{type:types.primitives.Any,required:true, virtual:true },
-        enable:{type:types.primitives.Bool, default:true, virtual:true},
+        enable:{type:types.primitives.Bool, virtual:true},
         visible:{type:types.primitives.Bool, default:true, virtual:true},
         focus:{type:types.primitives.Bool, default:false, virtual:true},
         widgets:{type:types.primitives.Set}
@@ -105,7 +105,7 @@ export class View extends Item{
         });
 
         this._controller.bind("enable", value=>{
-            this.enable( value );
+            if (typeof value === "boolean") this.enable( value );
         });
 
         this._controller.bind("visible", value=>{
@@ -160,7 +160,11 @@ export class View extends Item{
     }
 
     enable( value ){
-        // override it
+        if ( this._widgets){
+            Object.values(this._widgets).forEach(widget =>{
+                widget.set({enable:value});
+            });
+        }
     }
 
 
