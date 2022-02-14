@@ -35,7 +35,7 @@ export class Control extends Parent{
         title:{type:types.primitives.String},
         icon:{type:types.primitives.String}
     };
-    static markup = `<button class="${ mainCss.horizontal }" style="align-items: center">
+    static markup = `<button class="${ mainCss.horizontal }" style="align-items: center;cursor: pointer">
         <div name="icon" style="display: none; width: 20px; height: 20px;"></div>
         <div name="text"></div>
     </button>`;
