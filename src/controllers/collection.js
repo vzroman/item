@@ -40,7 +40,8 @@ export class Controller extends Item{
     static events = {
         add:true,
         edit:true,
-        remove:true
+        remove:true,
+        count:true
     };
 
     init( Data ){
@@ -81,9 +82,11 @@ export class Controller extends Item{
             if (this._view) this._view.destroy();
             this._view = new util.AVLTree();
             this._data = {};
+            this._count = 0;
             const changes = super.set( Data );
             this._data = util.patch(this._data, changes);
             this._changes = undefined;
+            this._trigger("count", this._count);
         }finally {
             this._isRefresh = false;
         }
@@ -136,8 +139,10 @@ export class Controller extends Item{
         const child = [
             item.bind("change",changes => this.set({ [id]:util.patch2value(changes, 0) }))
         ];
-        if (this._options.forkCommit === "refresh" || this._options.forkCommit === "commit"){
-            child.push( item.bind("commit",()=> this[this._options.forkCommit]()) )
+        if (this._options.forkCommit === "refresh"){
+            child.push( item.bind("commit",()=> this.refresh()) )
+        }else if (this._options.forkCommit === "commit"){
+            child.push( item.bind("commit",()=> this.commit( id )) )
         }
 
         // self-destroying bond
@@ -214,6 +219,10 @@ export class Controller extends Item{
         const data = [];
         this.forEach(id => data.push([id,this.get(id)]) );
         return data;
+    }
+
+    count(){
+        return this._count;
     }
 
     destroy(){
@@ -312,10 +321,14 @@ export class Controller extends Item{
         Object.entries( changes ).forEach(([id,[item, previous]])=>{
             if ( previous === undefined ){
                 this._view.insert([this._orderKey(id, item), id]);
+                this._count++;
                 this._trigger("add", [id, item]);
+                this._trigger("count", this._count);
             }else if( item === null ){
                 this._view.remove([this._orderKey(id, previous), id] );
+                this._count--;
                 this._trigger("remove", [id, previous]);
+                this._trigger("count", this._count)
             }else{
                 this._view.remove([this._orderKey(id, previous), id] );
                 this._view.insert([this._orderKey(id, item), id]);
