@@ -108,9 +108,18 @@ export class View extends Item{
             if (typeof value === "boolean") this.enable( value );
         });
 
+        let _displayBackup = this.$markup.css("display");
         this._controller.bind("visible", value=>{
-            const visibility = value ? "visible" : "hidden";
-            this.$markup.css({visibility});
+            // TODO. Or use visibility instead?
+            // const visibility = value ? "inherit" : "hidden";
+            // this.$markup.css({visibility});
+
+            if (!value){
+                _displayBackup = this.$markup.css("display");
+                this.$markup.css({display:"none"});
+            }else{
+                this.$markup.css({display:_displayBackup});
+            }
         });
 
         this.$markup.on("click",event => this._trigger("click", event) );
