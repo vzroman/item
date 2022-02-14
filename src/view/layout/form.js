@@ -51,6 +51,13 @@ export class View extends Parent{
         </div>
     </div>`;
 
+    link( context ){
+        context = super.link( context );
+
+        this._onError = () =>
+            context.default.unbind( context.default.bind("error",(...args)=>this._trigger("error", args)) );
+    }
+
     widgets(){
         return {
             view: {
@@ -91,6 +98,12 @@ export class View extends Parent{
                 }
             }
         }
+    }
+
+    destroy(){
+        if (this._onError) this._onError();
+        this._onError = undefined;
+        super.destroy();
     }
 
 }
