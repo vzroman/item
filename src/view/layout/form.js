@@ -67,7 +67,7 @@ export class View extends Parent{
                     text:i18n("save"),
                     enable:false,
                     links:{ enable:"committable" },
-                    events:{ click:(_,{data})=>{
+                    events:{ click:(...[,,{data}])=>{
                         // TODO. Waiting
                         data.commit().then(()=>{
                             this._trigger("commit");
@@ -84,7 +84,7 @@ export class View extends Parent{
                     text:i18n("cancel"),
                     enable:false,
                     links:{ enable:"committable"},
-                    events:{ click:(_,{data})=>{
+                    events:{ click:(...[,,{data}])=>{
                         data.rollback();
                         this._trigger("cancel");
                     }}

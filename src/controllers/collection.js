@@ -41,7 +41,8 @@ export class Controller extends Item{
         add:true,
         edit:true,
         remove:true,
-        count:true
+        count:true,
+        error:true
     };
 
     init( Data ){
@@ -174,7 +175,8 @@ export class Controller extends Item{
         }else if( !Array.isArray( idList ) ){
             return this.commit( [idList] );
         }else{
-            return new Promise((resolve, reject) => {
+            return this._promise("commit",(resolve, reject) => {
+
                 if ( !this._changes ) return reject("no changes");
 
                 const toCommit = idList.reduce((acc, id)=>{

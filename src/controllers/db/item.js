@@ -44,7 +44,8 @@ export class Controller extends Item{
     // Data access API
     //-------------------------------------------------------------------
     init( Data ){
-        return new Promise((resolve, reject)=>{
+        return this._promise("init",(resolve, reject)=>{
+
             let ID = undefined;
             if (typeof Data === "string"){
                 ID = Data;
@@ -85,7 +86,7 @@ export class Controller extends Item{
     }
 
     rollback(changes, error){
-        return new Promise((resolve, reject) => {
+        return this._promise("rollback",(resolve, reject) => {
 
             if (changes) {
                 resolve( super.rollback(changes, error) );
@@ -103,7 +104,7 @@ export class Controller extends Item{
 
     refresh( data ){
         if ( !data ){
-            return new Promise((resolve, reject) => {
+            return this._promise("refresh",(resolve, reject) => {
 
                 if (this._filter === undefined) return reject("not initialized");
 
@@ -136,7 +137,7 @@ export class Controller extends Item{
     }
 
     commit(){
-        return new Promise((resolve, reject)=>{
+        return this._promise("commit",(resolve, reject)=>{
 
             if ( !this.isCommittable() ) return reject("not ready");
 

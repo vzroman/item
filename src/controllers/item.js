@@ -159,7 +159,7 @@ export class Controller extends Linkable{
     }
 
     commit(){
-        return new Promise((resolve, reject)=>{
+        return this._promise("commit",(resolve, reject)=>{
 
             if ( !this.isCommittable() ) return reject("not ready");
 
@@ -199,10 +199,11 @@ export class Controller extends Linkable{
                 data = util.patch2value(this._changes,0);
                 return this.refresh( data );
             }else{
-                return new Promise( resolve => resolve());
+                return this._promise("refresh", resolve => resolve());
             }
         }else{
-            return new Promise((resolve, reject)=>{
+            return this._promise("refresh",(resolve, reject)=>{
+
                 this._isRefresh = true;
                 this._refresh( data )
                     .then(result => {
@@ -234,6 +235,15 @@ export class Controller extends Linkable{
         // 2. the controller has changes
         // 3. the data is valid
         return !!(this._data && this._changes && this._isValid);
+    }
+
+    _promise( action, fun ){
+        return new Promise((resolve, reject)=>{
+            fun( resolve, error => {
+                this._trigger("error", [error, action]);
+                reject( error )
+            })
+        });
     }
 
     //-------------------------------------------------------------------

@@ -269,10 +269,10 @@ class Link{
         };
 
         // The subscription
-        this._sourceSubscriptions.push( source.bind(event, value => {
+        this._sourceSubscriptions.push( source.bind(event, (...args) => {
 
             // Handler can be asynchronous
-            value = handler(value, context);
+            const value = handler.apply(this, [...args, context]);
 
             if (value instanceof Promise){
                 value.then( setTarget )

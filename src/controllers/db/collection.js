@@ -47,7 +47,7 @@ export class Controller extends Collection{
     //-------------------------------------------------------------------
     init( filter ){
 
-        return new Promise((resolve, reject) => {
+        return this._promise("init",(resolve, reject) => {
 
             filter = this.constructor.filter2query( filter );
 
@@ -62,7 +62,7 @@ export class Controller extends Collection{
     }
 
     rollback(changes, error){
-        return new Promise((resolve, reject) => {
+        return this._promise("rollback",(resolve, reject) => {
 
             if (changes) {
                 resolve( super.rollback(changes, error) );
@@ -80,7 +80,7 @@ export class Controller extends Collection{
 
     refresh( data ){
         if ( !data ){
-            return new Promise((resolve, reject) => {
+            return this._promise("refresh",(resolve, reject) => {
 
                 if (this._filter === undefined) return reject("not initialized");
 
@@ -113,7 +113,7 @@ export class Controller extends Collection{
         if ( idList ){
             return super.commit( idList );
         }else{
-            return new Promise((resolve, reject)=>{
+            return this._promise("commit",(resolve, reject)=>{
 
                 if ( !this.isCommittable() ) return reject("not ready");
 
