@@ -46,37 +46,7 @@ export class Controller extends Item{
     };
 
     init( Data ){
-        if (this._options.id !== undefined){
-            if (typeof Data === "object" && Data.constructor === Object){
-                Data = Object.values( Data );
-            }
-
-            if( !Array.isArray( Data ) ){
-                throw new Error("Invalid data");
-            }
-
-            Data = Data.reduce((acc, item)=>{
-                const id = item[ this._options.id ];
-                if (id !== undefined){
-                    acc[ id ] = item;
-                }else{
-                    console.warn(`undefined ${ this._options.id } for item`, item);
-                }
-                return acc;
-            },{});
-        }else if(Array.isArray( Data )){
-            Data = Data.reduce((acc, item, i)=>{
-                acc[i] = item;
-                return acc;
-            },{});
-        }else if(typeof Data !== "object"){
-            throw new Error("Invalid data");
-        }
-
-        // Coerce items
-        for (const k in Data){
-            Data[k] = this._schema.coerce( Data[k] );
-        }
+        Data = this._coerce( Data );
 
         this._isRefresh = true;
         try{
@@ -111,7 +81,7 @@ export class Controller extends Item{
     fork( id, settings ){
 
         const data = this._get( id );
-        if ( util.deepEqual({}, this._data) || this._data[ id ] ){
+        if ( this._isRefresh || this._data[ id ] ){
             // This is an object edit operation
             // Add item id if it is not in the schema
             if (data && this._options.id && !data.hasOwnProperty( this._options.id )){
@@ -233,6 +203,48 @@ export class Controller extends Item{
             this._view = undefined;
         }
         super.destroy();
+    }
+
+    refresh( data ){
+        if ( data ) data = this._coerce( data );
+        return super.refresh( data );
+    }
+
+
+    _coerce( Data ){
+        if (this._options.id !== undefined){
+            if (typeof Data === "object" && Data.constructor === Object){
+                Data = Object.values( Data );
+            }
+
+            if( !Array.isArray( Data ) ){
+                throw new Error("Invalid data");
+            }
+
+            Data = Data.reduce((acc, item)=>{
+                const id = item[ this._options.id ];
+                if (id !== undefined){
+                    acc[ id ] = item;
+                }else{
+                    console.warn(`undefined ${ this._options.id } for item`, item);
+                }
+                return acc;
+            },{});
+        }else if(Array.isArray( Data )){
+            Data = Data.reduce((acc, item, i)=>{
+                acc[i] = item;
+                return acc;
+            },{});
+        }else if(typeof Data !== "object"){
+            throw new Error("Invalid data");
+        }
+
+        // Coerce items
+        for (const k in Data){
+            Data[k] = this._schema.coerce( Data[k] );
+        }
+
+        return Data;
     }
 
     _get( id ){
