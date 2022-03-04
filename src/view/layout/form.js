@@ -80,6 +80,7 @@ export class View extends Parent{
                             this._trigger("commit");
                         }, error =>{
                             data.rollback(undefined, error);
+                            this._trigger("error", error)
                         })
                     }}
                 }
