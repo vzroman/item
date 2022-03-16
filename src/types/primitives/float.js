@@ -36,7 +36,8 @@ export class Type extends Parent{
         if (value === undefined || value === null){
             return undefined;
         }else{
-            value = +value;
+            value = Number.parseFloat(value);
+            if (Number.isNaN( value )) return undefined;
 
             if(typeof this._options.min ==="number" && value < this._options.min){
                 value = this._options.min;

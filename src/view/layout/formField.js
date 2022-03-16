@@ -44,5 +44,13 @@ export class View extends Parent{
         return context
     }
 
+    value( value ){
+        if (typeof this._widgets.value.value === "function" ){
+            return this._widgets.value.value( value );
+        }else{
+            return undefined;
+        }
+    }
+
 }
 View.extend();

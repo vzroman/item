@@ -30,8 +30,8 @@ import {types} from "../../types/index.js";
 export class Control extends Parent{
 
     static options = {
-        length:{type: types.primitives.Integer},
-        pattern:{type: types.primitives.String}
+        value:{type: types.primitives.String},
+        length:{type: types.primitives.Integer}
     };
 
     static markup = `<input type="text"/>`;

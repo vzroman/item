@@ -39,6 +39,8 @@ export class Type extends Any{
             // coerce the type
             value = "" + value;
 
+            if (value === "") return undefined;
+
             // Check the length
             if (this._options.length && value.length > this._options.length){
                 value = value.slice(0, this._options.length);

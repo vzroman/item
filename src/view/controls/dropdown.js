@@ -30,6 +30,7 @@ import {Controller} from "../../controllers/collection.js";
 export class Control extends Parent{
 
     static options = {
+        value:{type: types.primitives.String},
         size:{type: types.primitives.Integer},
         items:{type: types.primitives.Any},
         itemValue:{type: types.primitives.String},

@@ -41,6 +41,10 @@ export class Type extends primitives.Any{
         return this._schema.validate( value || {} ) || undefined;
     }
 
+    link( sources ){
+        return this._schema.link( sources );
+    }
+
     destroy(){
         this._schema.destroy();
         this._schema = undefined;

@@ -42,7 +42,7 @@ export class Control extends View{
         this._widget = undefined;
 
         this._validator = this._options.validate
-            ? new this.constructor.options.value.type( this._options.validate.options )
+            ? new this.constructor.options.value.type( this._options.validate )
             : undefined;
 
         // We do it asynchronously because descendants should be
@@ -55,7 +55,7 @@ export class Control extends View{
                     if (deepEqual(value, _value)){
                         this.updateValue( value, prev );
                     }else{
-                        this.setValue( _value );
+                        this.setValue( _value !== undefined ? value : null );
                     }
                 }else{
                     this.updateValue( value, prev );

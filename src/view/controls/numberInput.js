@@ -30,6 +30,7 @@ import {types} from "../../types/index.js";
 export class Control extends Parent{
 
     static options = {
+        value:{type: types.primitives.Float},
         step:{type: types.primitives.Float},
     };
 
@@ -38,7 +39,7 @@ export class Control extends Parent{
         if (typeof this._options.step === "number" && Math.round(this._options.step) === this._options.step){
             const value = typeof this._options.value === "number"
                 ? this._options.value
-                : this._options.min;
+                : this._options.validate?.min;
             if (typeof value ==="number" && Math.round(value) === value ) isInteger = true;
         }
 

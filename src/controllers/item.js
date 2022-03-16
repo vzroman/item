@@ -49,6 +49,7 @@ export class Controller extends Linkable{
 
         // Initialize the schema
         this._schema = new Schema( this._options.schema );
+        this._schema.link( this );
 
         this._data = undefined;
         this._changes = undefined;
@@ -117,12 +118,6 @@ export class Controller extends Linkable{
 
     _validate(){
         return !!this.get();
-    }
-
-    link( sources ){
-        sources = super.link( sources );
-        this._schema.link( sources );
-        return sources;
     }
 
 

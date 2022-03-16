@@ -42,9 +42,9 @@ export class Linkable extends Eventful{
     static extend(){
         if (Linkable.isPrototypeOf( this ) ){
 
-            this.options = deepMerge( this.options, Object.getPrototypeOf(this).options );
+            this.options = deepMerge( Object.getPrototypeOf(this).options, this.options );
 
-            this.events = deepMerge( this.events, Object.getPrototypeOf(this).events );
+            this.events = deepMerge( Object.getPrototypeOf(this).events, this.events );
         }
     }
 

@@ -47,7 +47,7 @@ export class Attribute extends Linkable{
             if (changes.type || changes.options){
                 this._initType();
             }else if(changes.hasOwnProperty("default")){
-                this.set({default: this._type.coerce(this._options.default)})
+                this._updateDefault();
             }
         });
     }
@@ -62,7 +62,13 @@ export class Attribute extends Linkable{
         }
         this._type = new this._options.type( this._options.options );
 
-        this.set({default: this._type.coerce( this._options.default )});
+        this._updateDefault();
+    }
+
+    link( sources ){
+        sources = super.link( sources );
+        this._type.link( sources );
+        return sources;
     }
 
     validate( value ){
@@ -95,6 +101,13 @@ export class Attribute extends Linkable{
         this._type.destroy();
         this._type = undefined;
         super.destroy();
+    }
+
+    _updateDefault(){
+        this.set({default: this._options.default !== undefined
+            ? this._type.coerce(this._options.default)
+            : null
+        });
     }
 }
 Attribute.extend();
@@ -171,6 +184,9 @@ export class Schema extends Linkable{
             }
 
             result[p] = this._attributes[p].validate( properties[p] );
+
+            // reset the value if it is not valid
+            if (result[p] === undefined) result[p] = null;
         }
 
         return result;
