@@ -33,10 +33,7 @@ export class Control extends View{
 
     static options = {
         value:{type:types.primitives.Any},
-        validate:{type: types.complex.Item, options:{schema:{
-            type:{ type: types.primitives.Class, options:{ class:types.primitives.Any }, required: true},
-            options:{type: types.primitives.Set }
-        }}}
+        validate:{type: types.primitives.Set }
     };
 
     constructor( options ){
@@ -45,7 +42,7 @@ export class Control extends View{
         this._widget = undefined;
 
         this._validator = this._options.validate
-            ? new this._options.validate.type( this._options.validate.options )
+            ? new this.constructor.options.value.type( this._options.validate.options )
             : undefined;
 
         // We do it asynchronously because descendants should be

@@ -30,9 +30,7 @@ import {types} from "../../types/index.js";
 export class Control extends Parent{
 
     static options = {
-        max:{type: types.primitives.Float},
-        min:{type: types.primitives.Float},
-        step:{type: types.primitives.Float}
+        step:{type: types.primitives.Float},
     };
 
     markup(){
@@ -54,10 +52,20 @@ export class Control extends Parent{
     constructor( options ){
         super( options );
 
-        ["max","min","step"].forEach( prop => {
-            this.bind(prop,value => {
-                if (typeof value === "number"){
-                    this.$markup.prop(prop, value);
+        this.bind("step",value => {
+            if (typeof value === "number"){
+                this.$markup.prop("step", value);
+            }else{
+                this.$markup.removeAttr("step");
+            }
+        });
+
+        this.bind("validate", value=>{
+            value = value || {};
+
+            ["max","min"].forEach( prop => {
+                if (typeof value[prop] === "number"){
+                    this.$markup.prop(prop, value[prop]);
                 }else{
                     this.$markup.removeAttr(prop);
                 }

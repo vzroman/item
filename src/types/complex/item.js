@@ -29,7 +29,7 @@ import {Schema} from "../../core/schema.js";
 export class Type extends primitives.Any{
 
     static options = {
-        schema:{type:primitives.Set, required: true}
+        schema:undefined
     };
 
     constructor( options ){

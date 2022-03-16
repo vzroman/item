@@ -24,13 +24,12 @@
 //------------------------------------------------------------------------------------
 
 import {Type as Any} from "./any.js";
-import {types} from "../index";
 
 export class Type extends Any{
 
     static options = {
-        length:{type: types.primitives.Integer},
-        pattern:{type: types.primitives.String}
+        length:undefined,
+        pattern:undefined
     };
 
     coerce( value ){
