@@ -47,9 +47,8 @@ export class Item extends Linkable{
         // Options are linkable to data
         this._controller = new Controller({
             schema: this.constructor.options,
+            data: options || {}
         });
-
-        this._controller.init( options || {} );
 
         this._options = this._controller.get();
 

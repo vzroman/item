@@ -138,8 +138,7 @@ export class Schema extends Linkable{
 
     link( sources ){
         sources = super.link( sources );
-        const attrSources = {...sources,parent:this};
-        Object.values( this._attributes ).forEach( a => a.link(attrSources) );
+        Object.values( this._attributes ).forEach( a => a.link(sources) );
         return sources;
     }
 

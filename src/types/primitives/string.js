@@ -24,14 +24,33 @@
 //------------------------------------------------------------------------------------
 
 import {Type as Any} from "./any.js";
+import {types} from "../index";
 
 export class Type extends Any{
 
-    static coerce( value ){
+    static options = {
+        length:{type: types.primitives.Integer},
+        pattern:{type: types.primitives.String}
+    };
+
+    coerce( value ){
         if (value === undefined || value === null){
             return undefined;
         }else {
-            return "" + value;
+            // coerce the type
+            value = "" + value;
+
+            // Check the length
+            if (this._options.length && value.length > this._options.length){
+                value = value.slice(0, this._options.length);
+            }
+
+            // Check the pattern
+            if (this._options.pattern && !value.match(this._options.pattern)){
+                value = undefined;
+            }
+
+            return value;
         }
     }
 }
