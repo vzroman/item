@@ -23,14 +23,16 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type as Parent} from "./any.js";
+import {Type as Parent} from "./float.js";
 
 export class Type extends Parent{
-    static coerce( value ){
-        if (value === undefined || value === null){
-            return undefined;
+
+    coerce( value ){
+        value = super.coerce( value );
+        if (typeof value === "number"){
+            return Math.round( value );
         }else{
-            return +value;
+            return value;
         }
     }
 }

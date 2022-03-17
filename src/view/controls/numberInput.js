@@ -23,41 +23,55 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Control as Parent} from "./control.js";
+import {Control as Parent} from "./textInput.js";
 import {types} from "../../types/index.js";
 
 // The control is the point where external widgets to be attached
 export class Control extends Parent{
 
     static options = {
-        value:{type: types.primitives.String},
-        length:{type: types.primitives.Integer}
+        value:{type: types.primitives.Float},
+        step:{type: types.primitives.Float},
     };
 
-    static markup = `<input type="text"/>`;
+    markup(){
+        let isInteger = false;
+        if (typeof this._options.step === "number" && Math.round(this._options.step) === this._options.step){
+            const value = typeof this._options.value === "number"
+                ? this._options.value
+                : this._options.validate?.min;
+            if (typeof value ==="number" && Math.round(value) === value ) isInteger = true;
+        }
+
+        isInteger = isInteger
+            ? ` oninput="this.value=this.value.replace(/[^0-9]/g,'');"`
+            : ``;
+
+        return `<input type="number" ${ isInteger } />`
+    }
 
     constructor( options ){
         super( options );
 
-        const onChange = ()=> this.set({ value:this.$markup.val() });
-        this.$markup.on("change", onChange).on("keypress", event=>{
-            if (event.which === 13){
-                event.preventDefault();
-                onChange();
+        this.bind("step",value => {
+            if (typeof value === "number"){
+                this.$markup.prop("step", value);
+            }else{
+                this.$markup.removeAttr("step");
             }
         });
-    }
 
-    updateValue( value, prev ){
-        this.$markup.val( value )
-    }
+        this.bind("validate", value=>{
+            value = value || {};
 
-    enable( value ){
-        this.$markup.prop('disabled', !value);
-    }
-
-    focus(){
-        this.$markup.focus();
+            ["max","min"].forEach( prop => {
+                if (typeof value[prop] === "number"){
+                    this.$markup.prop(prop, value[prop]);
+                }else{
+                    this.$markup.removeAttr(prop);
+                }
+            });
+        });
     }
 }
 Control.extend();

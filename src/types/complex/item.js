@@ -29,7 +29,7 @@ import {Schema} from "../../core/schema.js";
 export class Type extends primitives.Any{
 
     static options = {
-        schema:{type:primitives.Set, required: true}
+        schema:undefined
     };
 
     constructor( options ){
@@ -39,6 +39,10 @@ export class Type extends primitives.Any{
 
     coerce( value ){
         return this._schema.validate( value || {} ) || undefined;
+    }
+
+    link( sources ){
+        return this._schema.link( sources );
     }
 
     destroy(){

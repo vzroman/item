@@ -25,12 +25,15 @@
 
 import {View} from "../item.js";
 import {types} from "../../types/index.js";
+import {deepEqual} from "../../utilities/data.js";
+
 
 // The control is the point where external widgets to be attached
 export class Control extends View{
 
     static options = {
-        value:{type:types.primitives.Any}
+        value:{type:types.primitives.Any},
+        validate:{type: types.primitives.Set }
     };
 
     constructor( options ){
@@ -38,10 +41,26 @@ export class Control extends View{
 
         this._widget = undefined;
 
+        this._validator = this._options.validate
+            ? new this.constructor.options.value.type( this._options.validate )
+            : undefined;
+
         // We do it asynchronously because descendants should be
         // able to init their widget
         setTimeout(()=>{
-            this.bind("value",(value, prev) => this.updateValue( value, prev ));
+            this.bind("value",(value, prev) => {
+                if ( this._validator ){
+                    const _value = this._validator.coerce( value );
+
+                    if (deepEqual(value, _value)){
+                        this.updateValue( value, prev );
+                    }else{
+                        this.setValue( _value !== undefined ? value : null );
+                    }
+                }else{
+                    this.updateValue( value, prev );
+                }
+            });
         });
     }
 

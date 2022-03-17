@@ -23,27 +23,33 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Type as Any} from "./any.js";
-import {Type as Bool} from "./bool.js";
-import {Type as String} from "./string.js";
-import {Type as Float} from "./float.js";
-import {Type as Integer} from "./integer.js";
-import {Type as Set} from "./set.js";
-import {Type as Array} from "./array.js";
-import {Type as Fun} from "./fun.js";
-import {Type as Class} from "./class.js";
-import {Type as Instance} from "./instance.js";
+import {Type as Parent} from "./any.js";
 
+export class Type extends Parent{
 
-export const types = {
-    Any,
-    Bool,
-    Float,
-    Integer,
-    String,
-    Set,
-    Array,
-    Fun,
-    Class,
-    Instance
-};
+    static options = {
+        min:undefined,
+        max:undefined
+    };
+
+    coerce( value ){
+        if (value === undefined || value === null){
+            return undefined;
+        }else{
+            value = Number.parseFloat(value);
+            if (Number.isNaN( value )) return undefined;
+
+            if(typeof this._options.min ==="number" && value < this._options.min){
+                value = this._options.min;
+            }
+
+            if(typeof this._options.max ==="number" && value > this._options.max){
+                value = this._options.max;
+            }
+
+            return value;
+        }
+    }
+}
+Type.extend();
+

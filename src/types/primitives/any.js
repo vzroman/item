@@ -33,7 +33,7 @@ export class Type{
             // !Attention the strict inheritance the successor can extend the predecessor's options
             // But not to override them
             // Inherit options
-            this.options = {...this.options, ...Object.getPrototypeOf(this).options};
+            this.options = { ...Object.getPrototypeOf(this).options, ...this.options};
         }
     }
 
@@ -51,6 +51,11 @@ export class Type{
             }
             return acc;
         },{});
+    }
+
+    link( sources ){
+        // To be overridden
+        return sources;
     }
 
     coerce( value ){
