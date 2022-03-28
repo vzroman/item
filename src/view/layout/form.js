@@ -34,7 +34,12 @@ export class View extends Parent{
 
     static options = {
         view:{type: types.primitives.Class, options:{class:Parent}, required:true },
-        options:{type: types.primitives.Set }
+        options:{type: types.primitives.Set },
+        links:{
+            "!_commit":"commit",
+            "!_reject":"reject",
+            "!_rollback":"rollback"
+        }
     };
 
     static events = {
@@ -50,13 +55,6 @@ export class View extends Parent{
             <div name="cancel"></div>
         </div>
     </div>`;
-
-    link( context ){
-        context = super.link( context );
-
-        this._onError = () =>
-            context.default.unbind( context.default.bind("error",(...args)=>this._trigger("error", args)) );
-    }
 
     widgets(){
         return {
@@ -74,15 +72,7 @@ export class View extends Parent{
                     text:i18n("save"),
                     enable:false,
                     links:{ enable:"committable" },
-                    events:{ click:(...[,,{data}])=>{
-                        // TODO. Waiting
-                        data.commit().then(()=>{
-                            this._trigger("commit");
-                        }, error =>{
-                            data.rollback(undefined, error);
-                            this._trigger("error", error)
-                        })
-                    }}
+                    events:{ click:{ target:"!commit"} }
                 }
             },
             cancel: {
@@ -91,10 +81,7 @@ export class View extends Parent{
                     text:i18n("cancel"),
                     enable:false,
                     links:{ enable:"committable"},
-                    events:{ click:(...[,,{data}])=>{
-                        data.rollback();
-                        this._trigger("cancel");
-                    }}
+                    events:{ click: { target:"!rollback"} }
                 }
             }
         }
@@ -104,6 +91,18 @@ export class View extends Parent{
         if (this._onError) this._onError();
         this._onError = undefined;
         super.destroy();
+    }
+
+    _commit(){
+        this._trigger("commit")
+    }
+
+    _reject( error ){
+        this._trigger("error", error);
+    }
+
+    _rollback(){
+        this._trigger("cancel");
     }
 
 }

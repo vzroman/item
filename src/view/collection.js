@@ -27,6 +27,7 @@ import {View as Item} from "./item.js";
 import {controllers} from "../controllers/index.js";
 import {util} from "../utilities/index.js";
 import {types} from "../types/index.js";
+import {Linkable} from "../core/linkable.js";
 
 export class View extends Item{
 
@@ -54,14 +55,16 @@ export class View extends Item{
     link( sources ){
 
         // Init own links and events to the external data
-        sources = super.link( sources );
+        super.link( sources );
 
-        this.linkItems( sources );
-
-        return sources;
+        if (sources) this.linkItems( sources );
     }
 
     linkItems( sources ){
+
+        if (sources instanceof Linkable){
+            sources = {data:sources}
+        }
 
         const {data} = sources;
 

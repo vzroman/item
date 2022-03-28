@@ -55,7 +55,6 @@ export class Type{
 
     link( sources ){
         // To be overridden
-        return sources;
     }
 
     coerce( value ){

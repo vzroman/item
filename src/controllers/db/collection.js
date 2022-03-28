@@ -115,7 +115,12 @@ export class Controller extends Collection{
         }else{
             return this._promise("commit",(resolve, reject)=>{
 
-                if ( !this.isCommittable() ) return reject("not ready");
+                const onReject = error => {
+                    this._trigger("reject", error);
+                    return reject( error );
+                }
+
+                if ( !this.isCommittable() ) return onReject("not ready");
 
                 this.constructor.transaction(this._changes,  this._options.connection(), this._options.timeout)
                     .then(()=>{
@@ -126,7 +131,7 @@ export class Controller extends Collection{
                         // Refresh the data after successful commit
                         this.refresh();
 
-                    }, reject);
+                    }, onReject);
             });
         }
     }

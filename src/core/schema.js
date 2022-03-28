@@ -66,9 +66,8 @@ export class Attribute extends Linkable{
     }
 
     link( sources ){
-        sources = super.link( sources );
+        super.link( sources );
         this._type.link( sources );
-        return sources;
     }
 
     validate( value ){
@@ -150,9 +149,8 @@ export class Schema extends Linkable{
     }
 
     link( sources ){
-        sources = super.link( sources );
+        super.link( sources );
         Object.values( this._attributes ).forEach( a => a.link(sources) );
-        return sources;
     }
 
     get( properties ){

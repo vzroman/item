@@ -139,7 +139,11 @@ export class Controller extends Item{
     commit(){
         return this._promise("commit",(resolve, reject)=>{
 
-            if ( !this.isCommittable() ) return reject("not ready");
+            const onReject = error => {
+                this._trigger("reject", error);
+                return reject( error );
+            }
+            if ( !this.isCommittable() ) return onReject("not ready");
 
             if ( this._ID ){
                 // the object already exits
@@ -156,7 +160,7 @@ export class Controller extends Item{
                         // Request the updated item from the database
                         this.refresh();
 
-                    }, reject, this._options.timeout);
+                    }, onReject, this._options.timeout);
                 }
             }else{
                 // new object
@@ -171,7 +175,7 @@ export class Controller extends Item{
 
                     this.refresh();
 
-                },reject, this._options.timeout);
+                },onReject, this._options.timeout);
             }
         });
     }

@@ -81,13 +81,15 @@ export class Item extends Linkable{
     //-------------------------------------------------------------------
     link( sources ){
 
-        sources = super.link( sources );
+        super.link( sources );
+
+        if (sources instanceof Linkable){
+            sources = {data:sources}
+        }
 
         this._controller.link({...sources, parent:this });
 
-        if (sources.data) this.set({data:sources.data});
-
-        return sources;
+        if (sources?.data) this.set({data:sources.data});
     }
 
     //-------------------------------------------------------------------

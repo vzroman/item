@@ -147,14 +147,18 @@ export class Controller extends Item{
         }else{
             return this._promise("commit",(resolve, reject) => {
 
-                if ( !this._changes ) return reject("no changes");
+                const onReject = error => {
+                    this._trigger("reject", error);
+                    return reject( error );
+                }
+                if ( !this._changes ) return onReject("no changes");
 
                 const toCommit = idList.reduce((acc, id)=>{
                     acc[id] = this._changes[id];
                     return acc;
                 },{});
 
-                if ( !Object.keys( toCommit ).length ) return reject("no changes");
+                if ( !Object.keys( toCommit ).length ) return onReject("no changes");
 
                 // Get a copy of changes
                 const changes = util.deepCopy( this._changes );

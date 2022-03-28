@@ -54,6 +54,14 @@ export class Linkable extends Eventful{
             acc[p] = options.hasOwnProperty(p) ? options[p] : deepCopy( v );
             return acc;
         },{});
+
+        // Run links but after descendants finish their initialization procedures.
+        // We don't pass any data so only self links are initialized
+        this._linked = {
+            properties:{},
+            events:{}
+        };
+        setTimeout(() =>this.link());
     }
 
     bind(event, callback){
@@ -152,89 +160,106 @@ export class Linkable extends Eventful{
     //-------------------------------------------------------------------
     link( context ){
 
-        // Normally context id a set:
-        // {
-        //  data,
-        //  parent,
-        //  <some_source>
-        //  ...
-        // }
-        if (context instanceof Linkable){
-            context = {data: context};
-        }else{
-            context = {...context, self:this };
+        // Links can be either against data or against self/parent
+        // items. self/parent links are run in the constructor. Links to
+        // data can be run externally.
+        if ( !context ){
+            context = { self:this }
+        }else if (context instanceof Linkable){
+            context = { data:context };
         }
-        context.default = context.data || context.parent || context.self;
 
-        // Links
-        Object.entries(this._options.links).forEach(([ property, link])=>{
+        //------------------------Links---------------------------------------
+        for (let [property,link] of Object.entries(this._options.links)){
 
-            // Normally link has format:
-            // { source, event, handler }
-            // By default the source is data
+            // A link cannot be activated twice, skip it if it is already active
+            if (this._linked.properties[property]) continue;
+
+            // Normally a link has a format:
+            // { source, handler }
+            // source has a format controller@property
+            // By default the source controller is data, therefore
+            // link without a controller is the same as a link with data@ prefix
             if (typeof link === "string"){
-                link = {source: context.default, event: link}
-            }else if(typeof link === "object" && typeof link.event === "string"){
-                if (typeof link.source === "string"){
-                    // The source is defined
-                    if ( !context[link.source] ){
-                        // The source is not provided
-                        console.warn("skip the link for not provided source", link.source);
-                        link = undefined;
-                    }else{
-                        link.source = context[link.source];
-                    }
-                }else{
-                    link.source = context.default;
-                }
-            }else{
+                // The case when a handler is not defined
+                link = { source:link }
+            }
+            if ( link.source.split("@").length === 1){
+                // The source controller is not defined, be default it is data
+                link.source = "data@" + link.source;
+            }
+
+            if (!link.source){
                 console.error("invalid link settings", link);
-                link = undefined;
             }
 
-            if (link){
-                new Link({...link, context, target:this, property});
+            let [source, event] = link.source.split("@");
+            source = context[source];
+
+            if ( source ){
+                // The context contains the source controller, the link runs
+                this._linked.properties[property] = new Link({
+                    source,
+                    event,
+                    context,
+                    handler:link.handler,
+                    target:this,
+                    property
+                });
             }
+        }
 
-        });
 
-        // Events
-        Object.entries( this._options.events ).forEach(([event, params])=>{
+        //------------------------Events--------------------------------------------
+        for (let [event, params] of Object.entries(this._options.events)){
+
+            // An event cannot be activated twice, skip it if it is already active
+            if (this._linked.events[event]) continue;
+
             // Normally params have format:
-            // { handler, target, property }
-            if (typeof params === "function"){
+            // { handler, target }
+            if (typeof params === "function") {
                 // No target just handler is defined - callback
-                params = {handler:params }  // No target
-            }else if (typeof params === "string"){
-                // Just name of the property in data item
-                params = { target:context.default, property:params }
-            }else if(typeof params === "object" && (params.handler || params.property)){
-                if (params.property){
-                    if (typeof params.target === "string"){
-                        if (!context[params.target]){
-                            console.warn("skip the event for not provided target", params.target);
-                            params = undefined;
-                        }else{
-                            params.target = context[params.target];
-                        }
-                    }else{
-                        params.target = context.default;
-                    }
-                }else if (params.target){
-                    console.error("invalid event settings", params);
-                    params = undefined;
-                }
+                params = {handler: params};  // No target
             }
 
-            if (params){
-                new Link({...params, context, source:this, event});
+            if ( typeof params === "string" ){
+                // No handler is defined, just target
+                params = { target:params }
             }
-        });
 
-        return context;
+            if ( params.target && params.target.split("@").length === 1){
+                // By default, the target controller is data
+                params.target = "data@" + params.target;
+            }
+
+            const [target, property] = params.target ? params.target.split("@") : [];
+
+            // If the target is not defined then the event has only a handler
+            // and does not depend on the context
+            if ( !target || context[target]){
+
+                this._linked.events[ event ] = new Link({
+                    source:this,
+                    event,
+                    context,
+                    handler:params.handler,
+                    target: target ? context[target] : undefined,
+                    property
+                });
+            }
+        }
     }
 
     destroy(){
+        for (const link of Object.values(this._linked.properties)){
+            link.destroy();
+        }
+        for (const link of Object.values(this._linked.events)){
+            link.destroy();
+        }
+        this._linked = undefined;
+
         this._trigger("destroy");
         this._options = undefined;
         super.destroy();
@@ -262,11 +287,31 @@ class Link{
         // Default handler
         handler = handler || (v=>v);
 
-        const setTarget = value =>{
-            // The link could be destroyed while waiting for the handler
-            // or the link may don't have a target
-            if (this._target) this._target.set({ [property]:value });
-        };
+        let setTarget = () => {};
+        if ( this._target ){
+            if ( property.startsWith("!") && typeof this._target[property.slice(1)] === "function" ){
+                const method = property.slice(1);
+                setTarget = value => {
+
+                    // The link could be destroyed while waiting for the handler
+                    // or the link may don't have a target
+                    if ( !this._target ) return;
+
+                    if ( !Array.isArray( value ) ){
+                        value = [value];
+                    }
+                    this._target[method].apply(this._target, value);
+                }
+            }else{
+                setTarget = value => {
+                    // The link could be destroyed while waiting for the handler
+                    // or the link may don't have a target
+                    if ( !this._target ) return;
+
+                    this._target.set({ [property]:value });
+                }
+            }
+        }
 
         // The subscription
         this._sourceSubscriptions.push( source.bind(event, (...args) => {

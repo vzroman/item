@@ -40,9 +40,10 @@ export class View extends Parent{
         }
     }
 
-    widgetsContext( context ){
-        return context
+    linkWidgets( sources ){
+        Object.values(this._widgets).forEach(widget => widget.link( sources ));
     }
+
 
     value( value ){
         if (typeof this._widgets.value.value === "function" ){

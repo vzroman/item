@@ -26,6 +26,7 @@
 import {Item} from "../core/item.js";
 import {types} from "../types/index.js";
 import {deepMerge} from "../utilities/data.js";
+import {Linkable} from "../core/linkable.js";
 
 
 export class View extends Item{
@@ -79,7 +80,7 @@ export class View extends Item{
 
             options = {
                 links:{
-                    enable:{source:"parent", event:"enable"}
+                    enable:{source:"parent@enable" }
                 },
                 ...options
             };
@@ -128,16 +129,18 @@ export class View extends Item{
     link( sources ){
 
         // Init own links and events to the external data
-        sources = super.link( sources );
+        super.link( sources );
 
         this.linkWidgets( sources );
-
-        return sources;
     }
 
     linkWidgets( sources ){
 
-        sources = this.widgetsContext( sources );
+        if (sources instanceof Linkable){
+            sources = {data:sources}
+        }
+
+        sources = {...sources, parent:this};
 
         // Link the widgets to the external data
         if ( this._widgets ){
@@ -145,12 +148,6 @@ export class View extends Item{
                 widget.link( sources );
             });
         }
-
-        return sources;
-    }
-
-    widgetsContext( context ){
-        return {...context, parent:this}
     }
 
 

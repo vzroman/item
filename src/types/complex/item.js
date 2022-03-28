@@ -42,7 +42,7 @@ export class Type extends primitives.Any{
     }
 
     link( sources ){
-        return this._schema.link( sources );
+        this._schema.link( sources );
     }
 
     destroy(){

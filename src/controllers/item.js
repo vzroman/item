@@ -38,7 +38,8 @@ export class Controller extends Linkable{
     static events = {
         committable:true,
         commit:true,
-        rollback:true
+        rollback:true,
+        reject:true
     };
 
     constructor( options ){
@@ -49,7 +50,6 @@ export class Controller extends Linkable{
 
         // Initialize the schema
         this._schema = new Schema( this._options.schema );
-        this._schema.link( this );
 
         this._data = undefined;
         this._changes = undefined;
@@ -120,6 +120,11 @@ export class Controller extends Linkable{
         return !!this.get();
     }
 
+    link( sources ){
+        super.link( sources );
+        this._schema.link( sources );
+    }
+
 
     bind(event, callback){
         if ( this.constructor.events[event] ){
@@ -156,7 +161,10 @@ export class Controller extends Linkable{
     commit(){
         return this._promise("commit",(resolve, reject)=>{
 
-            if ( !this.isCommittable() ) return reject("not ready");
+            if ( !this.isCommittable() ) {
+                this._trigger("reject", "not ready");
+                return reject("not ready");
+            }
 
             const changes = this._changes;
             this._data = util.patch(this._data, changes);
