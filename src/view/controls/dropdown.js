@@ -26,6 +26,7 @@
 import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
 import {Controller} from "../../controllers/collection.js";
+import $ from "jquery";
 
 export class Control extends Parent{
 
