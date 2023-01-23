@@ -33,6 +33,8 @@ export class Linkable extends Eventful{
         events:{}
     };
 
+    static links = { };
+
     static events = {
         beforeChange:true,
         change:true,
@@ -43,6 +45,8 @@ export class Linkable extends Eventful{
         if (Linkable.isPrototypeOf( this ) ){
 
             this.options = deepMerge( Object.getPrototypeOf(this).options, this.options );
+
+            this.links = deepMerge( Object.getPrototypeOf(this).links, this.links );
 
             this.events = deepMerge( Object.getPrototypeOf(this).events, this.events );
         }
@@ -55,12 +59,13 @@ export class Linkable extends Eventful{
             return acc;
         },{});
 
-        // Run links but after descendants finish their initialization procedures.
-        // We don't pass any data so only self links are initialized
         this._linked = {
             properties:{},
             events:{}
         };
+
+        // Run links but after descendants finish their initialization procedures.
+        // We don't pass any data so only self links are initialized
         setTimeout(() =>this.link());
     }
 
@@ -160,17 +165,31 @@ export class Linkable extends Eventful{
     //-------------------------------------------------------------------
     link( context ){
 
-        // Links can be either against data or against self/parent
-        // items. self/parent links are run in the constructor. Links to
-        // data can be run externally.
-        if ( !context ){
-            context = { self:this }
-        }else if (context instanceof Linkable){
-            context = { data:context };
-        }
+        context = this.linkContext( context );
 
         //------------------------Links---------------------------------------
-        for (let [property,link] of Object.entries(this._options.links)){
+        this.initLinks( context );
+
+        //------------------------Events--------------------------------------------
+        this.initEvents( context );
+    }
+
+    linkContext( context ){
+
+        if (context instanceof Linkable){
+            context = { data:context };
+        }else if (!(context instanceof Object)){
+            context = {};
+        }
+
+        return {...context, self:this};
+    }
+
+    initLinks( context ){
+
+        const links = {...this.constructor.links, ...this._options.links};
+
+        for (let [property,link] of Object.entries( links )){
 
             // A link cannot be activated twice, skip it if it is already active
             if (this._linked.properties[property]) continue;
@@ -184,13 +203,15 @@ export class Linkable extends Eventful{
                 // The case when a handler is not defined
                 link = { source:link }
             }
-            if ( link.source.split("@").length === 1){
-                // The source controller is not defined, be default it is data
-                link.source = "data@" + link.source;
-            }
 
             if (!link.source){
                 console.error("invalid link settings", link);
+                continue;
+            }
+
+            if ( link.source.split("@").length === 1){
+                // The source controller is not defined, be default it is data
+                link.source = "data@" + link.source;
             }
 
             let [source, event] = link.source.split("@");
@@ -209,9 +230,13 @@ export class Linkable extends Eventful{
             }
         }
 
+    }
 
-        //------------------------Events--------------------------------------------
-        for (let [event, params] of Object.entries(this._options.events)){
+    initEvents( context ){
+
+        const events = {...this.constructor.events, ...this._options.events};
+
+        for (let [event, params] of Object.entries( events )){
 
             // An event cannot be activated twice, skip it if it is already active
             if (this._linked.events[event]) continue;
@@ -227,6 +252,8 @@ export class Linkable extends Eventful{
                 // No handler is defined, just target
                 params = { target:params }
             }
+
+            if (typeof params !== "object") continue;
 
             if ( params.target && params.target.split("@").length === 1){
                 // By default, the target controller is data

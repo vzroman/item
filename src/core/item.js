@@ -57,11 +57,6 @@ export class Item extends Linkable{
         }
 
         this._controller.bind("change", changes => this._update( changes ));
-
-        // If the data is defined we automatically perform the link
-        // procedure, but we do it asynchronously to allow the descendant
-        // to finish its constructor
-        if (this._options.data) setTimeout(()=>this.link( this._options.data ));
     }
 
     set( properties ){
@@ -79,17 +74,28 @@ export class Item extends Linkable{
     //-------------------------------------------------------------------
     // Link to external data
     //-------------------------------------------------------------------
-    link( sources ){
+    link( context ){
 
-        super.link( sources );
+        const data = context.data;
 
-        if (sources instanceof Linkable){
-            sources = {data:sources}
+        context = this.linkContext( context );
+
+        super.link( context );
+
+        this._controller.link( context );
+
+        if (data) this.set({data});
+    }
+
+    linkContext( context ){
+
+        context = super.linkContext( context );
+
+        if (!context.data && this._options.data){
+            context = {...context, data: this._options.data}
         }
 
-        this._controller.link({...sources, parent:this });
-
-        if (sources?.data) this.set({data:sources.data});
+        return context;
     }
 
     //-------------------------------------------------------------------

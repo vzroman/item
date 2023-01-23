@@ -39,8 +39,8 @@ export class View extends Item{
     };
 
     static events ={
-        addItem:types.primitives.Any,
-        removeItem:types.primitives.Any
+        addItem:true,
+        removeItem:true
     };
 
     constructor( options ){

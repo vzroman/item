@@ -92,7 +92,7 @@ class Wrapper extends Item{
     };
 
     static events = {
-        remove:types.primitives.Any
+        remove:true
     };
 
     markup(){

@@ -34,18 +34,19 @@ export class View extends Parent{
 
     static options = {
         view:{type: types.primitives.Class, options:{class:Parent}, required:true },
-        options:{type: types.primitives.Set },
-        links:{
-            "!_commit":"commit",
-            "!_reject":"reject",
-            "!_rollback":"rollback"
-        }
+        options:{type: types.primitives.Set }
+    };
+
+    static links = {
+        "!_commit":"commit",
+        "!_reject":"reject",
+        "!_rollback":"rollback"
     };
 
     static events = {
-        commit:types.primitives.Any,
-        error:types.primitives.Any,
-        cancel:types.primitives.Any
+        commit:true,
+        error:true,
+        cancel:true
     };
 
     static markup = `<div class="${ mainCss.vertical }" style="height: 100%">

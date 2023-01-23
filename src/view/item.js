@@ -27,7 +27,7 @@ import {Item} from "../core/item.js";
 import {types} from "../types/index.js";
 import {deepMerge} from "../utilities/data.js";
 import {Linkable} from "../core/linkable.js";
-import $ from "jquery";
+//import $ from "jquery";
 
 
 export class View extends Item{
@@ -41,7 +41,7 @@ export class View extends Item{
     };
 
     static events = {
-        click:types.primitives.Any
+        click:true
     };
 
     static markup = undefined;
@@ -127,28 +127,30 @@ export class View extends Item{
         this.$markup.on("click",event => this._trigger("click", event) );
     }
 
-    link( sources ){
+    link( context ){
+
+        context = this.linkContext( context );
 
         // Init own links and events to the external data
-        super.link( sources );
+        super.link( context );
 
-        this.linkWidgets( sources );
+        this.linkWidgets( context );
     }
 
-    linkWidgets( sources ){
+    linkWidgets( context ){
 
-        if (sources instanceof Linkable){
-            sources = {data:sources}
-        }
+        if (!this._widgets) return;
 
-        sources = {...sources, parent:this};
+        context = {
+            ...context,
+            ...this._widgets,
+            parent:this
+        };
 
         // Link the widgets to the external data
-        if ( this._widgets ){
-            Object.values(this._widgets).forEach(widget=>{
-                widget.link( sources );
-            });
-        }
+        Object.values(this._widgets).forEach(widget=>{
+            widget.link( context );
+        });
     }
 
 
