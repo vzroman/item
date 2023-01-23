@@ -73,7 +73,7 @@ export class View extends Parent{
                     text:i18n("save"),
                     enable:false,
                     links:{ enable:"committable" },
-                    events:{ click:{ target:"!commit"} }
+                    events:{ click:{ target:"!commit", handler:()=> undefined} }
                 }
             },
             cancel: {
@@ -82,7 +82,7 @@ export class View extends Parent{
                     text:i18n("cancel"),
                     enable:false,
                     links:{ enable:"committable"},
-                    events:{ click: { target:"!rollback"} }
+                    events:{ click: { target:"!rollback",handler:()=> undefined} }
                 }
             }
         }

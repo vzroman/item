@@ -63,10 +63,6 @@ export class Linkable extends Eventful{
             properties:{},
             events:{}
         };
-
-        // Run links but after descendants finish their initialization procedures.
-        // We don't pass any data so only self links are initialized
-        setTimeout(() =>this.link());
     }
 
     bind(event, callback){

@@ -57,6 +57,12 @@ export class Item extends Linkable{
         }
 
         this._controller.bind("change", changes => this._update( changes ));
+
+        // If the data is already defined run links but after descendants
+        // finish their initialization procedures.
+        if (this._options.data){
+            setTimeout(()=> this.link() );
+        }
     }
 
     set( properties ){
