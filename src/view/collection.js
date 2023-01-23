@@ -52,23 +52,21 @@ export class View extends Item{
     }
 
 
-    link( sources ){
+    link( context ){
+
+        context = this.linkContext( context );
 
         // Init own links and events to the external data
-        super.link( sources );
+        super.link( context );
 
-        if (sources) this.linkItems( sources );
+        this.linkItems( context );
     }
 
-    linkItems( sources ){
+    linkItems( context ){
 
-        if (sources instanceof Linkable){
-            sources = {data:sources}
-        }
+        const {data} = context;
 
-        const {data} = sources;
-
-        if (data && data instanceof controllers.Collection){
+        if (data && data instanceof controllers.Collection && data !== this._collection){
 
             this._collection = data;
 
@@ -88,7 +86,7 @@ export class View extends Item{
             this._subscriptions.push(()=>data.unbind(removeId));
         }
 
-        return sources;
+        return context;
     }
 
     addItem( item ){
