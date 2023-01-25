@@ -26,7 +26,6 @@
 import {Item} from "../core/item.js";
 import {types} from "../types/index.js";
 import {deepMerge} from "../utilities/data.js";
-import {Linkable} from "../core/linkable.js";
 //import $ from "jquery";
 
 

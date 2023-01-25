@@ -63,21 +63,6 @@ export class Controller extends Item{
         }
     }
 
-    bind(event, callback){
-        if ( this.constructor.events[event] ){
-            return super.bind( event, callback );
-        } else {
-            // Unlike other types Controller subscribes
-            // to the controlled item changes but not to it's own
-            const id = Eventful.prototype.bind.call(this, event, callback);
-
-            // The first event with actual value
-            this._trigger(event, [this.get(event), undefined]);
-
-            return id;
-        }
-    }
-
     fork( id, settings ){
 
         const data = this._get( id );

@@ -68,16 +68,13 @@ export class Linkable extends Eventful{
     bind(event, callback){
         if (this.constructor.events[event]){
             return super.bind( event, callback );
-        }else if( this.constructor.options[event] ){
+        }else{
             const id = super.bind( event, callback );
 
             // The first event with actual value
-            this._trigger(event, [this._options[event], undefined]);
+            this._trigger(event, [this.get( event ), undefined]);
 
             return id;
-        }else{
-            console.warn("invalid event", event);
-            return undefined;
         }
     }
 

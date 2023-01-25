@@ -125,25 +125,6 @@ export class Controller extends Linkable{
         this._schema.link( sources );
     }
 
-
-    bind(event, callback){
-        if ( this.constructor.events[event] ){
-            return super.bind( event, callback );
-        } else if( this._options.schema[event] ){
-            // Unlike other types Controller subscribes
-            // to the controlled item changes but not to it's own
-            const id = Eventful.prototype.bind.call(this, event, callback);
-
-            // The first event with actual value
-            this._trigger(event, [this.get(event), undefined]);
-
-            return id;
-        }else{
-            console.warn("invalid event to bind", event);
-            return undefined;
-        }
-    }
-
     //-------------------------------------------------------------------
     // Data access API
     //-------------------------------------------------------------------
