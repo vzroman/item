@@ -66,16 +66,51 @@ export class Linkable extends Eventful{
     }
 
     bind(event, callback){
-        if (this.constructor.events[event]){
-            return super.bind( event, callback );
-        }else{
-            const id = super.bind( event, callback );
 
-            // The first event with actual value
-            this._trigger(event, [this.get( event ), undefined]);
+        let id = undefined;
 
-            return id;
+        if (Array.isArray(event)){
+            //-----------Bind to a list of properties-----------------------------
+            let data;
+            if (event.length){
+                data = this.get( event );
+                id = super.bind("change", (changes,...args) => {
+                    let changed = false;
+                    for (const e of event){
+                        if (changes[e]){
+                            data[e] = deepCopy( changes[e][0] );
+                            changed = true;
+                        }
+                    }
+                    if (changed){
+                        callback.apply(this, [data,...args]);
+                    }
+                });
+            }else{
+                //Empty list means all properties
+                data = this.get( event );
+                id = super.bind("change", (changes,...args) => {
+                    data = {
+                        ...data,
+                        ...deepCopy( patch2value(changes, 0) )
+                    };
+                    callback.apply(this, [data,...args]);
+                });
+            }
+
+            callback.apply(this, [data,this]);
+
+        }else if(typeof event === "string"){
+            // Bind to an event or a single property
+            id = super.bind( event, callback );
+
+            if (!this.constructor.events[event]){
+                // The first event with actual value
+                callback.apply(this, [this.get( event ), undefined, this])
+            }
         }
+
+        return id;
     }
 
     get( property ){
@@ -187,27 +222,39 @@ export class Linkable extends Eventful{
             // A link cannot be activated twice, skip it if it is already active
             if (this._linked.properties[property]) continue;
 
-            // Normally a link has a format:
-            // { source, handler }
-            // source has a format controller@property
-            // By default the source controller is data, therefore
-            // link without a controller is the same as a link with data@ prefix
+            // The complete format of a link:
+            // { source, event, handler }
             if (typeof link === "string"){
-                // The case when a handler is not defined
                 link = { source:link }
             }
 
-            if (!link.source){
+            if (!(link instanceof Object)){
                 console.error("invalid link settings", link);
                 continue;
             }
 
-            if ( link.source.split("@").length === 1){
-                // The source controller is not defined, be default it is data
-                link.source = "data@" + link.source;
+            if (!link.source){
+                console.error("link source is not defined", link);
+                continue;
+            }
+            let {source, event, handler} = link;
+            if (!event){
+                [source, event] = link.source.split("@");
+                if (!event){
+                    event = source;
+                    source = "data";
+                }
             }
 
-            let [source, event] = link.source.split("@");
+            if (typeof event==="string" && event.startsWith("[")){
+                try{
+                    event = JSON.parse(event)
+                }catch(e){
+                    console.error("invalid event", link);
+                    continue;
+                }
+            }
+
             source = context[source];
 
             if ( source ){
@@ -216,7 +263,7 @@ export class Linkable extends Eventful{
                     source,
                     event,
                     context,
-                    handler:link.handler,
+                    handler,
                     target:this,
                     property
                 });
