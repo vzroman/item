@@ -82,7 +82,7 @@ export class Item extends Linkable{
     //-------------------------------------------------------------------
     link( context ){
 
-        const data = context.data;
+        const data = context?.data;
 
         context = this.linkContext( context );
 
