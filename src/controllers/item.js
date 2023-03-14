@@ -71,7 +71,9 @@ export class Controller extends Linkable{
     }
 
     _get( property ){
-        if (this._changes && this._changes[property]){
+        if (typeof property === "string" && property.startsWith("$.")) {
+            return this.option( property.slice(2) );
+        } else if (this._changes && this._changes[property]){
             return util.deepCopy( this._changes[property][0] );
         }else if (this._data){
             return util.deepCopy( this._data[property] );
@@ -90,8 +92,30 @@ export class Controller extends Linkable{
 
     }
 
+    option( option, value ){
+        if ( typeof option === "string" && value === undefined ){
+            return this._options[option];
+        }
+
+        const prevValue = this._options[option];
+
+        this._options[option] = value;
+        this._trigger("$."+option, [value, prevValue]);
+    }
+
     _set( properties ){
+        properties = this._set_options( properties );
         return this._schema.set( properties );
+    }
+
+    _set_options( options ) {
+        Object.entries( options ).forEach(([key, value]) => {
+            if (key.startsWith("$.")) {
+                this.option( key.slice(2), value );
+                delete options[key];
+            }
+        })
+        return options;
     }
 
     _update( changes ){

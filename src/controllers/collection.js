@@ -33,8 +33,11 @@ export class Controller extends Item{
         id:undefined,
         filter:undefined,
         orderBy:undefined,
-        page:undefined,
-        forkCommit:undefined
+        page:1,
+        pageSize: undefined,
+        forkCommit:undefined,
+        totalCount: 0,
+        pageItems: new Map()
     };
 
     static events = {
@@ -44,6 +47,13 @@ export class Controller extends Item{
         count:true,
         error:true
     };
+
+    constructor( options ) {
+        super( options );
+        ["page", "pageSize"].forEach(e=>{
+            this.bind("$."+e,()=>this.updatePage());
+        });
+    }
 
     init( Data ){
         Data = this._coerce( Data );
@@ -114,9 +124,14 @@ export class Controller extends Item{
         } else if (Array.isArray( id )) {
             const items = Linkable.prototype.get.call(this, id);
             for (const i in items){
-                if (items[i]) items[i] = this._schema.get( items[i] );
+                // If the requested id is an option or item is undefined then return it as is
+                if (i?.startsWith("$.") || !items[i]) continue;
+                // Otherwise validate the item against the schema
+                items[i] = this._schema.get( items[i] );
             }
             return items;
+        }else if(id.startsWith("$.")){
+            return Linkable.prototype.get.call(this, id);
         }else{
             let item = Linkable.prototype.get.call(this, id);
             if (item) item = this._schema.get( item );
@@ -172,7 +187,17 @@ export class Controller extends Item{
 
     forEach( callback ){
         if (this._view){
-            this._view.forEach(n => callback( n.key[1] ));
+            const { page, pageSize } = this._options;
+            if (pageSize === undefined) {
+                this._view.forEach(n => callback( n.key[1] ));
+            } else {
+                const startIndex = (page - 1) * pageSize;
+                let n = this._view.at( startIndex );
+                for (let i = 0; i < pageSize && n; i++) {
+                    callback( n.key[1] );
+                    n = this._view.next(n);
+                }
+            }
         }
     }
 
@@ -180,6 +205,10 @@ export class Controller extends Item{
         const data = [];
         this.forEach(id => data.push([id,this.get(id)]) );
         return data;
+    }
+
+    getCount() {
+        return this._view.size;
     }
 
     count(){
@@ -237,7 +266,9 @@ export class Controller extends Item{
     }
 
     _get( id ){
-
+        if (typeof id === "string" && id.startsWith("$.")) {
+            return super._get( id );
+        }
         let item = this._data ? this._data[ id ] : undefined;
 
         // If item has uncommitted changes
@@ -260,8 +291,9 @@ export class Controller extends Item{
     }
 
     _set( items ){
+        items = super._set_options( items );
         for (const id in items){
-
+            
             if (items[id] === null){
                 // The item is being deleted
                 continue;
@@ -320,25 +352,25 @@ export class Controller extends Item{
     }
 
     _onChange( changes ){
-
+        let isReordered = false;
         Object.entries( changes ).forEach(([id,[item, previous]])=>{
             if ( previous === undefined ){
-                this._view.insert([this._orderKey(id, item), id]);
-                this._count++;
-                this._trigger("add", [id, item]);
+                this._view.insert(this._orderKey(id, item));
+                isReordered = true;
                 this._trigger("count", this._count);
             }else if( item === null ){
-                this._view.remove([this._orderKey(id, previous), id] );
-                this._count--;
-                this._trigger("remove", [id, previous]);
-                this._trigger("count", this._count)
+                isReordered = true;
+                this._view.remove(this._orderKey(id, previous));
+                this._trigger("count", this._count);
             }else{
-                this._view.remove([this._orderKey(id, previous), id] );
-                this._view.insert([this._orderKey(id, item), id]);
-                this._trigger("edit", [id, item, previous]);
+                isReordered = true;
+                this._view.remove(this._orderKey(id, previous));
+                this._view.insert(this._orderKey(id, item));
             }
         });
-
+        if (isReordered) this._updateView();
+        this.option("totalCount", this.getCount())
+    
         super._onChange( changes );
     }
 
@@ -351,7 +383,34 @@ export class Controller extends Item{
                 key = this._get(id)[this._options.orderBy];
             }
         }
-        return key;
+        return [key,id];
+    }
+
+    updatePage() {
+        this._updateView();
+    }
+
+
+    _updateView(){
+        const newPageItems = new Map();
+        let prevId = null;
+        this.forEach(id =>{
+            if (!this._options.pageItems.has(id)) {
+                this._trigger("add", [id, prevId]);
+            }
+            if (this._options.pageItems.has(id)) {
+                if (this._options.pageItems.get(id) !== prevId) {
+                    this._trigger("edit", [id, prevId]);
+                }
+                this._options.pageItems.delete(id);
+            }
+            newPageItems.set( id, prevId );
+            prevId = id;
+        })
+        for (const id of this._options.pageItems.keys()) {
+            this._trigger("remove", [id]);
+        }
+        this._options.pageItems = newPageItems;
     }
 
 

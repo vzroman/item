@@ -31,7 +31,8 @@ export class Controller extends Collection{
         connection:undefined,
         timeout: 60000,
         subscribe:false,
-        forkCommit:"refresh"
+        forkCommit:"refresh",
+        serverPaging: false
     };
 
     constructor( options ){
@@ -59,6 +60,24 @@ export class Controller extends Collection{
 
             }, reject);
         });
+    }
+
+    updatePage() {
+        if (this._options.serverPaging && this._filter) {
+            this.refresh();
+        } else {
+            super._updateView();
+        }
+    }
+
+    forEach( callback ){
+        if (this._view){
+            if (this._options.serverPaging) {
+                this._view.forEach(n => callback( n.key[1] ));
+            } else {
+                super.forEach( callback );
+            }
+        }
     }
 
     rollback(changes, error){
@@ -100,9 +119,25 @@ export class Controller extends Collection{
         return new Promise((resolve, reject)=>{
 
             const fields = [this._options.id, ...this._schema.filter({virtual:false})].join(",");
-
-            this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`, resolve, reject, this._options.timeout );
+            if (this._options.serverPaging) {
+                const { page, pageSize } = this._options;
+                let pagination = "";
+                if (page!==undefined && pageSize!==undefined) {
+                    pagination = `PAGE ${page}:${pageSize}`;
+                }
+                const _this = this;
+                this._options.connection().find(`get ${ fields } from * where ${ filter } format $to_json ${pagination}`, ({total, set}) => {
+                    _this._totalCount = total;
+                    resolve(set.map(({oid, fields}) => ({[".oid"]: oid, ...fields})));
+                }, reject, this._options.timeout );
+            } else {
+                this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`, resolve, reject, this._options.timeout );
+            }
         });
+    }
+
+    getCount() {
+        return this._totalCount;
     }
 
     setSubscribe( value ){
