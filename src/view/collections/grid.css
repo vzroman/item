@@ -232,3 +232,7 @@ table>td {
     display: flex;
     align-items: center;
 }
+
+.test {
+    color: red !important;
+}

@@ -25,8 +25,41 @@
 
 import {types} from "../../types/index.js";
 import {View as Grid, GridRows, Row as GridRow, Pager} from "./grid";
+import {View as Item} from "../item.js";
 import style from "./grid.css";
 
+
+class CellPager extends Pager{
+
+    constructor( options ) {
+        super( options );
+
+        this.bind("page", (val=1) => {
+            this.cellPagination.text(val);
+        })
+    }
+
+    markup() {
+        const $hidden = super.markup();
+        const $markup = $(`
+            <div>
+                <div style="display: none;" name="hidden_pager"></div>
+                <div> < </div>
+                <div name="cellPagination" class="${style.test}">1</div>
+                <div> > </div>
+            </div>
+        `);
+
+        const cellPager = $markup.find('[name="hidden_pager"]');
+        this.cellPagination = $markup.find('[name="cellPagination"]');
+        $hidden.appendTo(cellPager);
+        $markup.on("click", () => {
+            this.set({page: 2});
+        })
+        return $markup;
+    }
+}
+CellPager.extend();
 
 export class View extends Grid{
 
@@ -72,37 +105,20 @@ class TreeRows extends GridRows{
         this.depth = depth;
         this.root = root;
         if (this.root) {
-            // this.createPager();
+            this.createPager();
         }
     }
 
     createPager() {
-        const idx = this._options.numerated ? 1 : 0;
-        const checkbox = this._options.selectable ? 1 : 0;
-        const colspan = this._options.columns.length + idx + checkbox;
-
-        const $empty_td = '<td style="border-right: 1px solid transparent;"></td>';
-
-        const $pagerWrapper = $(`<tr>
-                ${ idx ? $empty_td : "" };
-                ${ checkbox ? $empty_td : "" };
-                <td
-                    colspan=${colspan}
-                    style="position: relative;z-index: 2;"
-                >
-                    <div name="pager"></div>
-                </td>
-            </tr>`);
-        $pagerWrapper.insertAfter( this.root.$markup );
-        const $container = $pagerWrapper.find("[name='pager']");
-        this.$pagerWrapper = $pagerWrapper;
-        this.pager = new Pager({
+        this.pager = new CellPager({
             ...this._options,
-            $container,
             ...this.get("pager"),
             links: { page:"data@$.page", totalCount: "data@$.totalCount",pageSize:"data@$.pageSize" },
             events: { page:"data@$.page", pageSize: "data@$.pageSize" }
         });
+
+        const _pager_cell = this.root.$markup.find('[name="pager"]');
+        this.pager.$markup.appendTo(_pager_cell);
     }
 
     destroy(){
@@ -179,6 +195,7 @@ class Row extends GridRow{
                                 ${'<div></div>'.repeat(depth)}
                             </div>
                             <div name="tree-icon" class="${style.tree_icon} ${depth !== 0 ? style.connector : ""}">+</div>
+                            <div name="pager"></div>
                             <div name="${ i }" style="flex-shrink: 0;"></div>
                         </div>
                     </td>`).appendTo($markup);
@@ -189,6 +206,14 @@ class Row extends GridRow{
         this.$treeIcon = $markup.find(`[name="tree-icon"]`);
         this.$lineWrapper = $markup.find('[name="line-wrapper"]')
     }
+
+    // widgets(){
+    //     const widgets = super.widgets();
+    //     widgets.pager = {
+    //         view: CellPager,
+    //     }
+    //     return widgets;
+    // }
 
     open( data ) {
         this.set({isOpen: true});
