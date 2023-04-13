@@ -119,13 +119,16 @@ export class View extends Item{
         // Link the item to the data
         const controller = this._collection.fork( id, this._options.itemController );
         item.link( {data:controller, parent:this} );
-
-        this.insertItem( item, prevId );
+        this.insertItem( item, prevId, this.getRoot() );
 
         return [item, controller];
     }
 
-    insertItem( item, prevId ) {
+    insertItem( item, prevId, root=undefined ) {
+        if (prevId === null && root) {
+            item.$markup.insertAfter( root.$markup );
+            return;
+        }
         const prevItem = this._items[prevId];
         if (prevItem){
             item.$markup.insertAfter( prevItem[0].$markup );

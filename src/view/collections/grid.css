@@ -47,10 +47,17 @@
     -webkit-user-select: none;
     -ms-user-select: none;
 }
+table>td {
+    word-break: break-all;
+}
 .table>tbody>tr>td {
     border-bottom: 1px solid #ccc;
     border-right: 1px solid #ccc;
     padding: 3px;
+}
+.table>tbody>tr{
+    position: relative;
+    background: #fff;
 }
 .table>tbody>tr:hover {
     cursor: pointer;
@@ -69,7 +76,7 @@
 .table>thead{
     position: sticky;
     top:0;
-    z-index: 2;
+    z-index: 502;
 }
 
 .table>tfoot{
@@ -156,4 +163,72 @@
 
 .activePage {
     background: red !important;
+}
+
+.tree_icon {
+    font-size: 16px;
+    cursor: pointer;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    border: 1px solid black;
+    position: relative;
+}
+
+.connector::before {
+    content: "";
+    position: absolute;
+    width: 13px;
+    height: 5px;
+    border-left: 1px solid black;
+    border-bottom: 1px solid black;
+    left: -15px;
+    bottom: 6px;
+    z-index: 2;
+    border-bottom-left-radius: 4px;
+    pointer-events: none;
+}
+.lines {
+    display: flex;
+    align-items: center;
+}
+
+.lines > div {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+}
+.lines > div::before {
+    content: "";
+    width: 1px;
+    height: 30px;
+    position: absolute;
+    background: #000;
+    left: 6px;
+}
+
+.lastLine > div:last-of-type::before {
+    height: 10px;
+    top: -15px;
+}
+
+.hiddenLines > div::before {
+    opacity: 0;
+}
+
+.hiddenLines > div:last-of-type::before {
+    opacity: 1 !important;
+}
+
+.first_col_wrapper {
+    display: flex;
+    align-items: center;
 }

@@ -190,7 +190,7 @@ class Pages extends Item{
 }
 Pages.extend();
 
-class Pager extends Item{
+export class Pager extends Item{
 
     static options = {
         page:{type:types.primitives.Integer, default: 1},
@@ -252,7 +252,7 @@ class Pager extends Item{
 }
 Pager.extend();
 
-export class View extends Collection{
+export class View extends Item{
 
     static events = {
         onSelect: true
@@ -285,32 +285,12 @@ export class View extends Collection{
         });
         super( options );
 
-        if (this._options.numerated) {
-            const state ={
-                page:undefined,
-                pageSize:undefined
-            };
-            ["page", "pageSize", "totalCount"].forEach(e=>{
-                this._options.data.bind("$."+e,value=>{
-                    state[e]=value ?? 1;
-                    const startIndex = (state["page"] - 1) * state["pageSize"] + 1;
-                    // setTimeout because items not in view yet;
-                    setTimeout(()=>this.updateIndexies(startIndex));
-                })
-            })
-        }
         if (this._options.resizable) {
             this.init_column_resize();
         }
         if (this._options.selectable) {
             this.init_select();
         }
-    }
-
-    updateIndexies(startIndex=1) {
-        Object.keys( this._items ).forEach(id => {
-            this._items[id][0].set({index: startIndex++});
-        })
     }
 
     init_select() {
@@ -326,7 +306,7 @@ export class View extends Collection{
             if (!tr || !this.$tbody[0].contains(tr)) return;
 
             this.select($(tr).data("row_id"), e);
-            this.styleSelecterRows();
+            this.setSelecterRows();
         })
         this.lassoSelect();
     }
@@ -352,7 +332,7 @@ export class View extends Collection{
 
                 if (!(e.ctrlKey || e.metaKey || e.shiftKey)) {
                     this.selected = [];
-                    this.styleSelecterRows();
+                    this.setSelecterRows();
                 }
 
                 startX = e.pageX - this.$wrapper.offset().left;
@@ -391,7 +371,7 @@ export class View extends Collection{
                 this.selected = [...new Set([...this.selected, ...rows])];
             }
             
-            this.styleSelecterRows();
+            this.setSelecterRows();
         }
 
         const styleLasso = e => {
@@ -444,14 +424,12 @@ export class View extends Collection{
         return this.$tbody.find(`tr[data-row_id]`).index(row);
     }
 
-    styleSelecterRows() {
-        Object.keys(this._items).forEach(id =>{
-            if (this.selected.includes(id)) {
-                this._items[id][0].set({selected: true});
-            } else {
-                this._items[id][0].set({selected: false});
-            }
-        })
+    setSelecterRows() {
+        const rows = this.$tbody.find(`tr[data-row_id]`).toArray().map(row => $(row).data("row"));
+        rows.forEach(row => {
+            const selected = this.selected.includes(row.get("id"));
+            row.set({ selected });
+        });
         this._trigger("onSelect", [this.selected]);
     }
 
@@ -473,6 +451,17 @@ export class View extends Collection{
             }};
         }
 
+        widgets.tbody = {
+            view: GridRows,
+            options: {
+                data: this._options.data,
+                $container: this.$tbody,
+                columns: this._options.columns,
+                numerated: this._options.numerated,
+                selectable: this._options.selectable
+            }
+        }
+
         return widgets;
     }
 
@@ -482,7 +471,7 @@ export class View extends Collection{
                 <div class="${style.lasso} item_grid_lasso"></div>
                 <table class="${ style.table } item_grid_table">
                     <thead name="header"></thead>
-                    <tbody></tbody>
+                    <tbody name="tbody"></tbody>
                     <tfoot name="footer"></tfoot>
                 </table>
             </div>
@@ -495,22 +484,10 @@ export class View extends Collection{
         return $markup;
     };
 
-    newItem( id ){
-        return new Row({
-            id:id,
-            $container:this.$tbody,
-            columns:this._options.columns,
-            selectable:this._options.selectable,
-            numerated:this._options.numerated,
-        });
-    }
-
     init_column_resize() {
         const $thead = $(this.$markup.find("thead[name='header']")[0]);
 
         const $tr_markup = $(`<tr></tr>`);
-        this._options.numerated;
-        this._options.selectable;
 
         const numColumns = this._options.columns.length;
         const hasNumerated = this._options.numerated ? 1 : 0;
@@ -534,7 +511,7 @@ export class View extends Collection{
 
         $columns.each((_, $cell) => {
             $cell = $($cell);
-    
+
             let pos = 0;
             const onDrag = e => {
                 if (e.buttons !== 1) {
@@ -557,6 +534,7 @@ export class View extends Collection{
                     window.removeEventListener('mousemove', onDrag);
                 });
             })
+            onDrag({clientX: 0, buttons: 1});
         })
     }
 
@@ -567,16 +545,67 @@ export class View extends Collection{
 }
 View.extend();
 
+export class GridRows extends Collection{
+
+    static options = {
+        $container:{type:types.primitives.Any},
+        data:{type:types.primitives.Any},
+        numerated:{type:types.primitives.Bool},
+        selectable:{type:types.primitives.Bool},
+        columns:{type:types.primitives.Array}
+    };
+
+    constructor( options ) {
+        super( options );
+
+        if (this._options.numerated) {
+            const state ={
+                page:undefined,
+                pageSize:undefined
+            };
+            ["page", "pageSize", "totalCount"].forEach(e=>{
+                this._options.data.bind("$."+e,value=>{
+                    state[e]=value ?? 1;
+                    const startIndex = (state["page"] - 1) * state["pageSize"] + 1;
+                    // setTimeout because items not in view yet;
+                    setTimeout(()=>this.updateIndexies(startIndex));
+                })
+            })
+        }
+    }
+
+    updateIndexies(startIndex=1) {
+        const items = Object.keys( this._items );
+        let last = null;
+        items.forEach(id => {
+            this._items[id][0].set({index: startIndex++});
+            this._items[id][0].set({isLast: false});
+            last = this._items[id][0];
+        });
+        if (last) last.set({isLast: true});
+    }
+
+    newItem( id ){
+        return new Row({
+            id:id,
+            $container:this._options.$container,
+            columns:this._options.columns,
+            selectable:this._options.selectable,
+            numerated:this._options.numerated
+        });
+    }
+}
+GridRows.extend();
 
 
-class Row extends Item{
+export class Row extends Item{
 
     static options = {
         columns:{type:types.primitives.Array, required:true},
         selected:{type:types.primitives.Bool},
         selectable:{type:types.primitives.Bool},
         numerated:{type:types.primitives.Bool},
-        index:{type:types.primitives.Integer, default: 1}
+        index:{type:types.primitives.Integer, default: 0}
     };
 
     constructor( options ) {
@@ -585,13 +614,13 @@ class Row extends Item{
             this.$checkbox.prop('checked', val);
             this.$markup.toggleClass(style.selected_row, val);
         })
-
         this.bind("index", val=>this.$index.text(val));
     }
 
     markup() {
-        const { id, numerated, selectable, columns } = this._options;
+        const { id, numerated, selectable } = this._options;
         const $markup = $(`<tr data-row_id="${id}"></tr>`);
+        $markup.data("row", this);
         if (numerated) {
             $(`<td name="index"></td>`).appendTo($markup);
         }
@@ -600,8 +629,12 @@ class Row extends Item{
         }
         this.$index =$markup.find(`[name="index"]`);
         this.$checkbox = $markup.find(`[name="checkbox"]`);
-        columns.forEach((_,i)=> $(`<td name="${ i }"></td>`).appendTo($markup) );
+        this.appendColumns( $markup );
         return $markup;
+    }
+
+    appendColumns( $markup ) {
+        this._options.columns.forEach((_,i)=> $(`<td name="${ i }"></td>`).appendTo($markup) );
     }
 
     widgets(){
