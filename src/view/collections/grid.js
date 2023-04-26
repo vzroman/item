@@ -534,7 +534,7 @@ export class View extends Item{
                     window.removeEventListener('mousemove', onDrag);
                 });
             })
-            onDrag({clientX: 0, buttons: 1});
+            onDrag({clientX: -1, buttons: 1});
         })
     }
 
@@ -575,15 +575,7 @@ export class GridRows extends Collection{
     }
 
     updateIndexies(startIndex=1) {
-        const items = Object.keys( this._items );
-        let last = null, first = null;
-        items.forEach(id => {
-            if (first === null) first = this._items[id][0];
-            this._items[id][0].set({index: startIndex++});
-            this._items[id][0].set({isLast: false});
-            last = this._items[id][0];
-        });
-        if (last) last.set({isLast: true});
+        Object.keys( this._items ).forEach(id => this._items[id][0].set({index: startIndex++}));
     }
 
     newItem( id ){

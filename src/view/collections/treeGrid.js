@@ -24,49 +24,15 @@
 //------------------------------------------------------------------------------------
 
 import {types} from "../../types/index.js";
-import {View as Grid, GridRows, Row as GridRow, Pager} from "./grid";
-import {View as Item} from "../item.js";
+import {View as Grid, GridRows, Row as GridRow} from "./grid";
 import style from "./grid.css";
-
-
-class CellPager extends Pager{
-
-    constructor( options ) {
-        super( options );
-
-        this.bind("page", (val=1) => {
-            this.cellPagination.text(val);
-        })
-    }
-
-    markup() {
-        const $hidden = super.markup();
-        const $markup = $(`
-            <div>
-                <div style="display: none;" name="hidden_pager"></div>
-                <div> < </div>
-                <div name="cellPagination" class="${style.test}">1</div>
-                <div> > </div>
-            </div>
-        `);
-
-        const cellPager = $markup.find('[name="hidden_pager"]');
-        this.cellPagination = $markup.find('[name="cellPagination"]');
-        $hidden.appendTo(cellPager);
-        $markup.on("click", () => {
-            this.set({page: 2});
-        })
-        return $markup;
-    }
-}
-CellPager.extend();
 
 export class View extends Grid{
 
     static options = {
         ...super.options,
         isFolder:{type:types.primitives.Any},
-        getSubitems:{type:types.primitives.Any},
+        getSubitems:{type:types.primitives.Any}
     };
 
     widgets(){
@@ -80,8 +46,7 @@ export class View extends Grid{
                 selectable:this._options.selectable,
                 numerated:this._options.numerated,
                 isFolder: this._options.isFolder,
-                getSubitems: this._options.getSubitems,
-                pager: this.get("pager")
+                getSubitems: this._options.getSubitems
             }
         }
 
@@ -104,21 +69,6 @@ class TreeRows extends GridRows{
         super( options );
         this.depth = depth;
         this.root = root;
-        if (this.root) {
-            this.createPager();
-        }
-    }
-
-    createPager() {
-        this.pager = new CellPager({
-            ...this._options,
-            ...this.get("pager"),
-            links: { page:"data@$.page", totalCount: "data@$.totalCount",pageSize:"data@$.pageSize" },
-            events: { page:"data@$.page", pageSize: "data@$.pageSize" }
-        });
-
-        const _pager_cell = this.root.$markup.find('[name="pager"]');
-        this.pager.$markup.appendTo(_pager_cell);
     }
 
     destroy(){
@@ -135,7 +85,6 @@ class TreeRows extends GridRows{
 
     newItem( id ){
         return new Row({
-            parent: this.root,
             id:id,
             $container: this._options.$container,
             isFolder:this._options.isFolder,
@@ -155,11 +104,9 @@ class Row extends GridRow{
     static options = {
         ...super.options,
         isFolder:{type:types.primitives.Any},
-        parent:{type:types.primitives.Any},
         getSubitems:{type:types.primitives.Any},
         depth:{type:types.primitives.Integer, default: 0},
-        isOpen:{type:types.primitives.Bool},
-        isLast:{type:types.primitives.Bool}
+        isOpen:{type:types.primitives.Bool, default: false}
     };
     
     static events = {
@@ -176,26 +123,15 @@ class Row extends GridRow{
         this.bind("isOpen", (val=false) => {
             this.$treeIcon.text(val ?  "-" : "+");
         })
-        this.bind("isLast", (val=false) => {
-            this.$lineWrapper.toggleClass(style.lastLine, val);
-        })
     }
 
     appendColumns( $markup ) {
-        const { depth, icon, parent } = this._options;
+        const { depth, isFolder=()=>{}, id } = this._options;
         this._options.columns.forEach((_,i)=> {
-            if (i === 0 && this._options.isFolder( this._options.id )) {
-                $(` <td>
-                        <div class="${style.first_col_wrapper}">
-                            <div
-                                class="${style.lines} ${parent?.get("isLast") ?  style.hiddenLines : ""}"
-                                name="line-wrapper"
-                                style="width: ${depth * 20}px"
-                            >
-                                ${'<div></div>'.repeat(depth)}
-                            </div>
-                            <div name="tree-icon" class="${style.tree_icon} ${depth !== 0 ? style.connector : ""}">+</div>
-                            <div name="pager"></div>
+            if (i === 0) {
+                $(` <td style="position: relative;">
+                        <div style="margin-left: ${20 * depth}px;" class="${style.first_cell}">
+                            <div style="display: ${isFolder(id) ? "flex" : "none"};" name="tree-icon">+</div>
                             <div name="${ i }" style="flex-shrink: 0;"></div>
                         </div>
                     </td>`).appendTo($markup);
@@ -204,21 +140,16 @@ class Row extends GridRow{
             }
         });
         this.$treeIcon = $markup.find(`[name="tree-icon"]`);
-        this.$lineWrapper = $markup.find('[name="line-wrapper"]')
     }
 
-    // widgets(){
-    //     const widgets = super.widgets();
-    //     widgets.pager = {
-    //         view: CellPager,
-    //     }
-    //     return widgets;
-    // }
-
     open( data ) {
-        this.set({isOpen: true});
-        this._childrenController = this._options.getSubitems(data.get());
-        this._children = new TreeRows({...this._options, data: this._childrenController}, this._options.depth+1, this);
+        if (typeof this._options.getSubitems === "function") {
+            this.set({isOpen: true});
+            this._childrenController = this._options.getSubitems(data.get());
+            this._children = new TreeRows({...this._options, data: this._childrenController}, this._options.depth+1, this);
+        } else {
+            throw new Error("Provide getSubitems method");
+        }
     }
 
     close() {

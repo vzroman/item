@@ -119,19 +119,22 @@ export class Controller extends Collection{
         return new Promise((resolve, reject)=>{
 
             const fields = [this._options.id, ...this._schema.filter({virtual:false})].join(",");
+            const _this = this;
             if (this._options.serverPaging) {
                 const { page, pageSize } = this._options;
                 let pagination = "";
                 if (page!==undefined && pageSize!==undefined) {
                     pagination = `PAGE ${page}:${pageSize}`;
                 }
-                const _this = this;
                 this._options.connection().find(`get ${ fields } from * where ${ filter } format $to_json ${pagination}`, ({total, set}) => {
                     _this._totalCount = total;
                     resolve(set.map(({oid, fields}) => ({[".oid"]: oid, ...fields})));
                 }, reject, this._options.timeout );
             } else {
-                this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`, resolve, reject, this._options.timeout );
+                this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`, res => {
+                    _this._totalCount = res.length;
+                    resolve(res);
+                }, reject, this._options.timeout );
             }
         });
     }

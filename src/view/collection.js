@@ -119,7 +119,8 @@ export class View extends Item{
         // Link the item to the data
         const controller = this._collection.fork( id, this._options.itemController );
         item.link( {data:controller, parent:this} );
-        this.insertItem( item, prevId, this.getRoot() );
+        const _root = typeof this.getRoot === "function" ? this.getRoot() : undefined;
+        this.insertItem( item, prevId, _root );
 
         return [item, controller];
     }
