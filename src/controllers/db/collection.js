@@ -119,20 +119,35 @@ export class Controller extends Collection{
         return new Promise((resolve, reject)=>{
 
             const fields = [this._options.id, ...this._schema.filter({virtual:false})].join(",");
-            if (this._options.serverPaging) {
-                const { page, pageSize } = this._options;
-                let pagination = "";
-                if (page!==undefined && pageSize!==undefined) {
-                    pagination = `PAGE ${page}:${pageSize}`;
+            const {
+                serverPaging,
+                page,
+                pageSize,
+                connection
+            } = this._options;
+
+            const pagination = serverPaging && page !== undefined && pageSize !== undefined
+                ? `PAGE ${page}:${pageSize}`
+                : "";
+
+            connection().query(`get ${ fields } from * where ${ filter } format $to_json ${pagination}`, result => {
+                if (pagination !== ""){
+                    this._totalCount = result.count;
+                    result = result.result;
+                }else{
+                    this._totalCount = result.length - 1;
                 }
-                const _this = this;
-                this._options.connection().find(`get ${ fields } from * where ${ filter } format $to_json ${pagination}`, ({total, set}) => {
-                    _this._totalCount = total;
-                    resolve(set.map(({oid, fields}) => ({[".oid"]: oid, ...fields})));
-                }, reject, this._options.timeout );
-            } else {
-                this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`, resolve, reject, this._options.timeout );
-            }
+
+                const [header,...items] = result;
+                result = items.map( fields =>{
+                    const item = {};
+                    for (let i = 0; i < header.length; i++){
+                        item[header[i]] = fields[i]
+                    }
+                    return item;
+                })
+                resolve( result );
+            }, reject, this._options.timeout );
         });
     }
 
