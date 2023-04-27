@@ -465,12 +465,6 @@ export default class AVLTree {
     return null;
   }
 
-  compare (key1, key2) {
-    var compare = this._comparator;
-    var cmp = compare(key1, key2);
-    return cmp;
-  }
-
   /**
    * Insert a node into the tree
    * @param  {Key} key
