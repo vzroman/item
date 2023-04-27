@@ -25,7 +25,7 @@
 
 import {types} from "../../types/index.js";
 import {View as Grid, GridRows, Row as GridRow} from "./grid";
-import style from "./grid.css";
+import style from "./grid/grid.css";
 
 export class View extends Grid{
 
