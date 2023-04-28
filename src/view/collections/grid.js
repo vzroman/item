@@ -27,7 +27,7 @@ import {View as Collection} from "../collection.js";
 import {View as Item} from "../item.js";
 import {types} from "../../types/index.js";
 import {controls} from '../controls';
-import style from "./grid.css";
+import style from "./grid/grid.css";
 
 class Header extends Item{
 

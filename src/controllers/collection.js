@@ -36,8 +36,7 @@ export class Controller extends Item{
         page:1,
         pageSize: undefined,
         forkCommit:undefined,
-        totalCount: 0,
-        pageItems: new Map()
+        totalCount: 0
     };
 
     static events = {
@@ -50,6 +49,9 @@ export class Controller extends Item{
 
     constructor( options ) {
         super( options );
+
+        this._pageItems = new Map();
+
         ["page", "pageSize"].forEach(e=>{
             this.bind("$."+e,()=>this.updatePage());
         });
@@ -357,15 +359,15 @@ export class Controller extends Item{
             if ( previous === undefined ){
                 this._view.insert(this._orderKey(id, item));
                 isReordered = true;
-                this._trigger("count", this._count);
             }else if( item === null ){
                 isReordered = true;
                 this._view.remove(this._orderKey(id, previous));
-                this._trigger("count", this._count);
             }else{
-                isReordered = true;
-                this._view.remove(this._orderKey(id, previous));
-                this._view.insert(this._orderKey(id, item));
+                const prevKey = this._orderKey(id, previous);
+                const actualKey = this._orderKey(id, item);
+                isReordered = isReordered || (prevKey !== actualKey);
+                this._view.remove( prevKey );
+                this._view.insert( actualKey );
             }
         });
         if (isReordered) this._updateView();
@@ -395,22 +397,21 @@ export class Controller extends Item{
         const newPageItems = new Map();
         let prevId = null;
         this.forEach(id =>{
-            if (!this._options.pageItems.has(id)) {
+            if (!this._pageItems.has(id)) {
                 this._trigger("add", [id, prevId]);
-            }
-            if (this._options.pageItems.has(id)) {
-                if (this._options.pageItems.get(id) !== prevId) {
+            }else {
+                if (this._pageItems.get(id) !== prevId) {
                     this._trigger("edit", [id, prevId]);
                 }
-                this._options.pageItems.delete(id);
+                this._pageItems.delete(id);
             }
             newPageItems.set( id, prevId );
             prevId = id;
         })
-        for (const id of this._options.pageItems.keys()) {
+        for (const id of this._pageItems.keys()) {
             this._trigger("remove", [id]);
         }
-        this._options.pageItems = newPageItems;
+        this._pageItems = newPageItems;
     }
 
 
