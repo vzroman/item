@@ -24,8 +24,66 @@
 //------------------------------------------------------------------------------------
 
 import {types} from "../../types/index.js";
-import {View as Grid, GridRows, Row as GridRow} from "./grid";
+import {View as Grid, GridRows, Row as GridRow, Pager} from "./grid";
 import style from "./grid.css";
+
+
+class CellPager extends Pager{
+
+    constructor( options ) {
+        super( options );
+
+        this.bind("page", (val=1) => {
+            this.cellPagination.text(val);
+        })
+        
+    }
+
+    
+    onClick(event){
+        const cur_page = this.get("page");
+        const clickedChev = $(event.target).attr("data-chevron");
+        const totalPages = Math.ceil(this.get("totalCount") / this.get("pageSize"));       
+        if (clickedChev !== undefined) {       
+            
+            if (clickedChev === "next" && cur_page < totalPages) {                
+                this.set({page: cur_page+1});
+                               
+            } else if (clickedChev === "prev" && cur_page !== 1) {              
+                this.set({page: cur_page-1});
+                
+            } 
+        }
+               
+    }
+    markup() {
+        const $hidden = super.markup();
+        const $markup = $(`
+            <div>
+                <div style="display: none;" name="hidden_pager"></div>
+                <div style="display: flex; flex-direction: row; column-gap: 5px; margin-right: 5px;"> 
+                    <div data-chevron="prev" name="prev"> < </div>
+                    <div name="cellPagination" style="color: red;">1</div>
+                    <div data-chevron="next" name="next"> > </div>
+                </div>
+            </div>
+        `);
+
+        const cellPager = $markup.find('[name="hidden_pager"]');
+        this.cellPagination = $markup.find('[name="cellPagination"]');
+        $hidden.appendTo(cellPager);
+        const currentPage = this.get("page");
+        
+        this.$next = $markup.find('[name="next"]');
+        this.$prev = $markup.find('[name="prev"]');
+
+        $markup.on("click", (event) => {
+            this.onClick(event)
+        })
+        return $markup;
+    }
+}
+CellPager.extend();
 
 export class View extends Grid{
 
@@ -46,7 +104,8 @@ export class View extends Grid{
                 selectable:this._options.selectable,
                 numerated:this._options.numerated,
                 isFolder: this._options.isFolder,
-                getSubitems: this._options.getSubitems
+                getSubitems: this._options.getSubitems,
+                pager: this.get("pager")
             }
         }
 
@@ -69,6 +128,21 @@ class TreeRows extends GridRows{
         super( options );
         this.depth = depth;
         this.root = root;
+        if (this.root) {
+            this.createPager();
+        }
+    }
+
+    createPager() {
+        this.pager = new CellPager({
+            ...this._options,
+            ...this.get("pager"),
+            links: { page:"data@$.page", totalCount: "data@$.totalCount",pageSize:"data@$.pageSize" },
+            events: { page:"data@$.page", pageSize: "data@$.pageSize" }
+        });
+
+        const _pager_cell = this.root.$markup.find('[name="pager"]');
+        this.pager.$markup.appendTo(_pager_cell);
     }
 
     destroy(){
@@ -132,7 +206,8 @@ class Row extends GridRow{
                 $(` <td style="position: relative;">
                         <div style="margin-left: ${20 * depth}px;" class="${style.first_cell}">
                             <div style="display: ${isFolder(id) ? "flex" : "none"};" name="tree-icon">+</div>
-                            <div name="${ i }" style="flex-shrink: 0;"></div>
+                            <div name="pager"></div>                        
+                            <div name="${ i }" style="flex-shrink: 0;"></div>                            
                         </div>
                     </td>`).appendTo($markup);
             } else {
