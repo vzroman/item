@@ -112,9 +112,8 @@
 }
 
 .chevronLast, .chevron {
-    width: 13px;
-    margin: 0 4px;
-    height: 13px;
+    width: 8px;
+    height: 8px;
     cursor: pointer;
     background-position: center center;
     background-size: cover;
@@ -126,10 +125,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #eee;
-    border-bottom: 1px solid #ccc;
-    border-right: 1px solid #ccc;
-    border-left: 1px solid #ccc;
+    background-color: #f3f3f4;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    width: 100%;
+    height: 30px;
+    color: #515967;
 }
 .pager, .pagination {
     display: flex;
@@ -137,23 +137,128 @@
     justify-content: flex-start;
 }
 .pager {
-    gap: 24px;
+    width: 100%;
 }
 .pagination {
-    gap: 8px;
+    width: 100%;
 }
 
 .pages {
     display: flex !important;
     align-items: center;
     justify-content: center;
-    gap: 8px;
 }
 
 .pages > div {
-    cursor: pointer;
+    cursor: default;
+    padding: 4px;
+    width: calc( 10px + 1.42857em);
+    height: calc( 10px + 1.42857em);
+    color: #1984c8;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    z-index: 1;
 }
 
 .activePage {
-    background: red !important;
+    cursor: default !important;
+    background: #1984c8 !important;
+    color: #ffffff !important; 
+}
+
+.chevron_con {
+    cursor: default;
+    padding: 4px;
+    width: calc( 10px + 1.42857em);
+    height: calc( 10px + 1.42857em);
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    z-index: 1;
+}
+
+.threedots_con {
+    cursor: default;
+    padding: 4px;
+    width: calc( 10px + 1.42857em);
+    height: calc( 10px + 1.42857em);
+    color: #1984c8;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    z-index: 1;
+}
+
+.chevron_con:hover, .threedots_con:hover, .pages > div:hover {
+    cursor: pointer;
+    color: #1984c8;
+    background-color: #b6bdca;
+}
+
+.chevron_con:hover > .chevron {
+    cursor: pointer;
+    background-image: url('../../img/chevron_blue.svg');
+}
+
+.chevron_con:hover > .chevronLast {
+    cursor: pointer;
+    background-image: url('../../img/last_blue.svg');
+}
+
+.pageSize {
+    margin-left: 1em;
+    width: 5.2em;
+}
+
+.itemsPerPage {
+    margin-left: 8px;
+}
+
+.totalItems {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 1em;
+    align-items: center;
+    text-align: right;
+    order: 9;
+}
+
+.pageSize select {
+    width: 100%;
+    height: 30px;
+    border-radius: 3px;
+    border-color: rgba(0,0,0,0.15);
+    cursor: pointer;
+    outline-width: 0;
+}
+
+.pageSize select:hover {
+    background: #b6bdca;
+}
+
+.disable_chevron {
+    cursor: default !important;
+    background: none !important;
+    opacity: 0.6 !important;
+}
+
+.disable_chevron_icon {
+    background-image: url('../../img/chevron.svg') !important;
+    cursor: default !important;
+}
+
+.disable_last_icon {
+    background-image: url('../../img/last.svg') !important;
+    cursor: default !important;
 }

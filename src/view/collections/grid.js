@@ -121,21 +121,28 @@ class Pages extends Item{
     markup() {
         const $markup = $(`
             <div class="${style.pagination}">
-                <div data-page="1" class="${style.chevronLast}"></div>
-                <div data-chevron="prev" class="${style.chevron}"></div>
+                <div data-page="1" class="${style.chevron_con}" name="lastPrev"><div data-page="1" class="${style.chevronLast}" name="lastPrevIcon"></div></div>
+                <div data-chevron="prev" class="${style.chevron_con}" name="chevPrev"><div data-chevron="prev" class="${style.chevron}" name="chevPrevIcon"></div></div>
 
-                <div name="prev">...</div>
+                <div class="${style.threedots_con}" name="prev">...</div>
                 <div class="${style.pages}" name="pages"></div>
-                <div name="next">...</div>
+                <div class="${style.threedots_con}" name="next">...</div>
 
-                <div data-chevron="next" class="${style.chevron}" style="transform: rotate(180deg)"></div>
-                <div name="last" class="${style.chevronLast}" style="transform: rotate(180deg)"></div>
+                <div data-chevron="next" class="${style.chevron_con}" name="chevNext"><div data-chevron="next" class="${style.chevron}" name="chevNextIcon" style="transform: rotate(180deg)"></div></div>
+                <div data-chevron="lastpg" class="${style.chevron_con}" name="lastNext"><div name="last" class="${style.chevronLast}" style="transform: rotate(180deg)"></div></div>
             </div>
         `);
         this.$pages = $markup.find('[name="pages"]');
         this.$next = $markup.find('[name="next"]');
         this.$prev = $markup.find('[name="prev"]');
         this.$last = $markup.find('[name="last"]');
+        this.$lastPrev = $markup.find('[name="lastPrev"]');
+        this.$lastPrevIcon = $markup.find('[name="lastPrevIcon"]');
+        this.$chevPrev = $markup.find('[name="chevPrev"]');
+        this.$chevPrevIcon = $markup.find('[name="chevPrevIcon"]');
+        this.$chevNext = $markup.find('[name="chevNext"]');
+        this.$chevNextIcon = $markup.find('[name="chevNextIcon"]');
+        this.$lastNext = $markup.find('[name="lastNext"]');
 
         $markup.on( "click", event => this.onClick(event) );
         return $markup;
@@ -154,6 +161,8 @@ class Pages extends Item{
                 this.set({page: cur_page+1});
             } else if (clickedChev === "prev" && cur_page !== 1) {
                 this.set({page: cur_page-1});
+            } else if (clickedChev === "lastpg" && cur_page !== totalPages) {
+                this.set({page: totalPages});
             }
         }
 
@@ -186,6 +195,28 @@ class Pages extends Item{
             }
             this.$pages.append($pageCell);
         }
+        if (this.get("page") === 1) {
+            this.$lastPrev.addClass(style.disable_chevron);
+            this.$lastPrevIcon.addClass(style.disable_last_icon);
+            this.$chevPrev.addClass(style.disable_chevron);
+            this.$chevPrevIcon.addClass(style.disable_chevron_icon);
+        } else {
+            this.$lastPrev.removeClass(style.disable_chevron);
+            this.$lastPrevIcon.removeClass(style.disable_last_icon);
+            this.$chevPrev.removeClass(style.disable_chevron);
+            this.$chevPrevIcon.removeClass(style.disable_chevron_icon);
+        }
+        if (this.get("page") === totalPages) {
+            this.$lastNext.addClass(style.disable_chevron);
+            this.$last.addClass(style.disable_last_icon);
+            this.$chevNext.addClass(style.disable_chevron);
+            this.$chevNextIcon.addClass(style.disable_chevron_icon);
+        } else {
+            this.$lastNext.removeClass(style.disable_chevron);
+            this.$last.removeClass(style.disable_last_icon);
+            this.$chevNext.removeClass(style.disable_chevron);
+            this.$chevNextIcon.removeClass(style.disable_chevron_icon);
+        }
     }
 }
 Pages.extend();
@@ -210,9 +241,10 @@ class Pager extends Item{
             <div style="display: flex;justify-content: space-between;align-items: center;width: 100%;">
                 <div class="${style.pager}">
                     <div name="pagination"></div>
-                    <div name="pageSize"></div>
+                    <div name="pageSize" class="${style.pageSize}"></div>
+                    <div class="${style.itemsPerPage}">items per page</div>
                 </div>
-                <div name="totalItems"></div>
+                <div name="totalItems" class="${style.totalItems}"></div>
             </div>
         `)
         this.$totalItems = $markup.find(`[name="totalItems"]`);
