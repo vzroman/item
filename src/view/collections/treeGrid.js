@@ -24,73 +24,16 @@
 //------------------------------------------------------------------------------------
 
 import {types} from "../../types/index.js";
-import {View as Grid, GridRows, Row as GridRow, Pager} from "./grid";
+import {View as Grid, GridRows, Row as GridRow} from "./grid";
 import style from "./grid/grid.css";
 
 
-class CellPager extends Pager{
-
-    constructor( options ) {
-        super( options );
-
-        this.bind("page", (val=1) => {
-            this.cellPagination.text(val);
-        })
-        
-    }
-
-    
-    onClick(event){
-        const cur_page = this.get("page");
-        const clickedChev = $(event.target).attr("data-chevron");
-        const totalPages = Math.ceil(this.get("totalCount") / this.get("pageSize"));       
-        if (clickedChev !== undefined) {       
-            
-            if (clickedChev === "next" && cur_page < totalPages) {                
-                this.set({page: cur_page+1});
-                               
-            } else if (clickedChev === "prev" && cur_page !== 1) {              
-                this.set({page: cur_page-1});
-                
-            } 
-        }
-               
-    }
-    markup() {
-        const $hidden = super.markup();
-        const $markup = $(`
-            <div>
-                <div style="display: none;" name="hidden_pager"></div>
-                <div style="display: flex; flex-direction: row; column-gap: 5px; margin-right: 5px;"> 
-                    <div data-chevron="prev" name="prev"> < </div>
-                    <div name="cellPagination" style="color: red;">1</div>
-                    <div data-chevron="next" name="next"> > </div>
-                </div>
-            </div>
-        `);
-
-        const cellPager = $markup.find('[name="hidden_pager"]');
-        this.cellPagination = $markup.find('[name="cellPagination"]');
-        $hidden.appendTo(cellPager);
-        const currentPage = this.get("page");
-        
-        this.$next = $markup.find('[name="next"]');
-        this.$prev = $markup.find('[name="prev"]');
-
-        $markup.on("click", (event) => {
-            this.onClick(event)
-        })
-        return $markup;
-    }
-}
-CellPager.extend();
 
 export class View extends Grid{
 
     static options = {
-        ...super.options,
-        isFolder:{type:types.primitives.Any},
-        getSubitems:{type:types.primitives.Any}
+        ...super.options,        
+        getSubitems:{type:types.primitives.Any}        
     };
 
     widgets(){
@@ -105,7 +48,7 @@ export class View extends Grid{
                 numerated:this._options.numerated,
                 isFolder: this._options.isFolder,
                 getSubitems: this._options.getSubitems,
-                pager: this.get("pager")
+                getIcon: this._options.getIcon
             }
         }
 
@@ -117,40 +60,37 @@ View.extend();
 class TreeRows extends GridRows{
 
     static options = {
-        ...super.options,
-        isFolder:{type:types.primitives.Any},
-        getSubitems:{type:types.primitives.Any},
-        pager:{type:types.primitives.Set}
+        ...super.options,        
+        getSubitems:{type:types.primitives.Any},        
     };
 
-
-    constructor( options, depth=0, root=null ){
+    constructor( options, depth=0, root=null){
         super( options );
         this.depth = depth;
         this.root = root;
-        if (this.root) {
-            this.createPager();
+        this._options.data.bind("$.totalCount",value=>{
+            if (this.root) {
+                const text = this.formatTotalCount(value);
+                this.root.$markup.find(`[name="nestedRows"]`).text(text);
+            }
+        })
+    }
+
+    formatTotalCount(value) {
+        const _pageSize = this._options.data.option("pageSize");
+        let _text = value > _pageSize ? `${value}` : "";
+        const n = _text.length;
+
+        if (n !== 0) {
+            if(n > 6){
+                _text = _text.substring(0, n - 6) + "kk...";
+            } else if(n > 3){
+                _text = _text.substring(0, n - 3) + "k...";
+            } else if(n <= 3){
+                _text = _text + "...";
+            }
         }
-    }
-
-    createPager() {
-        this.pager = new CellPager({
-            ...this._options,
-            ...this.get("pager"),
-            links: { page:"data@$.page", totalCount: "data@$.totalCount",pageSize:"data@$.pageSize" },
-            events: { page:"data@$.page", pageSize: "data@$.pageSize" }
-        });
-
-        const _pager_cell = this.root.$markup.find('[name="pager"]');
-        this.pager.$markup.appendTo(_pager_cell);
-    }
-
-    destroy(){
-        this.$pagerWrapper?.remove();
-        this.$pagerWrapper = undefined;
-        this.pager?.destroy();
-        this.pager = undefined;
-        super.destroy();
+        return _text;
     }
 
     getRoot() {
@@ -163,11 +103,18 @@ class TreeRows extends GridRows{
             $container: this._options.$container,
             isFolder:this._options.isFolder,
             getSubitems:this._options.getSubitems,
+            getIcon:this._options.getIcon,
             columns:this._options.columns,
             numerated:this._options.numerated,
             selectable:this._options.selectable,
             depth:this.depth
         });
+    }
+    destroy(){
+        if(this.root){
+            this.root.$markup.find(`[name="nestedRows"]`).text("");
+        }
+        super.destroy();
     }
 }
 TreeRows.extend();
@@ -176,11 +123,10 @@ TreeRows.extend();
 class Row extends GridRow{
 
     static options = {
-        ...super.options,
-        isFolder:{type:types.primitives.Any},
-        getSubitems:{type:types.primitives.Any},
+        ...super.options,                
         depth:{type:types.primitives.Integer, default: 0},
-        isOpen:{type:types.primitives.Bool, default: false}
+        getSubitems:{type:types.primitives.Any},
+        isOpen:{type:types.primitives.Bool, default: false}  
     };
     
     static events = {
@@ -195,19 +141,28 @@ class Row extends GridRow{
     constructor( options ) {
         super( options );
         this.bind("isOpen", (val=false) => {
-            this.$treeIcon.text(val ?  "-" : "+");
+            this.$treeIcon.text(val ?  "-" : "+")
+        })
+       
+        this.bind("data", data =>{
+            if(data && typeof this._options.isFolder === 'function'){
+                const _plus = this._options.isFolder(data.get());
+                this.$treeIcon.toggleClass(style.treeIcon_visible, _plus);
+            }
         })
     }
 
+      
     appendColumns( $markup ) {
-        const { depth, isFolder=()=>{}, id } = this._options;
+        const {depth} = this._options;
         this._options.columns.forEach((_,i)=> {
             if (i === 0) {
-                $(` <td style="position: relative;">
+                $(`<td>
                         <div style="margin-left: ${20 * depth}px;" class="${style.first_cell}">
-                            <div style="display: ${isFolder(id) ? "flex" : "none"};" name="tree-icon">+</div>
-                            <div name="pager"></div>                        
-                            <div name="${ i }" style="flex-shrink: 0;"></div>                            
+                            <div name="tree-icon">+</div> 
+                            <div name="icon" class="${style.icon}"></div>                                                 
+                            <div name="${ i }" style="flex-shrink: 0;"></div>
+                            <div name="nestedRows" title="Quantity of nested rows"></div>
                         </div>
                     </td>`).appendTo($markup);
             } else {
@@ -226,7 +181,7 @@ class Row extends GridRow{
             throw new Error("Provide getSubitems method");
         }
     }
-
+ 
     close() {
         if (!this.get("isOpen")) {
             return;

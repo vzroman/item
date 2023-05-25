@@ -265,7 +265,9 @@ export class View extends Item{
         resizable:{type:types.primitives.Bool},
         numerated:{type:types.primitives.Bool},
         selectable:{type:types.primitives.Bool},
-        pager:{type:types.primitives.Set}
+        pager:{type:types.primitives.Set},
+        isFolder:{type:types.primitives.Any},
+        getIcon:{type:types.primitives.Any}
     };
 
     constructor( options ) {
@@ -458,7 +460,9 @@ export class View extends Item{
                 $container: this.$tbody,
                 columns: this._options.columns,
                 numerated: this._options.numerated,
-                selectable: this._options.selectable
+                selectable: this._options.selectable,
+                isFolder: this._options.isFolder,
+                getIcon: this._options.getIcon
             }
         }
 
@@ -552,7 +556,9 @@ export class GridRows extends Collection{
         data:{type:types.primitives.Any},
         numerated:{type:types.primitives.Bool},
         selectable:{type:types.primitives.Bool},
-        columns:{type:types.primitives.Array}
+        columns:{type:types.primitives.Array},
+        isFolder:{type:types.primitives.Any},
+        getIcon:{type:types.primitives.Any}
     };
 
     constructor( options ) {
@@ -574,7 +580,7 @@ export class GridRows extends Collection{
         }
     }
 
-    updateIndexies(startIndex=1) {
+    updateIndexies(startIndex=1) {        
         Object.keys( this._items ).forEach(id => this._items[id][0].set({index: startIndex++}));
     }
 
@@ -584,7 +590,9 @@ export class GridRows extends Collection{
             $container:this._options.$container,
             columns:this._options.columns,
             selectable:this._options.selectable,
-            numerated:this._options.numerated
+            numerated:this._options.numerated,
+            isFolder:this._options.isFolder,
+            getIcon:this._options.getIcon
         });
     }
 }
@@ -598,7 +606,9 @@ export class Row extends Item{
         selected:{type:types.primitives.Bool},
         selectable:{type:types.primitives.Bool},
         numerated:{type:types.primitives.Bool},
-        index:{type:types.primitives.Integer, default: 0}
+        index:{type:types.primitives.Integer, default: 0},
+        isFolder:{type:types.primitives.Any},
+        getIcon:{type:types.primitives.Any}
     };
 
     constructor( options ) {
@@ -608,6 +618,36 @@ export class Row extends Item{
             this.$markup.toggleClass(style.selected_row, val);
         })
         this.bind("index", val=>this.$index.text(val));
+        this.bind("data", data => {
+            if (data) this.setIcon(data);
+        });
+    }
+
+    setIcon(data){
+        const { getIcon } = this._options;
+        if(typeof getIcon === 'function'){
+            const _icon = getIcon(data.get());
+            if(_icon){
+                this.$icon.css({'background-image': `url(${_icon})`});
+                return;
+            }
+        }
+        this.setDefaultIcons(data);
+    }
+
+    setDefaultIcons(data){
+        const file_icon = `${style.icon_file}`;
+        const folder_icon = `${style.icon_folder}`;
+        const { isFolder } = this._options;
+
+        if(typeof isFolder === 'function'){
+            const _folder = isFolder(data.get())
+            if(_folder){
+                this.$icon.addClass(folder_icon);
+                return;
+            }
+        }
+        this.$icon.addClass(file_icon);
     }
 
     markup() {
@@ -623,11 +663,23 @@ export class Row extends Item{
         this.$index =$markup.find(`[name="index"]`);
         this.$checkbox = $markup.find(`[name="checkbox"]`);
         this.appendColumns( $markup );
+        this.$icon = $markup.find(`[name="icon"]`);
         return $markup;
     }
 
     appendColumns( $markup ) {
-        this._options.columns.forEach((_,i)=> $(`<td name="${ i }"></td>`).appendTo($markup) );
+        this._options.columns.forEach((_,i)=>{
+            if(i === 0){
+                $(`<td>
+                        <div class="${style.first_cell}">
+                            <div name="icon" class="${style.icon}"></div>                                                 
+                            <div name="${ i }" style="flex-shrink: 0;"></div>
+                        </div>
+                    </td>`).appendTo($markup)
+            }else{
+                $(`<td name="${ i }"></td>`).appendTo($markup);
+            }
+        }); 
     }
 
     widgets(){

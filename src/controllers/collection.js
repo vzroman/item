@@ -396,6 +396,7 @@ export class Controller extends Item{
     _updateView(){
         const newPageItems = new Map();
         let prevId = null;
+        if (!this._pageItems) this._pageItems = new Map();
         this.forEach(id =>{
             if (!this._pageItems.has(id)) {
                 this._trigger("add", [id, prevId]);
