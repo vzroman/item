@@ -52,8 +52,16 @@ export class Controller extends Item{
 
         this._pageItems = new Map();
 
-        ["page", "pageSize"].forEach(e=>{
-            this.bind("$."+e,()=>this.updatePage());
+        this.bind("$.pageSize",()=>{
+            if (this.option("page") === 1){
+                this.updatePage();
+            }else{
+                this.option("page", 1);
+            }
+        });
+
+        this.bind("$.page",()=>{
+            this.updatePage();
         });
     }
 
@@ -63,7 +71,7 @@ export class Controller extends Item{
         this._isRefresh = true;
         try{
             if (this._view) this._view.destroy();
-            this._view = new util.AVLTree();
+            this._view = this._options.orderBy === ".oid" ? new util.AVLTree(this._compareOid) : new util.AVLTree();
             this._data = {};
             this._count = 0;
             const changes = super.set( Data );
@@ -356,10 +364,10 @@ export class Controller extends Item{
     _onChange( changes ){
         let isReordered = false;
         Object.entries( changes ).forEach(([id,[item, previous]])=>{
-            if ( previous === undefined ){
+            if ( previous === null || previous === undefined ){
                 this._view.insert(this._orderKey(id, item));
                 isReordered = true;
-            }else if( item === null ){
+            }else if( item === null || item === undefined ){
                 isReordered = true;
                 this._view.remove(this._orderKey(id, previous));
             }else{
@@ -372,7 +380,7 @@ export class Controller extends Item{
         });
         if (isReordered) this._updateView();
         this.option("totalCount", this.getCount())
-    
+
         super._onChange( changes );
     }
 
@@ -396,6 +404,7 @@ export class Controller extends Item{
     _updateView(){
         const newPageItems = new Map();
         let prevId = null;
+        if (!this._pageItems) this._pageItems = new Map();
         this.forEach(id =>{
             if (!this._pageItems.has(id)) {
                 this._trigger("add", [id, prevId]);
@@ -414,6 +423,20 @@ export class Controller extends Item{
         this._pageItems = newPageItems;
     }
 
-
+    _compareOid(a, b) {
+        const helper = (a, b) => {
+            const n1 = a[0].replace(/[^0-9,]/g, "").split(",");
+            const n2 = b[0].replace(/[^0-9,]/g, "").split(",");
+            if (Number(n1[0]) > Number(n2[0])) return 1;
+            if (Number(n1[0]) < Number(n2[0])) return -1;
+            if (n1[0] == n2[0]) {
+                if (Number(n1[1]) > Number(n2[1])) return 1;
+                if (Number(n1[1]) < Number(n2[1])) return -1;
+                return 0;
+            }
+        }
+        const val = helper(a, b);
+        return val > 0 ? 1 : val < 0 ? -1 : 0;
+    }
 }
 Controller.extend();

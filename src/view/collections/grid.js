@@ -107,7 +107,6 @@ class Pages extends Item{
         super( options );
 
         this.bind("pageSize", () => {
-            this.set({page: 1});
             this.updatePages()
         });
         this.bind("totalCount", () => {
@@ -121,15 +120,15 @@ class Pages extends Item{
     markup() {
         const $markup = $(`
             <div class="${style.pagination}">
-                <div data-page="1" class="${style.chevronLast}"></div>
-                <div data-chevron="prev" class="${style.chevron}"></div>
+                <div data-page="1" name="first_page" class="${style.chevronLast}"><div></div></div>
+                <div data-chevron="prev" class="${style.chevron}"><div></div></div>
 
                 <div name="prev">...</div>
                 <div class="${style.pages}" name="pages"></div>
                 <div name="next">...</div>
 
-                <div data-chevron="next" class="${style.chevron}" style="transform: rotate(180deg)"></div>
-                <div name="last" class="${style.chevronLast}" style="transform: rotate(180deg)"></div>
+                <div data-chevron="next" class="${style.chevron}" style="transform: rotate(180deg)"><div></div></div>
+                <div name="last" class="${style.chevronLast}" style="transform: rotate(180deg)"><div></div></div>
             </div>
         `);
         this.$pages = $markup.find('[name="pages"]');
@@ -147,7 +146,6 @@ class Pages extends Item{
 
         const clickedPage = $(event.target).attr("data-page");
         const clickedChev = $(event.target).attr("data-chevron");
-        
         
         if (clickedChev !== undefined) {
             if (clickedChev === "next" && cur_page !== totalPages) {
@@ -185,6 +183,24 @@ class Pages extends Item{
                 $pageCell.addClass(style.activePage);
             }
             this.$pages.append($pageCell);
+        }
+
+        const arrow_prev = this.$markup.find('[data-chevron="prev"]');
+        const arrow_next = this.$markup.find('[data-chevron="next"]');
+        const arrow_first = this.$markup.find('[name="first_page"]');
+
+        this.$last.css({"pointer-events": ""});
+        arrow_prev.css({"pointer-events": ""});
+        arrow_next.css({"pointer-events": ""});
+        arrow_first.css({"pointer-events": ""});
+
+        if (page === totalPages) {
+            this.$last.css({"pointer-events": "none"});
+            arrow_next.css({"pointer-events": "none"});
+        }
+        if (page === 1) {
+            arrow_first.css({"pointer-events": "none"});
+            arrow_prev.css({"pointer-events": "none"});
         }
     }
 }
@@ -265,7 +281,9 @@ export class View extends Item{
         resizable:{type:types.primitives.Bool},
         numerated:{type:types.primitives.Bool},
         selectable:{type:types.primitives.Bool},
-        pager:{type:types.primitives.Set}
+        pager:{type:types.primitives.Set},
+        isFolder:{type:types.primitives.Any},
+        getSubitems:{type:types.primitives.Any}
     };
 
     constructor( options ) {
@@ -291,7 +309,69 @@ export class View extends Item{
         if (this._options.selectable) {
             this.init_select();
         }
+        if (this._options.getSubitems) {
+            this.init_folder_open();
+        }
     }
+
+    init_folder_open() {
+        this.breadcrumbs = [];
+        this.$tbody.on("dblclick", e => {
+            const row = $(e.target.closest('tr')).data("row");
+            const item = row._options.data.get();
+            this.add_breadcrumbs(row);
+            this.open_folder(item);
+        })
+
+        this.$breadcrumbs.on("click", e => {
+            const idx = $(e.target).data("index");
+            this.breadcrumbs = this.breadcrumbs.slice(0, idx + 1);
+            this.open_folder(this.breadcrumbs[this.breadcrumbs.length - 1]);
+        })
+    }
+
+    open_folder(item) {
+        this.update_breadcrumbs();
+        this.change_view(item);
+    }
+
+    change_view(item, view=GridRows) {
+        const _pageSize = this._options.data.option("pageSize");
+        const _controller = item ? this._options.getSubitems(item) : this._options.data;
+        _controller.option("pageSize", _pageSize);
+        const { tbody, pager } = this._widgets;
+
+        const tbody_options = tbody.get();
+        delete tbody_options.data;
+        tbody.destroy();
+
+        this._widgets.tbody = new view(tbody_options);
+        const context = this.linkContext({data: _controller});
+        this._widgets.tbody.link({...context, ...this._widgets , parent:this});
+
+        const pager_options = pager.get();
+        delete pager_options.data;
+        pager.destroy();
+
+        this._widgets.pager = new Pager(pager_options);
+        this._widgets.pager.link({...context, ...this._widgets , parent:this});
+    }
+
+    add_breadcrumbs(row) {
+        this.breadcrumbs.push(row._options.data.get());
+    }
+
+    update_breadcrumbs() {
+        this.$breadcrumbs.empty();
+        if (this.breadcrumbs.length > 0) {
+            $(`<div data-index="-1"> / </div>`).appendTo(this.$breadcrumbs);
+        }
+        this.breadcrumbs.forEach((item, idx) => {
+            $(`<div data-index="${idx}"> ${item[".name"]} </div>`).appendTo(this.$breadcrumbs);
+        })
+    }
+
+    
 
     init_select() {
         this.selected = [];
@@ -469,6 +549,7 @@ export class View extends Item{
         const $markup = $(`<div class="${ style.grid } item_grid_container">
             <div class="${ style.wrapper } item_grid_table_container">
                 <div class="${style.lasso} item_grid_lasso"></div>
+                <div name="breadcrumbs" class="${style.breadcrumbs}"></div>
                 <table class="${ style.table } item_grid_table">
                     <thead name="header"></thead>
                     <tbody name="tbody"></tbody>
@@ -481,6 +562,7 @@ export class View extends Item{
         this.$tfoot = $markup.find('tfoot');
         this.$lasso = $markup.find(".item_grid_lasso");
         this.$wrapper = $markup.find(".item_grid_table_container");
+        this.$breadcrumbs = $markup.find('[name="breadcrumbs"]');
         return $markup;
     };
 
@@ -557,18 +639,19 @@ export class GridRows extends Collection{
 
     constructor( options ) {
         super( options );
-
         if (this._options.numerated) {
             const state ={
                 page:undefined,
                 pageSize:undefined
             };
-            ["page", "pageSize", "totalCount"].forEach(e=>{
-                this._options.data.bind("$."+e,value=>{
-                    state[e]=value ?? 1;
-                    const startIndex = (state["page"] - 1) * state["pageSize"] + 1;
-                    // setTimeout because items not in view yet;
-                    setTimeout(()=>this.updateIndexies(startIndex));
+            this.bind("data", data => {
+                ["page", "pageSize", "totalCount"].forEach(e=>{
+                    data?.bind("$."+e,value=>{
+                        state[e]=value ?? 1;
+                        const startIndex = (state["page"] - 1) * state["pageSize"] + 1;
+                        // setTimeout because items not in view yet;
+                        setTimeout(()=> this._items && this.updateIndexies(startIndex));
+                    })
                 })
             })
         }

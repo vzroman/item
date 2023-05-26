@@ -24,21 +24,29 @@
 //------------------------------------------------------------------------------------
 
 import {types} from "../../types/index.js";
-import {View as Grid, GridRows, Row as GridRow} from "./grid";
+import {View as Grid, GridRows as Rows, Row as GridRow} from "./grid";
 import style from "./grid/grid.css";
 
 export class View extends Grid{
 
-    static options = {
-        ...super.options,
-        isFolder:{type:types.primitives.Any},
-        getSubitems:{type:types.primitives.Any}
-    };
+    change_view(item, view=GridRows) {
+        super.change_view(item, view);
+    }
+
+    add_breadcrumbs(row) {
+        const items = [];
+        const traverse = row => {
+            if (row && row._options.root) traverse(row._options.root);
+            items.push(row._options.data.get())
+        }
+        traverse(row);
+        this.breadcrumbs = [...this.breadcrumbs, ...items];
+    }
 
     widgets(){
         const widgets = super.widgets();
         widgets.tbody = {
-            view: TreeRows,
+            view: GridRows,
             options: {
                 data: this._options.data,
                 $container: this.$tbody,
@@ -55,28 +63,17 @@ export class View extends Grid{
 }
 View.extend();
 
-class TreeRows extends GridRows{
-
+class GridRows extends Rows{
     static options = {
         ...super.options,
         isFolder:{type:types.primitives.Any},
-        getSubitems:{type:types.primitives.Any},
-        pager:{type:types.primitives.Set}
+        getSubitems:{type:types.primitives.Any}
     };
-
 
     constructor( options, depth=0, root=null ){
         super( options );
         this.depth = depth;
         this.root = root;
-    }
-
-    destroy(){
-        this.$pagerWrapper?.remove();
-        this.$pagerWrapper = undefined;
-        this.pager?.destroy();
-        this.pager = undefined;
-        super.destroy();
     }
 
     getRoot() {
@@ -92,12 +89,12 @@ class TreeRows extends GridRows{
             columns:this._options.columns,
             numerated:this._options.numerated,
             selectable:this._options.selectable,
-            depth:this.depth
+            depth:this.depth,
+            root:this.root
         });
     }
 }
-TreeRows.extend();
-
+GridRows.extend();
 
 class Row extends GridRow{
 
@@ -106,7 +103,8 @@ class Row extends GridRow{
         isFolder:{type:types.primitives.Any},
         getSubitems:{type:types.primitives.Any},
         depth:{type:types.primitives.Integer, default: 0},
-        isOpen:{type:types.primitives.Bool, default: false}
+        isOpen:{type:types.primitives.Bool, default: false},
+        root:{type:types.primitives.Any}
     };
     
     static events = {
@@ -146,7 +144,7 @@ class Row extends GridRow{
         if (typeof this._options.getSubitems === "function") {
             this.set({isOpen: true});
             this._childrenController = this._options.getSubitems(data.get());
-            this._children = new TreeRows({...this._options, data: this._childrenController}, this._options.depth+1, this);
+            this._children = new GridRows({...this._options, data: this._childrenController}, this._options.depth+1, this);
         } else {
             throw new Error("Provide getSubitems method");
         }

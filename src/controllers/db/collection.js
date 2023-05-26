@@ -47,14 +47,12 @@ export class Controller extends Collection{
     // Data access API
     //-------------------------------------------------------------------
     init( filter ){
+        const _filter = this.constructor.filter2query( filter );
+        this._filter = _filter;
 
         return this._promise("init",(resolve, reject) => {
 
-            filter = this.constructor.filter2query( filter );
-
-            this.query( filter ).then(data => {
-
-                this._filter = filter;
+            this.query( _filter ).then(data => {
 
                 resolve( super.init(data) );
 
