@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 import {types} from "../../types/index.js";
-import {View as Grid, GridRows, Row as GridRow} from "./grid";
+import {View as Grid, GridRows as Rows, Row as GridRow} from "./grid";
 import style from "./grid/grid.css";
 
 
@@ -36,10 +36,24 @@ export class View extends Grid{
         getSubitems:{type:types.primitives.Any}        
     };
 
+    change_view(item, view=GridRows) {
+        super.change_view(item, view);
+    }
+
+    add_breadcrumbs(row) {
+        const items = [];
+        const traverse = row => {
+            if (row && row._options.root) traverse(row._options.root);
+            items.push(row._options.data.get())
+        }
+        traverse(row);
+        this.breadcrumbs = [...this.breadcrumbs, ...items];
+    }
+
     widgets(){
         const widgets = super.widgets();
         widgets.tbody = {
-            view: TreeRows,
+            view: GridRows,
             options: {
                 data: this._options.data,
                 $container: this.$tbody,
@@ -57,8 +71,7 @@ export class View extends Grid{
 }
 View.extend();
 
-class TreeRows extends GridRows{
-
+class GridRows extends Rows{
     static options = {
         ...super.options,        
         getSubitems:{type:types.primitives.Any},        
@@ -68,10 +81,12 @@ class TreeRows extends GridRows{
         super( options );
         this.depth = depth;
         this.root = root;
-        this._options.data.bind("$.totalCount",value=>{
-            if (this.root) {
-                const text = this.formatTotalCount(value);
-                this.root.$markup.find(`[name="nestedRows"]`).text(text);
+        this.bind("data", data => {
+            if (data && this.root) {
+                data.bind("$.totalCount",value=>{
+                    const text = this.formatTotalCount(value);
+                    this.root.$markup.find(`[name="nestedRows"]`).text(text);
+                })
             }
         })
     }
@@ -107,7 +122,8 @@ class TreeRows extends GridRows{
             columns:this._options.columns,
             numerated:this._options.numerated,
             selectable:this._options.selectable,
-            depth:this.depth
+            depth:this.depth,
+            root:this.root
         });
     }
     destroy(){
@@ -117,8 +133,7 @@ class TreeRows extends GridRows{
         super.destroy();
     }
 }
-TreeRows.extend();
-
+GridRows.extend();
 
 class Row extends GridRow{
 
@@ -126,7 +141,8 @@ class Row extends GridRow{
         ...super.options,                
         depth:{type:types.primitives.Integer, default: 0},
         getSubitems:{type:types.primitives.Any},
-        isOpen:{type:types.primitives.Bool, default: false}  
+        isOpen:{type:types.primitives.Bool, default: false},
+        root:{type:types.primitives.Any}
     };
     
     static events = {
@@ -176,7 +192,7 @@ class Row extends GridRow{
         if (typeof this._options.getSubitems === "function") {
             this.set({isOpen: true});
             this._childrenController = this._options.getSubitems(data.get());
-            this._children = new TreeRows({...this._options, data: this._childrenController}, this._options.depth+1, this);
+            this._children = new GridRows({...this._options, data: this._childrenController}, this._options.depth+1, this);
         } else {
             throw new Error("Provide getSubitems method");
         }
