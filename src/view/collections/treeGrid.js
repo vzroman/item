@@ -29,6 +29,11 @@ import style from "./grid/grid.css";
 
 export class View extends Grid{
 
+    static options = {
+        ...super.options,        
+        getSubitems:{type:types.primitives.Any}        
+    };
+
     change_view(item, view=GridRows) {
         super.change_view(item, view);
     }
@@ -54,7 +59,8 @@ export class View extends Grid{
                 selectable:this._options.selectable,
                 numerated:this._options.numerated,
                 isFolder: this._options.isFolder,
-                getSubitems: this._options.getSubitems
+                getSubitems: this._options.getSubitems,
+                getIcon: this._options.getIcon
             }
         }
 
@@ -65,15 +71,39 @@ View.extend();
 
 class GridRows extends Rows{
     static options = {
-        ...super.options,
-        isFolder:{type:types.primitives.Any},
-        getSubitems:{type:types.primitives.Any}
+        ...super.options,        
+        getSubitems:{type:types.primitives.Any},        
     };
 
-    constructor( options, depth=0, root=null ){
+    constructor( options, depth=0, root=null){
         super( options );
         this.depth = depth;
         this.root = root;
+        this.bind("data", data => {
+            if (data && this.root) {
+                data.bind("$.totalCount",value=>{
+                    const text = this.formatTotalCount(value);
+                    this.root.$markup.find(`[name="nestedRows"]`).text(text);
+                })
+            }
+        })
+    }
+
+    formatTotalCount(value) {
+        const _pageSize = this._options.data.option("pageSize");
+        let _text = value > _pageSize ? `${value}` : "";
+        const n = _text.length;
+
+        if (n !== 0) {
+            if(n > 6){
+                _text = _text.substring(0, n - 6) + "kk...";
+            } else if(n > 3){
+                _text = _text.substring(0, n - 3) + "k...";
+            } else if(n <= 3){
+                _text = _text + "...";
+            }
+        }
+        return _text;
     }
 
     getRoot() {
@@ -86,6 +116,7 @@ class GridRows extends Rows{
             $container: this._options.$container,
             isFolder:this._options.isFolder,
             getSubitems:this._options.getSubitems,
+            getIcon:this._options.getIcon,
             columns:this._options.columns,
             numerated:this._options.numerated,
             selectable:this._options.selectable,
@@ -93,16 +124,21 @@ class GridRows extends Rows{
             root:this.root
         });
     }
+    destroy(){
+        if(this.root){
+            this.root.$markup.find(`[name="nestedRows"]`).text("");
+        }
+        super.destroy();
+    }
 }
 GridRows.extend();
 
 class Row extends GridRow{
 
     static options = {
-        ...super.options,
-        isFolder:{type:types.primitives.Any},
-        getSubitems:{type:types.primitives.Any},
+        ...super.options,                
         depth:{type:types.primitives.Integer, default: 0},
+        getSubitems:{type:types.primitives.Any},
         isOpen:{type:types.primitives.Bool, default: false},
         root:{type:types.primitives.Any}
     };
@@ -119,18 +155,28 @@ class Row extends GridRow{
     constructor( options ) {
         super( options );
         this.bind("isOpen", (val=false) => {
-            this.$treeIcon.text(val ?  "-" : "+");
+            this.$treeIcon.text(val ?  "-" : "+")
+        })
+       
+        this.bind("data", data =>{
+            if(data && typeof this._options.isFolder === 'function'){
+                const _plus = this._options.isFolder(data.get());
+                this.$treeIcon.toggleClass(style.treeIcon_visible, _plus);
+            }
         })
     }
 
+      
     appendColumns( $markup ) {
-        const { depth, isFolder=()=>{}, id } = this._options;
+        const {depth} = this._options;
         this._options.columns.forEach((_,i)=> {
             if (i === 0) {
-                $(` <td style="position: relative;">
+                $(`<td>
                         <div style="margin-left: ${20 * depth}px;" class="${style.first_cell}">
-                            <div style="display: ${isFolder(id) ? "flex" : "none"};" name="tree-icon">+</div>
+                            <div name="tree-icon">+</div> 
+                            <div name="icon" class="${style.icon}"></div>                                                 
                             <div name="${ i }" style="flex-shrink: 0;"></div>
+                            <div name="nestedRows" title="Quantity of nested rows"></div>
                         </div>
                     </td>`).appendTo($markup);
             } else {
@@ -149,7 +195,7 @@ class Row extends GridRow{
             throw new Error("Provide getSubitems method");
         }
     }
-
+ 
     close() {
         if (!this.get("isOpen")) {
             return;
