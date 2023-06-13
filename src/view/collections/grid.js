@@ -647,7 +647,8 @@ export class GridRows extends Collection{
         if (this._options.numerated) {
             const state ={
                 page:undefined,
-                pageSize:undefined
+                pageSize:undefined,
+                totalCount:undefined
             };
             this.bind("data", data => {
                 ["page", "pageSize", "totalCount"].forEach(e=>{
