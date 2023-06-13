@@ -72,13 +72,14 @@ View.extend();
 class GridRows extends Rows{
     static options = {
         ...super.options,        
-        getSubitems:{type:types.primitives.Any},        
+        getSubitems:{type:types.primitives.Any}   
     };
 
     constructor( options, depth=0, root=null){
         super( options );
         this.depth = depth;
         this.root = root;
+        this.parentIndex = undefined;
         this.bind("data", data => {
             if (data && this.root) {
                 data.bind("$.totalCount",value=>{
@@ -86,7 +87,10 @@ class GridRows extends Rows{
                     this.root.$markup.find(`[name="nestedRows"]`).text(text);
                 })
             }
-        })
+        });
+        if(this.root){
+            this.parentIndex = `${this.root._options.index}.`;
+        }
     }
 
     formatTotalCount(value) {
@@ -121,6 +125,7 @@ class GridRows extends Rows{
             numerated:this._options.numerated,
             selectable:this._options.selectable,
             depth:this.depth,
+            parentIndex:this.parentIndex,
             root:this.root
         });
     }
@@ -138,6 +143,7 @@ class Row extends GridRow{
     static options = {
         ...super.options,                
         depth:{type:types.primitives.Integer, default: 0},
+        parentIndex:{type:types.primitives.String},
         getSubitems:{type:types.primitives.Any},
         isOpen:{type:types.primitives.Bool, default: false},
         root:{type:types.primitives.Any}
@@ -164,6 +170,14 @@ class Row extends GridRow{
                 this.$treeIcon.toggleClass(style.treeIcon_visible, _plus);
             }
         })
+        if(this._options.numerated){
+            this.bind("index", index =>{
+                if(index && this._options.parentIndex){
+                    const current_idx = this.$index.text();
+                    this.$index.text(`${this._options.parentIndex}${current_idx}`);
+                }
+            })
+        }       
     }
 
       
@@ -188,8 +202,8 @@ class Row extends GridRow{
 
     open( data ) {
         if (typeof this._options.getSubitems === "function") {
-            this.set({isOpen: true});
-            this._childrenController = this._options.getSubitems(data.get());
+            this.set({isOpen: true});            
+            this._childrenController = this._options.getSubitems(data.get());            
             this._children = new GridRows({...this._options, data: this._childrenController}, this._options.depth+1, this);
         } else {
             throw new Error("Provide getSubitems method");
