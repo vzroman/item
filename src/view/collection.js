@@ -102,45 +102,35 @@ export class View extends Item{
 
     _editItem( id, prevId ){
         
-        const item = this._items[id][0];
+        const item = this.getItem( id );
 
-        const prevItem = this._items[prevId];
+        const prevItem = this.getItem( prevId );
+
+        this._placeItem( item, prevItem );
+    }
+
+    _placeItem( item, prevItem ){
         if (prevItem){
-            item.$markup.insertAfter( prevItem[0].$markup );
+            item.$markup.insertAfter( prevItem.$markup );
         }
+        // TODO. If the previousItem is undefined then we need to put the item on the first position in the collection
     }
 
 
     _addItem( id, prevId ){
 
-        const item = this.newItem( id );
+        const prevItem = this.getItem( prevId );
+
+        const item = this.newItem( id, prevItem );
 
         // Link the item to the data
         const controller = this._collection.fork( id, this._options.itemController );
         item.link( {data:controller, parent:this} );
-        const _root = typeof this.getRoot === "function" ? this.getRoot() : undefined;
-        this.insertItem( item, prevId, _root );
 
         return [item, controller];
     }
 
-    insertItem( item, prevId, root=undefined ) {
-        if (prevId === null && root) {
-            item.$markup.insertAfter( root.$markup );
-            return;
-        }
-        const prevItem = this._items[prevId];
-        if (prevItem){
-            item.$markup.insertAfter( prevItem[0].$markup );
-        } else if (prevId === null) {
-            const firstItem = this._items[ Object.keys( this._items )[0] ];
-            if (firstItem) {
-                item.$markup.insertBefore( firstItem[0].$markup );
-            }
-        }
-    }
-
-    newItem( id ){
+    newItem( id, prevItem ){
         // To be overridden
         throw new Error("not implemented");
     }
@@ -153,6 +143,11 @@ export class View extends Item{
     _removeItem( id ){
         this._items[id][0].destroy();
         this._items[id][1].destroy();
+    }
+
+    getItem( id ){
+        const [item] = this._items[id] || [];
+        return item;
     }
 
     destroy(){

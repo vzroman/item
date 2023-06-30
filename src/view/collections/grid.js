@@ -27,74 +27,9 @@ import {View as Collection} from "../collection.js";
 import {View as Item} from "../item.js";
 import {types} from "../../types/index.js";
 import {controls} from '../controls';
-import style from "./grid/grid.css";
-
-//------------------------------------------------------------------------------------
-//  Header
-//------------------------------------------------------------------------------------
-class Header extends Item{
-
-    static options = {
-        columns:{type:types.primitives.Array, required:true},
-        numerated:{type:types.primitives.Bool},
-        selectable:{type:types.primitives.Bool}
-    };
-    
-    constructor( options ) {
-        const { numerated, selectable } = options;
-
-        options.columns = options.columns.map( col =>{
-            if (typeof col === "object" && col.view!==undefined) {
-                return col
-            }
-            if (typeof col === "string" || typeof col==="number" || typeof col === "function"){
-                col = { text: col};
-            }else if(typeof col!=="object"){
-                throw new Error("invalid column format");
-            }
-
-            const {text,...rest} = col;
-            if (typeof text === "string" || typeof text==="number") {
-                return { view:Cell, options:{ text }, ...rest}
-            } else if (typeof text === "function") {
-                return { view:Cell, options: {
-                    links:{ text:{source:"data", event:[], handler: text}}
-                }, ...rest}
-            }else{
-                throw new Error("invalid column format");
-            }
-        });
-
-        if (numerated) options.columns = [
-            { view:Cell, options: { style: {"width": "32px"} } },
-            ...options.columns
-        ];
-        if (selectable) options.columns = [
-            { view:Cell, options: { style: {"width": "32px"} } },
-            ...options.columns
-        ];
-
-        super( options );
-    }
-
-    markup() {
-        const $markup = $(`<tr></tr>`);
-        this._options.columns.forEach(({colspan=1}, i)=> $(`<td colspan="${colspan}" name=${ i }></td>`).appendTo($markup));
-        return $markup;
-    }
-
-    widgets(){
-        return this._options.columns.reduce((acc, col, i)=>{
-            acc[i] = col;
-            return acc;
-        },{});
-    }
-}
-Header.extend();
-
-class Footer extends Header{}
-Footer.extend();
-
+import style from "./grid.css";
+import {Header} from "./grid/header";
+import {Footer} from "./grid/footer";
 
 class Pages extends Item{
 
@@ -684,111 +619,8 @@ export class GridRows extends Collection{
 GridRows.extend();
 
 
-export class Row extends Item{
 
-    static options = {
-        columns:{type:types.primitives.Array, required:true},
-        selected:{type:types.primitives.Bool},
-        selectable:{type:types.primitives.Bool},
-        numerated:{type:types.primitives.Bool},
-        index:{type:types.primitives.Integer, default: 0},
-        isFolder:{type:types.primitives.Any},
-        getIcon:{type:types.primitives.Any}
-    };
 
-    constructor( options ) {
-        super( options );
-        this.bind("selected", (val=false) => {
-            this.$checkbox.prop('checked', val);
-            this.$markup.toggleClass(style.selected_row, val);
-        })
-        this.bind("index", val=>this.$index.text(val));
-        this.bind("data", data => {
-            if (data) this.setIcon(data);
-        });
-    }
-
-    setIcon(data){
-        const { getIcon } = this._options;
-        if(typeof getIcon === 'function'){
-            const _icon = getIcon(data.get());
-            if(_icon){
-                this.$icon.css({'background-image': `url(${_icon})`});
-                return;
-            }
-        }
-        this.setDefaultIcons(data);
-    }
-
-    setDefaultIcons(data){
-        const file_icon = `${style.icon_file}`;
-        const folder_icon = `${style.icon_folder}`;
-        const { isFolder } = this._options;
-
-        if(typeof isFolder === 'function'){
-            const _folder = isFolder(data.get())
-            if(_folder){
-                this.$icon.addClass(folder_icon);
-                return;
-            }
-        }
-        this.$icon.addClass(file_icon);
-    }
-
-    markup() {
-        const { id, numerated, selectable } = this._options;
-        const $markup = $(`<tr data-row_id="${id}"></tr>`);
-        $markup.data("row", this);
-        if (numerated) {
-            $(`<td name="index"></td>`).appendTo($markup);
-        }
-        if (selectable) {
-            $(`<td><input name="checkbox" type="checkbox"></input></td>`).appendTo($markup);
-        }
-        this.$index =$markup.find(`[name="index"]`);
-        this.$checkbox = $markup.find(`[name="checkbox"]`);
-        this.appendColumns( $markup );
-        this.$icon = $markup.find(`[name="icon"]`);
-        return $markup;
-    }
-
-    appendColumns( $markup ) {
-        this._options.columns.forEach((_,i)=>{
-            if(i === 0){
-                $(`<td>
-                        <div class="${style.first_cell}">
-                            <div name="icon" class="${style.icon}"></div>                                                 
-                            <div name="${ i }" style="flex-shrink: 0;"></div>
-                        </div>
-                    </td>`).appendTo($markup)
-            }else{
-                $(`<td name="${ i }"></td>`).appendTo($markup);
-            }
-        }); 
-    }
-
-    widgets(){
-        return this._options.columns.reduce((acc, col, i)=>{
-            acc[i] = col;
-            return acc;
-        },{});
-    }
-}
-Row.extend();
-
-class Cell extends Item{
-    static options = {
-        text:{type:types.primitives.Any}
-    };
-    constructor(options) {
-        super(options);
-        if (options.style) {
-            this._options.$container.css(options.style);
-        }
-        this.bind("text", val=>this._options.$container.html( val ))
-    }
-}
-Cell.extend();
 
 function toggleArrayElement(array, element) {
     return array.includes(element)
