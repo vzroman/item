@@ -27,7 +27,6 @@ import {View as Item} from "./item.js";
 import {controllers} from "../controllers/index.js";
 import {util} from "../utilities/index.js";
 import {types} from "../types/index.js";
-import {Linkable} from "../core/linkable.js";
 
 export class View extends Item{
 
@@ -74,8 +73,8 @@ export class View extends Item{
                 this._items[id] = this._addItem( id );
             });
 
-            const addId = data.bind("add", id=>{
-                this._items[id] = this._addItem( id );
+            const addId = data.bind("add", (id, prevId)=>{
+                this._items[id] = this._addItem( id, prevId );
             });
             this._subscriptions.push(()=>data.unbind( addId ));
 
@@ -84,6 +83,11 @@ export class View extends Item{
                 delete this._items[id];
             });
             this._subscriptions.push(()=>data.unbind(removeId));
+
+            const editId = data.bind("edit", (id, prevId)=>{
+                this._editItem( id, prevId );
+            });
+            this._subscriptions.push(()=>data.unbind( editId ));
         }
 
         return context;
@@ -96,15 +100,44 @@ export class View extends Item{
         return this._collection.set({ [id]: item });
     }
 
-    _addItem( id ){
+    _editItem( id, prevId ){
+        
+        const item = this._items[id][0];
+
+        const prevItem = this._items[prevId];
+        if (prevItem){
+            item.$markup.insertAfter( prevItem[0].$markup );
+        }
+    }
+
+
+    _addItem( id, prevId ){
 
         const item = this.newItem( id );
 
         // Link the item to the data
         const controller = this._collection.fork( id, this._options.itemController );
         item.link( {data:controller, parent:this} );
+        const _root = typeof this.getRoot === "function" ? this.getRoot() : undefined;
+        this.insertItem( item, prevId, _root );
 
-        return item;
+        return [item, controller];
+    }
+
+    insertItem( item, prevId, root=undefined ) {
+        if (prevId === null && root) {
+            item.$markup.insertAfter( root.$markup );
+            return;
+        }
+        const prevItem = this._items[prevId];
+        if (prevItem){
+            item.$markup.insertAfter( prevItem[0].$markup );
+        } else if (prevId === null) {
+            const firstItem = this._items[ Object.keys( this._items )[0] ];
+            if (firstItem) {
+                item.$markup.insertBefore( firstItem[0].$markup );
+            }
+        }
     }
 
     newItem( id ){
@@ -118,13 +151,15 @@ export class View extends Item{
     }
 
     _removeItem( id ){
-        this._items[id].destroy();
+        this._items[id][0].destroy();
+        this._items[id][1].destroy();
     }
 
     destroy(){
         if (this._items){
             Object.values(this._items).forEach(item =>{
-                item.destroy();
+                item[0].destroy();
+                item[1].destroy();
             });
             this._items = undefined;
         }

@@ -33,5 +33,13 @@ module.exports = {
         ],
     },
     devtool: devMode? 'inline-source-map' : 'source-map',
-    plugins: [new MiniCssExtractPlugin()]
+    plugins: [new MiniCssExtractPlugin()],
+
+    devServer: {
+        static: {
+            directory: __dirname,
+        },
+        compress: true,
+        port: 3000,
+    }
 };

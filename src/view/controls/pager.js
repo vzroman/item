@@ -31,10 +31,12 @@ import mainCss from "../../css/main.css";
 export class Control extends Parent{
 
     static options = {
-        text:{type:types.primitives.String},
-        title:{type:types.primitives.String},
-        icon:{type:types.primitives.String}
+        page:{type:types.primitives.Integer, default: 1},
+        totalCount:{type:types.primitives.Integer},
+        pageSize:{type:types.primitives.Integer},
+        maxVisible:{type:types.primitives.Integer, default: 10}
     };
+
     static markup = `<button class="${ mainCss.horizontal }" style="align-items: center;cursor: pointer">
         <div name="icon" style="display: none; width: 20px; height: 20px;"></div>
         <div name="text"></div>
