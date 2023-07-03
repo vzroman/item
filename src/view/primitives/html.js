@@ -23,52 +23,22 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Control as Parent} from "./control.js";
+import {View as Parent} from "../item.js";
 import {types} from "../../types/index.js";
-import mainCss from "../../css/main.css";
 
 // The control is the point where external widgets to be attached
-export class Control extends Parent{
+export class Html extends Parent{
 
     static options = {
-        page:{type:types.primitives.Integer, default: 1},
-        totalCount:{type:types.primitives.Integer},
-        pageSize:{type:types.primitives.Integer},
-        maxVisible:{type:types.primitives.Integer, default: 10}
+        html:{type:types.primitives.Any}
     };
-
-    static markup = `<button class="${ mainCss.horizontal }" style="align-items: center;cursor: pointer">
-        <div name="icon" style="display: none; width: 20px; height: 20px;"></div>
-        <div name="text"></div>
-    </button>`;
 
     constructor( options ){
         super( options );
 
-        this.bind("text", value => this.$markup.find('[name="text"]').text( value ));
-
-        this.bind("icon", value => {
-            let css = value
-                ?{
-                    "background-image":value,
-                    "display":"block"
-                }
-                :{
-                    "background-image":"",
-                    "display":"none"
-                };
-            this.$markup.find('[name="icon"]').css( css );
-        });
-
-        this.bind("title", value => this.$markup.attr("title", value));
-    }
-
-    enable( value ){
-        this.$markup.prop('disabled', !value);
-    }
-
-    focus(){
-        this.$markup.focus();
+        this.bind("html", value =>
+            this._options.$container.html( value )
+        );
     }
 }
-Control.extend();
+Html.extend();

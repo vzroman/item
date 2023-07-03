@@ -1,0 +1,85 @@
+
+
+/*.chevron,*/
+/*.chevronLast {*/
+/*    width: 30px;*/
+/*    height: 30px;*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    cursor: pointer;*/
+/*}*/
+/*.pagination > [name="prev"]:hover,*/
+/*.pagination > [name="next"]:hover,*/
+/*.chevronLast:hover,*/
+/*.chevron:hover,*/
+/*.pages > div:hover {*/
+/*    background-color: #b6bdca;*/
+/*}*/
+/*.chevron:hover > div {*/
+/*    background-image: url('src/view/widgets/pager/chevron_blue.svg');*/
+/*}*/
+/*.chevronLast:hover > div {*/
+/*    background-image: url('src/view/widgets/pager/last_blue.svg');*/
+/*}*/
+/*.chevron > div {*/
+/*    background-image: url('src/view/widgets/pager/chevron.svg');*/
+/*}*/
+
+/*.chevronLast > div {*/
+/*    background-image: url('src/view/widgets/pager/last.svg');*/
+/*}*/
+
+/*.chevronLast > div,*/
+/*.chevron > div {*/
+/*    flex-shrink: 0;*/
+/*    width: 10px;*/
+/*    height: 10px;*/
+/*    background-position: center center;*/
+/*    background-size: contain;*/
+/*    background-repeat: no-repeat;*/
+/*    pointer-events: none;*/
+/*}*/
+
+/*.pager_wrapper {*/
+/*    padding: 8px;*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: space-between;*/
+/*    background: #eee;*/
+/*    border-bottom: 1px solid #ccc;*/
+/*    border-right: 1px solid #ccc;*/
+/*    border-left: 1px solid #ccc;*/
+/*}*/
+/*.pager,*/
+/*.pagination {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: flex-start;*/
+/*}*/
+/*.pager {*/
+/*    gap: 24px;*/
+/*}*/
+/*.pagination > [name="prev"],*/
+/*.pagination > [name="next"],*/
+/*.pages > div {*/
+/*    cursor: pointer;*/
+/*    color: #1984c8;*/
+/*    width: 30px;*/
+/*    height: 30px;*/
+/*    font-size: 14px;*/
+/*    line-height: 20px;*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*}*/
+/*.pages {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*}*/
+
+/*.pages > div.activePage {*/
+/*    background-color: #1984c8;*/
+/*    color: #ffffff;*/
+/*}*/

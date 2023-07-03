@@ -25,18 +25,18 @@
 
 import {View as Item} from "../../item";
 import {types} from "../../../types";
-import {Cell} from "./cell";
+import {Html} from "../../primitives/html";
 
 export class Header extends Item{
 
     static options = {
         columns:{type:types.primitives.Array, required:true},
         numerated:{type:types.primitives.Bool},
-        selectable:{type:types.primitives.Bool}
+        checkbox:{type:types.primitives.Bool}
     };
 
     constructor( options ) {
-        const { numerated, selectable } = options;
+        const { numerated, checkbox } = options;
 
         options.columns = options.columns.map( col =>{
             if (typeof col === "object" && col.view!==undefined) {
@@ -50,24 +50,19 @@ export class Header extends Item{
 
             const {text,...rest} = col;
             if (typeof text === "string" || typeof text==="number") {
-                return { view:Cell, options:{ text }, ...rest}
+                return { view:Html, options:{ html:text }, ...rest}
             } else if (typeof text === "function") {
-                return { view:Cell, options: {
-                        links:{ text:{source:"data", event:[], handler: text}}
+                return { view:Html, options: {
+                        links:{ html:{source:"data", event:[], handler: text}}
                     }, ...rest}
             }else{
                 throw new Error("invalid column format");
             }
         });
 
-        if (numerated) options.columns = [
-            { view:Cell, options: { style: {"width": "32px"} } },
-            ...options.columns
-        ];
-        if (selectable) options.columns = [
-            { view:Cell, options: { style: {"width": "32px"} } },
-            ...options.columns
-        ];
+        [numerated,checkbox].filter( val => val ).forEach( () => {
+            options.columns.unshift({ view:Html, options: { html:$(`<div style="width: 32px"></div>`) } });
+        });
 
         super( options );
     }

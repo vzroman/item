@@ -23,19 +23,35 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {View as Item} from "../../item";
-import {types} from "../../../types";
+import {Control} from "./control";
+import {types} from "../../types";
 
-export class Cell extends Item{
+export class Checkbox extends Control{
+
     static options = {
-        text:{type:types.primitives.Any}
+        value:{type: types.primitives.Bool}
     };
-    constructor(options) {
-        super(options);
-        if (options.style) {
-            this._options.$container.css(options.style);
-        }
-        this.bind("text", val=>this._options.$container.html( val ))
+
+    static markup = `<input type="checkbox"/>`;
+
+    constructor( options ){
+        super( options );
+
+        this.$markup.on("change", ()=>{
+            this.set({ value:this.$markup.prop("checked")})
+        });
+    }
+
+    updateValue( value=false, prev ){
+        this.$markup.prop('checked', value);
+    }
+
+    enable( value ){
+        this.$markup.prop('disabled', !value);
+    }
+
+    focus(){
+        this.$markup.focus();
     }
 }
-Cell.extend();
+Checkbox.extend();

@@ -33,10 +33,12 @@ export class Row extends Item{
 
     static options = {
         columns:{type:types.primitives.Array, required:true},
+        numerated:{type:types.primitives.Bool, default:false},
+        selectable:{type:types.primitives.Bool, default:true},
         selected:{type:types.primitives.Bool},
         parentRow:{type: types.primitives.Instance, options:{class:Row}},
+        nextRow:{type: types.primitives.Instance, options:{class:Row}},
         previousRow:{type: types.primitives.Instance, options:{class:Row}},
-        numerated:{type:types.primitives.Bool, default:false},
         index:{type:types.primitives.String, default:"0"}
     };
 
@@ -51,37 +53,31 @@ export class Row extends Item{
             this.$markup.toggleClass(style.selected_row, val);
         });
 
+        if (this._options.selectable){
+            this.$markup.on("click",()=>{
+               this.set({selected: !this._options.selected });
+            });
+        }
 
-        if (this._options.parentRow){
-
-            this.#placeAfter( this._options.previousRow );
-
-            if (this._options.numerated ){
-                this._options.parentRow.bind("index", parentIndex=>{
-                    this.#indexPrefix = parentIndex + ".";
-                    this.#updateIndex();
-                })
-            }
+        if (this._options.numerated && this._options.parentRow){
+            this._options.parentRow.bind("index", parentIndex=>{
+                this.#indexPrefix = parentIndex + ".";
+                this.#updateIndex();
+            });
         }
 
         this.bind("previousRow", row=>{
             this.#unbind.forEach( u => u());
             this.#unbind = [];
 
-            if (row){
-                this.#unbind.push(()=> row.unbind( row.bind("destroy",()=>{
-                    this.set({previousRow: row.get("previousRow")})
+            if (this._options.numerated && row){
+                this.#unbind.push(()=> row.unbind( row.bind("index",()=>{
+                    this.#updateIndex( );
                 })));
-
-                if (this._options.numerated){
-                    this.#unbind.push(()=> row.unbind( row.bind("index",()=>{
-                        this.#updateIndex( );
-                    })));
-                }
             }
 
             this.#placeAfter( row )
-        })
+        });
     }
 
 
@@ -105,14 +101,6 @@ export class Row extends Item{
         },{});
     }
 
-    getLastChild(){
-        if (this.#children){
-            return this.#children.getLastItem();
-        }else{
-            return undefined;
-        }
-    }
-
     unfold( controller ){
         if (this.#children) this.#children.destroy();
 
@@ -124,9 +112,21 @@ export class Row extends Item{
         this.#children = undefined;
     }
 
+    insertAfter( nextRow ){
+        if (this._options.nextRow){
+            nextRow.$markup.insertBefore( this._options.nextRow.$markup );
+        }else{
+            nextRow.$markup.insertAfter( this.$markup );
+        }
+        this.set({nextRow});
+    }
+
     destroy() {
         this.#unbind.forEach( u => u());
         this.#unbind = undefined;
+
+        this._options.nextRow?.set({previousRow: this._options.previousRow});
+        this._options.previousRow?.set({nextRow: this._options.nextRow});
 
         if (this.#children){
             this.#children.destroy();
@@ -138,12 +138,7 @@ export class Row extends Item{
 
     #placeAfter( previousRow ){
         if (previousRow){
-            const lastChild = previousRow.getLastChild();
-            if (lastChild){
-                this.$markup.insertAfter( lastChild.$markup );
-            }else{
-                this.$markup.insertAfter( previousRow.$markup );
-            }
+            previousRow.insertAfter( this );
         }else if(this._options.parentRow){
             this.$markup.insertAfter( this._options.parentRow.$markup );
         }else{
@@ -151,12 +146,12 @@ export class Row extends Item{
         }
     }
 
-    #updateIndex( prefix ){
+    #updateIndex(){
         const index = this._options.previousRow
-            ? this._options.previousRow.get("index").split(".").pop()
+            ? (+this._options.previousRow.get("index").split(".").pop()) + 1
             : 0;
 
-        this.set({index: "" + prefix + index})
+        this.set({index: this.#indexPrefix + index})
     }
 }
 Row.extend();
@@ -168,15 +163,10 @@ class RowsCollection extends Collection{
     };
 
     newItem( id, previousRow ){
-        const index = previousRow
-            ? previousRow.get("index").split(".").pop()
-            : "0";
-
         return new Row({...this._options.parent._options, ...{
             id:id,
             parentRow:this._options.parent,
-            previousRow:previousRow,
-            index:index
+            previousRow:previousRow
         }});
     }
 

@@ -25,6 +25,7 @@
 import {Control} from "./control.js";
 import {Control as Button} from "./button.js";
 import {Control as TextInput} from "./textInput.js";
+import {Checkbox} from "./checkbox.js";
 import {Control as NumberInput} from "./numberInput.js";
 import {Control as Dropdown} from "./dropdown.js";
 
@@ -32,6 +33,7 @@ export const controls = {
     Control,
     Button,
     TextInput,
+    Checkbox,
     NumberInput,
     Dropdown
 };
