@@ -44,8 +44,9 @@ export function run( $container ){
             columns:[".name",".pattern"],    // string | { fields, handler } | Item }
             header:["name", "pattern"],                    // string | Item | function -> string | $markup
             resizable:true,
-            numerated:false,
-            selectable:true
+            numerated:true,
+            multiselect:true,
+            checkbox:true
             // pager:{type:types.primitives.Set},
             // isFolder:{type:types.primitives.Any},
             // getIcon:{type:types.primitives.Any},

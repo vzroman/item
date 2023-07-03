@@ -30,8 +30,10 @@ import {Row} from "./grid/row";
 import {Html} from "../primitives/html";
 import {Checkbox} from "../controls/checkbox";
 import {Pager} from "../widgets/pager";
+import {selection} from "../../utilities/selection";
 import {types} from "../../types";
 import style from "./grid.css";
+
 
 
 
@@ -249,6 +251,7 @@ export class Grid extends Collection{
 
         if (options.checkbox){
             options.columns.unshift({ view:Checkbox, options:{
+                enable:!options.multiselect,
                 links:{ value:"parent@selected" }},
                 events:{ value:"parent@selected" }
             })
@@ -266,7 +269,14 @@ export class Grid extends Collection{
         }
         
         if (this._options.multiselect) {
-            this.#initSelect();
+            selection({
+               $container: this.$tbody,
+               $selector: 'tr',
+               onSelect: ({add:addItems=[], remove:removeItems=[]}) =>{
+                   addItems.forEach( $item => this.constructor.getItem( $item )?.set({selected:true}) );
+                   removeItems.forEach( $item => this.constructor.getItem( $item )?.set({selected:false}) );
+               }
+            });
         }
         // if (this._options.getSubitems) {
         //     this.init_folder_open();
@@ -477,9 +487,6 @@ export class Grid extends Collection{
         });
     }
 
-    #initSelect(){
-        //TODO
-    }
 
     destroy() {
         this.heightObserver?.disconnect();

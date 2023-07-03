@@ -22,160 +22,112 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-
-import style from "../view/collections/grid.css";
-
-export class Selection {
-    constructor( options ){
-
-        this._options = {...{
-            container: undefined,
-            selector: undefined
-        }, ...options};
-
-    }
+export function selection( options ){
 
 
+    const {
+        $container,
+        $selector,
+        onSelect
+    } = options;
+
+    const $lasso = $(`<div></div>`).css({
+        "display": "none",
+        "position": "absolute",
+        "z-index": 9999,
+        "background-color": "lightblue",
+        "opacity": 0.3,
+        "border": "1px dotted grey",
+        "pointer-events":"none"
+    }).appendTo('body');
+
+    const start = {
+        x:undefined,
+        y:undefined
+    };
+
+    let fromIndex = undefined;
+
+    const selection = new Set();
 
 
-    init_select() {
-        this.selected = [];
-        this.temp = [];
-        this.from = null;
-        this.timer = null;
+    const startSelection = (e) => {
+        const $item = $(e.target).closest( $selector );
+        if (!$item.length) return;
 
-        this.$tbody.on("click", e => {
+        // Clear items that are not present already
+        selection.forEach(i =>{
+            if (!$container[0].contains(i)) selection.delete( i )
+        });
 
-            clearTimeout(this.timer);
-            let tr = e.target.closest('tr');
-            if (!tr || !this.$tbody[0].contains(tr)) return;
+        if (!e.shiftKey) fromIndex = $container.children( $selector ).index( $item );
 
-            this.select($(tr).data("row_id"), e);
-            this.setSelecterRows();
-        })
-        this.lassoSelect();
-    }
-
-    lassoSelect() {
-        let startX = 0,
-            startY = 0,
-            drawing = false;
-
-        const onDraw = e => {
-            if (e.buttons !== 1) return destroy();
-            drawing = true;
-            styleLasso(e);
+        if (!(e.ctrlKey || e.metaKey || e.shiftKey)) {
+            onSelect({remove:[...selection].map( i => $(i))});
+            selection.clear();
         }
 
-        this.$wrapper.on("mousedown", e => {
-            this.timer = setTimeout(() => {
-                if ($(e.target).hasClass(style.resizer)) return;
+        start.x = e.pageX;
+        start.y = e.pageY;
 
-                const _from = this.getRowIndex($(e.target.closest('tr')).data("row_id"));
-                if (_from === -1) return;
-                this.from = _from;
+        $lasso.css({display:"block"});
 
-                if (!(e.ctrlKey || e.metaKey || e.shiftKey)) {
-                    this.selected = [];
-                    this.setSelecterRows();
+        window.addEventListener('mousemove', onDraw);
+        window.addEventListener('mouseup', endSelection);
+    }
+
+    const endSelection = (e)=>{
+
+        $lasso.css({display:"none",width:0, height:0});
+        window.removeEventListener('mousemove', onDraw);
+
+        const $item = $(e.target).closest( $selector );
+
+        const toIndex = $container.children( $selector ).index( $item );
+
+        const $items = $container.children( $selector ).slice(Math.min(fromIndex, toIndex), Math.max(fromIndex, toIndex)+1);
+
+        const diff = {
+            add:[],
+            remove:[]
+        };
+
+        $items.each(function (){
+            if (selection.has( this )){
+                if (e.ctrlKey || e.metaKey){
+                    selection.delete( this );
+                    diff.remove.push( $(this) );
                 }
-
-                startX = e.pageX - this.$wrapper.offset().left;
-                startY = e.pageY - this.$wrapper.offset().top;
-                drawing = false;
-                this.$tfoot.css({"pointer-events": "none"});
-                window.addEventListener('mousemove', onDraw);
-                window.addEventListener('mouseup', destroy);
-            }, 150);
+            }else{
+                selection.add( this );
+                diff.add.push( $(this) )
+            }
         });
 
-        const destroy = e => {
-            if (drawing) beforeDestroy(e);
+        fromIndex = toIndex;
 
-            drawing = false;
-            this.$lasso.css({"display": "none"});
-            this.$tfoot.css({"pointer-events": "unset"});
-            window.removeEventListener('mousemove', onDraw);
-        }
-
-        const beforeDestroy = e => {
-            const to = this.getRowIndex($(e.target.closest('tr')).data("row_id"));
-            const rows = this.getTableRows(this.from, to);
-
-            this.temp = rows.filter(el => !this.selected.includes(el));
-
-            if (e.ctrlKey || e.metaKey) {
-                rows.forEach(el => {
-                    if (!this.selected.includes(el)) {
-                        this.selected.push(el);
-                    } else {
-                        this.selected.splice(this.selected.indexOf(el), 1);
-                    }
-                })
-            } else {
-                this.selected = [...new Set([...this.selected, ...rows])];
-            }
-
-            this.setSelecterRows();
-        }
-
-        const styleLasso = e => {
-            const currentX = e.pageX - this.$wrapper.offset().left;
-            const currentY = e.pageY - this.$wrapper.offset().top;
-            const width = currentX - startX;
-            const height = currentY - startY;
-
-            this.$lasso.css({
-                "display": "unset",
-                "width": Math.abs(width)+ "px",
-                "height": Math.abs(height)+ "px",
-                "left": ((width < 0 ? currentX : startX) + this.$wrapper.scrollLeft()) + "px",
-                "top": ((height < 0 ? currentY : startY) + this.$wrapper.scrollTop()) + "px"
-            })
-        }
+        onSelect( diff );
     }
 
-    select(id, e) {
-        if (e.shiftKey && !(e.ctrlKey || e.metaKey)) {
-            if (this.selected.length === 0) {
-                this.selected = [id];
-                this.temp = [];
-                this.from = this.getRowIndex(id);
-            } else {
-                const to = this.getRowIndex(id);
-                const rows = this.getTableRows(this.from, to);
+    const onDraw = e => {
+        if (e.buttons !== 1) return endSelection(e);
 
-                this.selected = this.selected.filter(el => !this.temp.includes(el));
+        const width = e.pageX - start.x;
+        const height = e.pageY - start.y;
 
-                this.temp = rows.filter(el => !this.selected.includes(el));
-                this.selected = [...new Set([...this.selected, ...rows])];
-            }
-        } else {
-            this.selected = (e.ctrlKey || e.metaKey) ? toggleArrayElement(this.selected, id) :
-                (this.selected.length === 1 && this.selected[0] === id) ? [] : [id];
-
-            this.from = this.getRowIndex(id);
-            this.temp = [];
-        }
-    }
-
-    getTableRows(from, to) {
-        let _from = Math.min(from, to), _to = Math.max(from, to);
-        return this.$tbody.find(`tr[data-row_id]`).slice(_from, _to+1).toArray().map(row => $(row).data("row_id"));
-    }
-
-    getRowIndex(id) {
-        const row = this.$tbody.find(`tr[data-row_id='${id}']`);
-        return this.$tbody.find(`tr[data-row_id]`).index(row);
-    }
-
-    setSelecterRows() {
-        const rows = this.$tbody.find(`tr[data-row_id]`).toArray().map(row => $(row).data("row"));
-        rows.forEach(row => {
-            const selected = this.selected.includes(row.get("id"));
-            row.set({ selected });
+        $lasso.css({
+            width: Math.abs(width)+ "px",
+            height: Math.abs(height)+ "px",
+            left: (width < 0 ? e.pageX : start.x) + "px",
+            top: (height < 0 ? e.pageY : start.y) + "px"
         });
-        this._trigger("onSelect", [this.selected]);
+
     }
+
+    $container.on("mousedown", startSelection);
+
+    return ()=> $lasso.remove();
+
 }
+
 

@@ -55,10 +55,15 @@ export class View extends Item{
         return this.constructor.widgets;
     }
 
+    static getItem( $item ){
+        return $item.data("@item");
+    }
+
     constructor( options ){
         super( options );
 
         this.$markup = $( this.markup() ).appendTo( this._options.$container );
+        this.$markup.data("@item", this);
 
         this._widgets = this.widgets();
 

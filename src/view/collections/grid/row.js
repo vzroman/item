@@ -26,7 +26,6 @@
 import {View as Item} from "../../item";
 import {types} from "../../../types";
 import style from "../grid.css";
-import {util} from "../../../utilities";
 import {View as Collection} from "../../collection";
 
 export class Row extends Item{
@@ -39,7 +38,7 @@ export class Row extends Item{
         parentRow:{type: types.primitives.Instance, options:{class:Row}},
         nextRow:{type: types.primitives.Instance, options:{class:Row}},
         previousRow:{type: types.primitives.Instance, options:{class:Row}},
-        index:{type:types.primitives.String, default:"0"}
+        index:{type:types.primitives.String, default:"1"}
     };
 
     #indexPrefix = "";
@@ -71,9 +70,10 @@ export class Row extends Item{
             this.#unbind = [];
 
             if (this._options.numerated && row){
-                this.#unbind.push(()=> row.unbind( row.bind("index",()=>{
+                const id = row.bind("index",()=>{
                     this.#updateIndex( );
-                })));
+                });
+                this.#unbind.push(()=> row.unbind( id ));
             }
 
             this.#placeAfter( row )
@@ -83,8 +83,7 @@ export class Row extends Item{
 
 
     markup() {
-        const id = util.data.GUID();
-        const $markup = $(`<tr data-row-id="${id}"></tr>`);
+        const $markup = $(`<tr></tr>`);
         $markup.data("row", this);
 
         this._options.columns.forEach((_,i)=>{
