@@ -35,7 +35,9 @@ export function run( $container ){
             schema:{
                 ".name":{ type:item.types.primitives.String },
                 ".pattern":{type:item.types.primitives.String}
-            }
+            },
+            page:1,
+            pageSize: 10,
         });
 
         const grid = new item.view.collections.Grid({
@@ -46,14 +48,14 @@ export function run( $container ){
             resizable:true,
             numerated:true,
             multiselect:true,
-            checkbox:true
-            // pager:{type:types.primitives.Set},
+            checkbox:true,
+            pager:{}
             // isFolder:{type:types.primitives.Any},
             // getIcon:{type:types.primitives.Any},
             // getSubitems:{type:types.primitives.Any}
         });
 
-        controller.init([".folder","=","$oid('/root/PROJECT')"]);
+        controller.init([".folder","=","$oid('/root/PROJECT/LOCALIZATION')"]);
 
     }
 }

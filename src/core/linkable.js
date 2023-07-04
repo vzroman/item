@@ -23,7 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Eventful} from "./eventful.js";
-import {deepMerge,deepCopy,diff,patch2value} from "../utilities/data.js";
+import {deepMerge, deepCopy, diff, patch2value, pathEval} from "../utilities/data.js";
 
 export class Linkable extends Eventful{
 
@@ -255,7 +255,7 @@ export class Linkable extends Eventful{
                 }
             }
 
-            source = context[source];
+            source = pathEval(source, context);
 
             if ( source ){
                 // The context contains the source controller, the link runs
@@ -304,14 +304,14 @@ export class Linkable extends Eventful{
 
             // If the target is not defined then the event has only a handler
             // and does not depend on the context
-            if ( !target || context[target]){
+            if ( !target || pathEval(target, context)){
 
                 this._linked.events[ event ] = new Link({
                     source:this,
                     event,
                     context,
                     handler:params.handler,
-                    target: target ? context[target] : undefined,
+                    target: pathEval(target, context),
                     property
                 });
             }

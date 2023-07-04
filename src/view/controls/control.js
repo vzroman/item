@@ -104,7 +104,6 @@ export class Control extends View{
             this._widget.destroy();
             this._widget = undefined;
         }
-        this._options.$container.empty();
         super.destroy();
     }
 }

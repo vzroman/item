@@ -30,6 +30,10 @@ module.exports = {
                     }
                 ]
             },
+            {
+                test: /\.(png|svg|jpg|jpeg|gif)$/i,
+                type: 'asset/resource',
+            },
         ],
     },
     devtool: devMode? 'inline-source-map' : 'source-map',

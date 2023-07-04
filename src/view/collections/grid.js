@@ -363,11 +363,7 @@ export class Grid extends Collection{
             }};
         }
         if (this._options.pager) {
-            widgets.pager = {view: Pager, options:{
-                ...this.get("pager"),
-                links: { page:"data@$.page", totalCount: "data@$.totalCount",pageSize:"data@$.pageSize" },
-                events: { page:"data@$.page", pageSize: "data@$.pageSize" }
-            }};
+            widgets.pager = {view: Pager, options: this.get("pager")};
         }
 
         // widgets.tbody = {

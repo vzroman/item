@@ -150,8 +150,10 @@ export class View extends Item{
 
         context = {
             ...context,
-            ...this._widgets,
-            parent:this
+            ...{
+                widgets:this._widgets,
+                parent:this
+            },
         };
 
         // Link the widgets to the external data
