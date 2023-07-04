@@ -40,7 +40,8 @@ export class View extends Item{
     };
 
     static events = {
-        click:true
+        click:true,
+        dblClick:true
     };
 
     static markup = undefined;
@@ -131,7 +132,21 @@ export class View extends Item{
             }
         });
 
-        this.$markup.on("click",event => this._trigger("click", event) );
+        // Click and double click events
+        let timer = undefined;
+        this.$markup.on("click",event => {
+            if (timer){
+                clearTimeout( timer );
+                timer=undefined;
+                this._trigger("dblClick", event);
+            }else {
+               timer=setTimeout(()=>{
+                    clearTimeout(timer);
+                    timer=undefined;
+                   this._trigger("click", event);
+                },200);
+            }
+        });
     }
 
     link( context ){

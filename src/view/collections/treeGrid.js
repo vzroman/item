@@ -23,210 +23,148 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-// import {types} from "../../types/index.js";
-// import {View as Grid, GridRows as Rows, Row as GridRow} from "./grid";
-// import style from "./grid.css";
-//
-// export class View extends Grid{
-//
-//     static options = {
-//         ...super.options,
-//         getSubitems:{type:types.primitives.Any}
-//     };
-//
-//     change_view(item, view=GridRows) {
-//         super.change_view(item, view);
-//     }
-//
-//     add_breadcrumbs(row) {
-//         const items = [];
-//         const traverse = row => {
-//             if (row && row._options.root) traverse(row._options.root);
-//             items.push(row._options.data.get())
-//         }
-//         traverse(row);
-//         this.breadcrumbs = [...this.breadcrumbs, ...items];
-//     }
-//
-//     widgets(){
-//         const widgets = super.widgets();
-//         widgets.tbody = {
-//             view: GridRows,
-//             options: {
-//                 data: this._options.data,
-//                 $container: this.$tbody,
-//                 columns: this._options.columns,
-//                 selectable:this._options.selectable,
-//                 numerated:this._options.numerated,
-//                 isFolder: this._options.isFolder,
-//                 getSubitems: this._options.getSubitems,
-//                 getIcon: this._options.getIcon
-//             }
-//         }
-//
-//         return widgets;
-//     }
-// }
-// View.extend();
-//
-// class GridRows extends Rows{
-//     static options = {
-//         ...super.options,
-//         getSubitems:{type:types.primitives.Any}
-//     };
-//
-//     constructor( options, depth=0, root=null){
-//         super( options );
-//         this.depth = depth;
-//         this.root = root;
-//         this.parentIndex = undefined;
-//         this.bind("data", data => {
-//             if (data && this.root) {
-//                 data.bind("$.totalCount",value=>{
-//                     const text = this.formatTotalCount(value);
-//                     this.root.$markup.find(`[name="nestedRows"]`).text(text);
-//                 })
-//             }
-//         });
-//         if(this.root){
-//             this.parentIndex = `${this.root._options.index}.`;
-//         }
-//     }
-//
-//     formatTotalCount(value) {
-//         const _pageSize = this._options.data.option("pageSize");
-//         let _text = value > _pageSize ? `${value}` : "";
-//         const n = _text.length;
-//
-//         if (n !== 0) {
-//             if(n > 6){
-//                 _text = _text.substring(0, n - 6) + "kk...";
-//             } else if(n > 3){
-//                 _text = _text.substring(0, n - 3) + "k...";
-//             } else if(n <= 3){
-//                 _text = _text + "...";
-//             }
-//         }
-//         return _text;
-//     }
-//
-//     getRoot() {
-//         return this.root;
-//     }
-//
-//     newItem( id ){
-//         return new Row({
-//             id:id,
-//             $container: this._options.$container,
-//             isFolder:this._options.isFolder,
-//             getSubitems:this._options.getSubitems,
-//             getIcon:this._options.getIcon,
-//             columns:this._options.columns,
-//             numerated:this._options.numerated,
-//             selectable:this._options.selectable,
-//             depth:this.depth,
-//             parentIndex:this.parentIndex,
-//             root:this.root
-//         });
-//     }
-//     destroy(){
-//         if(this.root){
-//             this.root.$markup.find(`[name="nestedRows"]`).text("");
-//         }
-//         super.destroy();
-//     }
-// }
-// GridRows.extend();
-//
-// class Row extends GridRow{
-//
-//     static options = {
-//         ...super.options,
-//         depth:{type:types.primitives.Integer, default: 0},
-//         parentIndex:{type:types.primitives.String},
-//         getSubitems:{type:types.primitives.Any},
-//         isOpen:{type:types.primitives.Bool, default: false},
-//         root:{type:types.primitives.Any}
-//     };
-//
-//     static events = {
-//         click: (event, _this, { data }) => {
-//             if ($(event.target).attr("name") === "tree-icon") {
-//                 event.stopPropagation();
-//                 _this._options.isOpen ? _this.close() : _this.open( data );
-//             }
-//         }
-//     }
-//
-//     constructor( options ) {
-//         super( options );
-//         this.bind("isOpen", (val=false) => {
-//             this.$treeIcon.text(val ?  "-" : "+")
-//         })
-//
-//         this.bind("data", data =>{
-//             if(data && typeof this._options.isFolder === 'function'){
-//                 const _plus = this._options.isFolder(data.get());
-//                 this.$treeIcon.toggleClass(style.treeIcon_visible, _plus);
-//             }
-//         })
-//         if(this._options.numerated){
-//             this.bind("index", index =>{
-//                 if(index && this._options.parentIndex){
-//                     const current_idx = this.$index.text();
-//                     this.$index.text(`${this._options.parentIndex}${current_idx}`);
-//                 }
-//             })
-//         }
-//     }
-//
-//
-//     appendColumns( $markup ) {
-//         const {depth} = this._options;
-//         this._options.columns.forEach((_,i)=> {
-//             if (i === 0) {
-//                 $(`<td>
-//                         <div style="margin-left: ${20 * depth}px;" class="${style.first_cell}">
-//                             <div name="tree-icon">+</div>
-//                             <div name="icon" class="${style.icon}"></div>
-//                             <div name="${ i }" style="flex-shrink: 0;"></div>
-//                             <div name="nestedRows" title="Quantity of nested rows"></div>
-//                         </div>
-//                     </td>`).appendTo($markup);
-//             } else {
-//                 $(`<td name="${ i }"></td>`).appendTo($markup);
-//             }
-//         });
-//         this.$treeIcon = $markup.find(`[name="tree-icon"]`);
-//     }
-//
-//     open( data ) {
-//         if (typeof this._options.getSubitems === "function") {
-//             this.set({isOpen: true});
-//             this._childrenController = this._options.getSubitems(data.get());
-//             this._children = new GridRows({...this._options, data: this._childrenController}, this._options.depth+1, this);
-//         } else {
-//             throw new Error("Provide getSubitems method");
-//         }
-//     }
-//
-//     close() {
-//         if (!this.get("isOpen")) {
-//             return;
-//         }
-//         this.set({isOpen: false});
-//         this.destroyChildren();
-//     }
-//
-//     destroyChildren() {
-//         this._children?.destroy();
-//         this._children = undefined;
-//         this._childrenController?.destroy();
-//         this._childrenController = undefined;
-//     }
-//     destroy(){
-//         this.destroyChildren();
-//         super.destroy();
-//     }
-// }
-// Row.extend();
+import {View as ItemView} from "../item";
+import {types} from "../../types/index.js";
+import {Grid} from "./grid";
+import mainStyles from "../../css/main.css"
+import {Label} from "../primitives/label";
+
+export class TreeGrid extends ItemView{
+
+    static options = {
+        ...Grid.options,
+        getSubitems:{type:types.primitives.Fun},
+        isFolder:{type:types.primitives.Fun},
+        getIcon:{type:types.primitives.Fun}
+    };
+
+    static markup = `<div class="${ mainStyles.vertical }">
+        <div name="breadcrumps"> TODO breadcrumps </div>
+        <div name="grid"></div>
+    </div>`;
+
+    constructor( options ) {
+
+
+        super( options );
+    }
+
+    widgets(){
+        const options = this.get();
+        options.columns[0] = {
+            view: TreeCell,
+            options: {
+                column: options.columns[0],
+                getSubitems: this._options.getSubitems,
+                isFolder: this._options.isFolder,
+                getIcon: this._options.getIcon,
+                events:{
+                    drillDown:( whatShouldBeHere )=>{
+                        console.debug("TODO: drillDown a row", whatShouldBeHere)
+                    }
+                }
+            }
+        };
+
+        return {
+            grid:{ view:Grid, options:options }
+        }
+
+    }
+}
+TreeGrid.extend();
+
+class TreeCell extends ItemView{
+
+    static options = {
+        column: {type: types.primitives.Any},
+        getSubitems:{type:types.primitives.Fun},
+        isFolder:{type:types.primitives.Fun},
+        getIcon:{type:types.primitives.Fun},
+        icon:{type:types.primitives.String},
+        isExpandable:{type:types.primitives.Bool},
+        isExpanded:{type:types.primitives.Bool}
+    };
+
+    static events = {
+        drillDown: true
+    }
+
+    #parent;
+    #data;
+    #isFolder = false;
+
+    static markup = `<div class="${ mainStyles.horizontal }">
+        <div name="offset"></div>
+        <div name="expand"></div>
+        <div name="icon"></div>
+        <div name="cell"></div>
+        <div name="total"></div>
+    </div>`;
+
+    widgets() {
+
+        this.$offset = this.$markup.find('[name=offset]');
+
+        return {
+            expand:{
+                view:Label,
+                options: {
+                    links:{
+                        text:{source:"parent", event:["isExpandable","isExpanded"], handler:({isExpandable,isExpanded})=>{
+                            if (isExpanded) return "-";
+                            if (isExpandable) return "+";
+                            return " "
+                        }}
+                    },
+                    events: {
+                        click:{  }
+                    }
+                }
+            }
+        }
+
+    }
+
+    link( context ){
+        if (!this.#parent && context.parent){
+            this.#parent = context.parent;
+            let level = 0, row = this.#parent.get("parentRow");
+            while ( row ){
+                level++;
+                row = row.get("parentRow");
+            }
+            this.$offset.width(level + 10);
+
+            this.#parent.bind("dblClick",()=>{
+                if (this.#isFolder){
+                    this._trigger("drillDown",[this.#data, this.#parent?.get("data")])
+                }
+            })
+        }
+        if (!this.#data && context.data){
+            this.#data = context.data;
+            this.#isFolder = this._options.isFolder ? this._options.isFolder( this.#data ) : false;
+
+            if (this._options.getIcon){
+                this.#data.bind("change",()=>{
+                    let icon = this._options.getIcon( this.#data );
+                    if (!icon){
+                        icon = this.#isFolder ? "TODO:folderIcon" : "TODO: itemIcon"
+                    }
+                    this.set({icon});
+                });
+            }
+        }
+    }
+
+    #fold(){
+
+    }
+
+    #unfold(){
+
+    }
+
+}
+TreeCell.extend();
