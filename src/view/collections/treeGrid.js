@@ -54,7 +54,7 @@ export class TreeGrid extends ItemView{
         options.columns[0] = {
             view: TreeCell,
             options: {
-                column: options.columns[0],
+                cell: options.columns[0],
                 getSubitems: this._options.getSubitems,
                 isFolder: this._options.isFolder,
                 getIcon: this._options.getIcon,
@@ -77,13 +77,13 @@ TreeGrid.extend();
 class TreeCell extends ItemView{
 
     static options = {
-        column: {type: types.primitives.Any},
+        cell: {type: types.primitives.Any},
         getSubitems:{type:types.primitives.Fun},
         isFolder:{type:types.primitives.Fun},
         getIcon:{type:types.primitives.Fun},
         icon:{type:types.primitives.String},
-        isExpandable:{type:types.primitives.Bool},
-        isExpanded:{type:types.primitives.Bool}
+        isExpandable:{type:types.primitives.Bool, default:false },
+        isExpanded:{type:types.primitives.Bool, default:false }
     };
 
     static events = {
@@ -92,12 +92,16 @@ class TreeCell extends ItemView{
 
     #parent;
     #data;
-    #isFolder = false;
+
+    constructor( options ) {
+        options.cell = Grid.compileColumn( options.cell );
+        super( options );
+    }
 
     static markup = `<div class="${ mainStyles.horizontal }">
         <div name="offset"></div>
         <div name="expand"></div>
-        <div name="icon"></div>
+        <div name="icon">icon</div>
         <div name="cell"></div>
         <div name="total"></div>
     </div>`;
@@ -118,15 +122,33 @@ class TreeCell extends ItemView{
                         }}
                     },
                     events: {
-                        click:{  }
+                        click:e=>{
+                            e.stopPropagation();
+                            if (!this._options.isExpandable) return;
+                            if (!this.#parent) return;
+                            if (this._options.isExpanded){
+                                this.#parent.fold();
+                                this.set({isExpanded:false});
+                            }else if(this.#data){
+                                const controller = this._options.getSubitems( this.#data );
+                                this.#parent.unfold( controller );
+                                this.set({isExpanded:true});
+                            }
+
+                        }
                     }
+
                 }
-            }
+            },
+            cell:this._options.cell
         }
 
     }
 
     link( context ){
+
+        super.link( context );
+
         if (!this.#parent && context.parent){
             this.#parent = context.parent;
             let level = 0, row = this.#parent.get("parentRow");
@@ -134,36 +156,29 @@ class TreeCell extends ItemView{
                 level++;
                 row = row.get("parentRow");
             }
-            this.$offset.width(level + 10);
+            this.$offset.width(level * 5);
 
             this.#parent.bind("dblClick",()=>{
-                if (this.#isFolder){
+                if (this._options.isExpandable){
                     this._trigger("drillDown",[this.#data, this.#parent?.get("data")])
                 }
             })
         }
         if (!this.#data && context.data){
             this.#data = context.data;
-            this.#isFolder = this._options.isFolder ? this._options.isFolder( this.#data ) : false;
+
+            this.set({ isExpandable:this._options.isFolder ? this._options.isFolder( this.#data ) : false });
 
             if (this._options.getIcon){
                 this.#data.bind("change",()=>{
                     let icon = this._options.getIcon( this.#data );
                     if (!icon){
-                        icon = this.#isFolder ? "TODO:folderIcon" : "TODO: itemIcon"
+                        icon = this._options.isExpandable ? "TODO:folderIcon" : "TODO: itemIcon"
                     }
                     this.set({icon});
                 });
             }
         }
-    }
-
-    #fold(){
-
-    }
-
-    #unfold(){
-
     }
 
 }

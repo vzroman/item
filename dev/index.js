@@ -1,4 +1,5 @@
 import {run as grid_test} from "./grid_test.js";
+import {run as treeGrid_test} from "./treeGrid_test.js";
 
 
 $(function () {
@@ -9,7 +10,7 @@ $(function () {
 
 
 
-    grid_test( $container );
+    treeGrid_test( $container );
 
 
 

@@ -103,7 +103,11 @@ export class Row extends Item{
     unfold( controller ){
         if (this.#children) this.#children.destroy();
 
-        this.#children = new RowsCollection({ parent:this, data:controller });
+        this.#children = new RowsCollection({
+            $container:this._options.$container,
+            parent:this,
+            data:controller
+        });
     }
 
     fold(){
@@ -162,10 +166,14 @@ class RowsCollection extends Collection{
     };
 
     newItem( id, previousRow ){
-        return new Row({...this._options.parent._options, ...{
+        return new Row({...this._options.parent.get(), ...{
+            data:undefined,
             id:id,
             parentRow:this._options.parent,
-            previousRow:previousRow
+            nextRow: undefined,
+            previousRow:previousRow,
+            selected: false,
+            index:undefined
         }});
     }
 
