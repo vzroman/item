@@ -123,7 +123,7 @@ class TreeCell extends ItemView{
                     },
                     events: {
                         click:e=>{
-                            e.stopPropagation();
+                            e.stopPropagation(); // TODO. doesn't work
                             if (!this._options.isExpandable) return;
                             if (!this.#parent) return;
                             if (this._options.isExpanded){
@@ -140,7 +140,9 @@ class TreeCell extends ItemView{
 
                 }
             },
-            cell:this._options.cell
+            // icon:{}, TODO
+            cell:this._options.cell,
+            //total:{} TODO
         }
 
     }
