@@ -26,8 +26,11 @@
 import {View as ItemView} from "../item";
 import {types} from "../../types/index.js";
 import {Grid} from "./grid";
+import {View as Flex} from "./flex";
 import mainStyles from "../../css/main.css"
 import {Label} from "../primitives/label";
+import { controllers } from "../../controllers";
+import { controls } from "../controls";
 
 export class TreeGrid extends ItemView{
 
@@ -35,11 +38,13 @@ export class TreeGrid extends ItemView{
         ...Grid.options,
         getSubitems:{type:types.primitives.Fun},
         isFolder:{type:types.primitives.Fun},
-        getIcon:{type:types.primitives.Fun}
+        getIcon:{type:types.primitives.Fun},
+        itemName:{type:types.primitives.Fun},
+        contextPath:{type:types.primitives.Array,default:[]}
     };
 
     static markup = `<div class="${ mainStyles.vertical }">
-        <div name="breadcrumps"> TODO breadcrumps </div>
+        <div name="breadcrumbs"></div>
         <div name="grid"></div>
     </div>`;
 
@@ -50,26 +55,83 @@ export class TreeGrid extends ItemView{
     }
 
     widgets(){
-        const options = this.get();
-        options.columns[0] = {
+        this._breadCrumbsController = new controllers.Collection({
+            id:"id",
+            schema:{ 
+                id:{ type: types.primitives.Integer }, 
+                caption:{type: types.primitives.String},
+                item:{type: types.primitives.Any } 
+            },
+            keyCompare:([a],[b])=>{
+                a = +a;
+                b = +b;
+                if ( a > b ) return 1;
+                if ( a < b ) return -1;
+                return 0;
+            },
+            data:[{id:0, caption:"/", item:{id:"clicked item"}}]
+        });
+        
+        this._gridOptions = this.get();
+        delete this._gridOptions.$container;
+        this._gridOptions.columns[0] = {
             view: TreeCell,
             options: {
-                cell: options.columns[0],
+                cell: this._gridOptions.columns[0],
                 getSubitems: this._options.getSubitems,
                 isFolder: this._options.isFolder,
                 getIcon: this._options.getIcon,
                 events:{
-                    drillDown:( whatShouldBeHere )=>{
-                        console.debug("TODO: drillDown a row", whatShouldBeHere)
-                    }
+                    drillDown:( path )=>this.drillDown( path )
                 }
             }
         };
-
         return {
-            grid:{ view:Grid, options:options }
+            grid:{ view:Grid, options:this._gridOptions },
+            breadcrumbs:{
+                view:Flex,
+                options:{
+                    data: this._breadCrumbsController,
+                    direction:"horizontal",
+                    item:{
+                        view:controls.Button,
+                        options:{
+                            links:{text:"data@caption" },
+                            events:{ click:{ handler:(_,button)=>{
+                                const idx = button.get("data").get("id")-1;
+                                const _contextPath = idx === -1 ? [] : this._options.contextPath.slice(0, idx);
+                                const path = idx === -1 ? [] : [button.get("data").get("item")];
+
+                                this.set({"contextPath": _contextPath});
+                                this.drillDown( path );
+                            }}}
+                        }
+                    }
+                }
+            }
         }
 
+    }
+
+    drillDown( path ){
+        this.set({"contextPath": [...this._options.contextPath, ...path]});
+        path = this._options.contextPath;
+
+        const set = this._breadCrumbsController.get();
+        delete set["0"];
+        for (const k in set){
+            set[k] = null;
+        }
+        for (let i=0; i < path.length; i++){
+            const caption = typeof this._options.itemName === "function" ? this._options.itemName( path[i]) : `Item ${i+1}`;
+            set[i+1] = {id:i+1, caption, item: path[i] };
+        }
+
+        this._breadCrumbsController.set(set);
+        const data = path[path.length - 1];
+        const _controller = data ? this._options.getSubitems( data ) : this._options.data;
+        this._widgets.grid.destroy();
+        this._widgets.grid = new Grid({...this._gridOptions,data:_controller});
     }
 }
 TreeGrid.extend();
@@ -130,7 +192,7 @@ class TreeCell extends ItemView{
                                 this.#parent.fold();
                                 this.set({isExpanded:false});
                             }else if(this.#data){
-                                const controller = this._options.getSubitems( this.#data );
+                                const controller = this._options.getSubitems( this.#data.get() );
                                 this.#parent.unfold( controller );
                                 this.set({isExpanded:true});
                             }
@@ -162,7 +224,8 @@ class TreeCell extends ItemView{
 
             this.#parent.bind("dblClick",()=>{
                 if (this._options.isExpandable){
-                    this._trigger("drillDown",[this.#data, this.#parent?.get("data")])
+                    const path = this.#parent.getPath().map(r => r.get("data").get());
+                    this._trigger("drillDown",[path]);
                 }
             })
         }
