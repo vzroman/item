@@ -58,8 +58,11 @@ export function run( $container ){
             multiselect:true,
             checkbox:true,
             pager:{},
-            isFolder:( any )=> true,
-            getIcon:( item ) => "TODO",
+            isFolder:( any )=> {
+                if (any.get(".name") === "trends") return false;
+                return true;
+            },
+            getIcon:( item ) =>false,
             getSubitems:( folder )=>{
                 return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder.get(".path")+"')"]})
             }

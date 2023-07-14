@@ -28,6 +28,10 @@ import {types} from "../../types/index.js";
 import {Grid} from "./grid";
 import mainStyles from "../../css/main.css"
 import {Label} from "../primitives/label";
+import {Html} from "../primitives/html";
+import style from "./grid.css";
+import folderIcon from "./grid/img/icon_folder.png";
+import fileIcon from "./grid/img/icon_file.png";
 
 export class TreeGrid extends ItemView{
 
@@ -109,7 +113,10 @@ class TreeCell extends ItemView{
     widgets() {
 
         this.$offset = this.$markup.find('[name=offset]');
-
+        this.$markup.find('[name=expand]').on("mousedown mouseup", e=>{
+            e.stopPropagation();
+            e.preventDefault();
+        })
         return {
             expand:{
                 view:Label,
@@ -122,15 +129,19 @@ class TreeCell extends ItemView{
                         }}
                     },
                     events: {
-                        click:e=>{
-                            e.stopPropagation(); // TODO. doesn't work
+                        click:()=>{
                             if (!this._options.isExpandable) return;
                             if (!this.#parent) return;
                             if (this._options.isExpanded){
+                                this._widgets.total?.destroy();
                                 this.#parent.fold();
                                 this.set({isExpanded:false});
                             }else if(this.#data){
                                 const controller = this._options.getSubitems( this.#data );
+                                this._widgets.total = new Label({...this.get(), $container: this.$markup.find('[name=total]'), data: controller, links:{text: {
+                                    source: "$.totalCount",
+                                    handler:(totalCount)=>this.formatTotalCount(totalCount)
+                                }}});
                                 this.#parent.unfold( controller );
                                 this.set({isExpanded:true});
                             }
@@ -140,9 +151,17 @@ class TreeCell extends ItemView{
 
                 }
             },
-            // icon:{}, TODO
-            cell:this._options.cell,
-            //total:{} TODO
+            icon:{
+                view:Html,
+                options: {
+                    links:{
+                        html:{source:"parent", event: ["icon"], handler:({icon})=>{
+                            return `<div style="background-image: url(${icon})" class="${style.icon}"></div>`
+                        }}
+                    }
+                }
+            },
+            cell:this._options.cell
         }
 
     }
@@ -172,15 +191,30 @@ class TreeCell extends ItemView{
             this.set({ isExpandable:this._options.isFolder ? this._options.isFolder( this.#data ) : false });
 
             if (this._options.getIcon){
-                this.#data.bind("change",()=>{
+                const setIcon=()=>{
                     let icon = this._options.getIcon( this.#data );
                     if (!icon){
-                        icon = this._options.isExpandable ? "TODO:folderIcon" : "TODO: itemIcon"
+                        icon = this._options.isExpandable ? `${folderIcon}` : `${fileIcon}`;
                     }
                     this.set({icon});
-                });
+                };
+                this.#data.bind("change",()=>setIcon());
+                setIcon();
             }
         }
+    }
+
+    formatTotalCount(value=0) {
+        if (!value || typeof value!=="number") return "";
+        let text = value.toString();
+        const n = text.length;
+
+        if(n > 6){
+            text = text.substring(0, n - 6) + "kk...";
+        } else if(n > 3){
+            text = text.substring(0, n - 3) + "k...";
+        }
+        return text;
     }
 
 }

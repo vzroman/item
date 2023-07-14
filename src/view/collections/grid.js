@@ -206,8 +206,6 @@ export class Grid extends Collection{
                 });
             });
 
-            // TODO. What for?
-            //onDrag({clientX: -1, buttons: 1});
         });
     }
 
