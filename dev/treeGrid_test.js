@@ -60,7 +60,7 @@ export function run( $container ){
             pager:{},
             itemName:(item)=>item[".name"],
             isFolder:( any )=> true,
-            getIcon:( item ) => "TODO",
+            getIcon:( item ) => false,
             getSubitems:( folder )=>{
                 return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
             }

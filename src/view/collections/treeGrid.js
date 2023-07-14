@@ -77,7 +77,6 @@ export class TreeGrid extends ItemView{
         });
         
         this._gridOptions = this.get();
-        delete this._gridOptions.$container;
         this._gridOptions.columns[0] = {
             view: TreeCell,
             options: {
@@ -135,7 +134,7 @@ export class TreeGrid extends ItemView{
         const data = path[path.length - 1];
         const _controller = data ? this._options.getSubitems( data ) : this._options.data;
         this._widgets.grid.destroy();
-        this._widgets.grid = new Grid({...this._gridOptions,data:_controller});
+        this._widgets.grid = new Grid({...this._gridOptions, $container: this.$markup.find('[name="grid"]'), data:_controller});
     }
 }
 TreeGrid.extend();
