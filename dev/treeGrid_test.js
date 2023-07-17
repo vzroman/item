@@ -38,7 +38,7 @@ export function run( $container ){
                 ".path":{type:item.types.primitives.String}
             },
             page:1,
-            pageSize: 10,
+            pageSize: 30,
         }
         const schema = {
             ".name":{ type:item.types.primitives.String },
@@ -58,10 +58,11 @@ export function run( $container ){
             multiselect:true,
             checkbox:true,
             pager:{},
+            itemName:(item)=>item[".name"],
             isFolder:( any )=> true,
-            getIcon:( item ) => "TODO",
+            getIcon:( item ) => false,
             getSubitems:( folder )=>{
-                return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder.get(".path")+"')"]})
+                return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
             }
         });
 

@@ -124,6 +124,16 @@ export class Row extends Item{
         this.set({nextRow});
     }
 
+    getPath(){
+        const path = [];
+        let row = this;
+        while (row){
+            path.unshift(row);
+            row = row._options.parentRow
+        }
+        return path;
+    }
+
     destroy() {
         this.#unbind.forEach( u => u());
         this.#unbind = undefined;
@@ -179,6 +189,11 @@ class RowsCollection extends Collection{
 
     _placeItem( row, previousRow ){
         row.set({previousRow});
+    }
+
+    destroy() {
+        this._options.data?.destroy();
+        super.destroy();
     }
 
 

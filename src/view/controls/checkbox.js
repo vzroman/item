@@ -37,8 +37,16 @@ export class Checkbox extends Control{
     constructor( options ){
         super( options );
 
-        this.$markup.on("change", ()=>{
-            this.set({ value:this.$markup.prop("checked")})
+        ["mousedown","mouseup","click"].forEach(event => this.$markup.on(event, e=>{
+            if (this._options.disabled) return;
+            e.stopPropagation();
+        }));
+
+        this.$markup.on("change", e=>{
+            if (this._options.disabled) return;
+            e.preventDefault();
+            e.stopPropagation();
+            this.set({ value: this.$markup.prop('checked')});
         });
     }
 

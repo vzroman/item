@@ -69,8 +69,10 @@ export class View extends Item{
 
             this._collection = data;
 
+            let prevId = undefined;
             data.forEach( id => {
-                this._items[id] = this._addItem( id );
+                this._items[id] = this._addItem( id, prevId );
+                prevId = id;
             });
 
             const addId = data.bind("add", (id, prevId)=>{

@@ -123,7 +123,7 @@ export class Controller extends Item{
         }
 
         // self-destroying bond
-        parent.push(this.bind("destroy",() => child.forEach(id => child.unbind( id ))));
+        parent.push(this.bind("destroy",() => child.forEach(id => item.unbind( id ))));
         child.push(item.bind("destroy",() => parent.forEach(id => this.unbind( id ))));
 
         return item;

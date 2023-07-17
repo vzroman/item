@@ -61,7 +61,7 @@ export class Header extends Item{
         });
 
         [numerated,checkbox].filter( val => val ).forEach( () => {
-            options.columns.unshift({ view:Html, options: { html:$(`<div style="width: 32px"></div>`) } });
+            options.columns.unshift({ view:Html, options: { html:$(`<div></div>`) } });
         });
 
         super( options );
@@ -70,6 +70,10 @@ export class Header extends Item{
     markup() {
         const $markup = $(`<tr></tr>`);
         this._options.columns.forEach(({colspan=1}, i)=> $(`<td colspan="${colspan}" name=${ i }></td>`).appendTo($markup));
+        if (this._options.checkbox){
+            const pos = this._options.numerated ? 2 : 1;
+            $markup.find(`td::nth-child(${ pos })`).width(32);
+        }
         return $markup;
     }
 
