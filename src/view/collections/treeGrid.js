@@ -48,7 +48,7 @@ export class TreeGrid extends ItemView{
     };
 
     static markup = `<div class="${ mainStyles.vertical }">
-        <div name="breadcrumbs"></div>
+        <div name="breadcrumbs" style="display:flex"></div>
         <div name="grid"></div>
     </div>`;
 
@@ -77,7 +77,6 @@ export class TreeGrid extends ItemView{
         });
         
         this._gridOptions = this.get();
-        delete this._gridOptions.$container;
         this._gridOptions.columns[0] = {
             view: TreeCell,
             options: {
@@ -118,6 +117,7 @@ export class TreeGrid extends ItemView{
     }
 
     drillDown( path ){
+        if (!path) return;
         this.set({"contextPath": [...this._options.contextPath, ...path]});
         path = this._options.contextPath;
 
@@ -135,7 +135,7 @@ export class TreeGrid extends ItemView{
         const data = path[path.length - 1];
         const _controller = data ? this._options.getSubitems( data ) : this._options.data;
         this._widgets.grid.destroy();
-        this._widgets.grid = new Grid({...this._gridOptions,data:_controller});
+        this._widgets.grid = new Grid({...this._gridOptions, $container: this.$markup.find('[name="grid"]'), data:_controller});
     }
 }
 TreeGrid.extend();
@@ -164,12 +164,12 @@ class TreeCell extends ItemView{
         super( options );
     }
 
-    static markup = `<div class="${ mainStyles.horizontal }">
+    static markup = `<div class="${style.treeCell}">
         <div name="offset"></div>
         <div name="expand"></div>
         <div name="icon">icon</div>
         <div name="cell"></div>
-        <div name="total"></div>
+        <div name="total" style="margin-left: auto"></div>
     </div>`;
 
     widgets() {
@@ -188,6 +188,9 @@ class TreeCell extends ItemView{
                             if (isExpanded) return "-";
                             if (isExpandable) return "+";
                             return " "
+                        }},
+                        backgroundColor:{source:"parent", event:"isExpandable", handler: (val)=>{
+                            return "1";
                         }}
                     },
                     events: {
@@ -200,10 +203,17 @@ class TreeCell extends ItemView{
                                 this.set({isExpanded:false});
                             }else if(this.#data){
                                 const controller = this._options.getSubitems( this.#data.get() );
-                                this._widgets.total = new Label({...this.get(), $container: this.$markup.find('[name=total]'), data: controller, links:{text: {
-                                    source: "$.totalCount",
-                                    handler:(totalCount)=>this.formatTotalCount(totalCount)
-                                }}});
+                                this._widgets.total = new Label(
+                                    {
+                                        ...this.get(), $container: this.$markup.find('[name=total]'), 
+                                        data: controller, 
+                                        links:{
+                                            text: {
+                                                source: "$.totalCount",
+                                                handler:(totalCount)=>this.formatTotalCount(totalCount)
+                                            }
+                                        }
+                                    });
                                 this.#parent.unfold( controller );
                                 this.set({isExpanded:true});
                             }
@@ -244,7 +254,7 @@ class TreeCell extends ItemView{
             this.#parent.bind("dblClick",()=>{
                 if (this._options.isExpandable){
                     const path = this.#parent.getPath().map(r => r.get("data").get());
-                    this._trigger("drillDown",[path]);
+                    if (path) this._trigger("drillDown",[path]);
                 }
             })
         }
@@ -268,7 +278,7 @@ class TreeCell extends ItemView{
     }
 
     formatTotalCount(value=0) {
-        if (!value || typeof value!=="number") return "";
+        if (!value) return "";
         let text = value.toString();
         const n = text.length;
 

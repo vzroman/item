@@ -39,7 +39,7 @@ export class Control extends Parent{
         itemGroup:{type: types.primitives.Any}
     };
 
-    static markup = `<select></select>`;
+    static markup = `<select style="height:100%; width:100%;"></select>`;
 
     constructor( options ){
         super( options );

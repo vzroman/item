@@ -110,29 +110,29 @@ table>td {
     background: #e9f0fd !important;
 }
 
+.treeCell{
+    display: flex;
+    justify-content: flex-start;
+    column-gap: 5px;
+    align-items:center; 
+    font-size: 14px;
+    line-height: 1.5;
+}
 
+.treeCell > [name="expand"]{
+    width: 15px;
+    height: 15px;
+    line-height: 15px;
+    font-weight: 700;
+    text-align: center;
+    background-color: #0095b6;
+    color: #fff;
+    align-self: center;
+}
 .first_cell {
     display: flex;
     align-items: center;
     gap: 12px;
-}
-
-.first_cell > [name="tree-icon"] {
-    font-size: 16px;
-    cursor: pointer;
-    width: 12px;
-    height: 12px;    
-    border-radius: 2px;
-    border: 1px solid black;
-    display: flex;
-    opacity: 0;
-    pointer-events: none;
-    align-items: center;
-    justify-content: center;
-}
-
-.first_cell > [name="nestedRows"]{
-    margin-left: auto;
 }
 
 .icon{
@@ -141,14 +141,6 @@ table>td {
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-}
-
-.icon_folder{
-    /*background-image: url("src/view/collections/grid/img/icon_folder.png");*/
-}
-
-.icon_file{
-    /*background-image: url("src/view/collections/grid/img/icon_file.png");*/
 }
 
 .treeIcon_visible{

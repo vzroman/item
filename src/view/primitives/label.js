@@ -30,7 +30,8 @@ import {types} from "../../types/index.js";
 export class Label extends Parent{
 
     static options = {
-        text:{type:types.primitives.String}
+        text:{type:types.primitives.String},
+        opacity:{type:types.primitives.String}
     };
 
     static markup = `<div></div>`;
@@ -40,6 +41,9 @@ export class Label extends Parent{
 
         this.bind("text", value =>
             this.$markup.text( value ? value : "")
+        );
+        this.bind("opacity", value =>
+            this.$markup.css("opacity", value)
         );
     }
 }

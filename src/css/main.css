@@ -23,14 +23,21 @@
 /*SOFTWARE.*/
 /*------------------------------------------------------------------------------------*/
 
+.vertical, .horizontal{
+    font-size: 14px;
+    line-height: 1.5; 
+}
+
 .vertical{
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    width: 100%;
 }
 
 .horizontal{
     display: flex;
     flex-direction: row;
     align-items: stretch;
+    height: 100%;
 }

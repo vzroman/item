@@ -33,10 +33,11 @@ export class Control extends Parent{
     static options = {
         text:{type:types.primitives.String},
         title:{type:types.primitives.String},
-        icon:{type:types.primitives.String}
+        icon:{type:types.primitives.String},
+        wrap:{type:types.primitives.String, default:"nowrap"}
     };
-    static markup = `<button class="${ mainCss.horizontal }" style="align-items: center;cursor: pointer">
-        <div name="icon" style="display: none; width: 20px; height: 20px;"></div>
+    static markup = `<button class="${ mainCss.horizontal }" style="width:100%;height:100%;align-items: center;cursor: pointer">
+        <div name="icon" style="display: none; width: 20px; height: 20px; background-size: contain; background-repeat: no-repeat;"></div>
         <div name="text"></div>
     </button>`;
 
@@ -59,6 +60,7 @@ export class Control extends Parent{
         });
 
         this.bind("title", value => this.$markup.attr("title", value));
+        this.bind("wrap", value => this.$markup.find('[name="text"]').css("text-wrap",value))
     }
 
     enable( value ){

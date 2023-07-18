@@ -59,8 +59,14 @@ export function run( $container ){
             checkbox:true,
             pager:{},
             itemName:(item)=>item[".name"],
-            isFolder:( any )=> true,
-            getIcon:( item ) => "TODO",
+            isFolder:( any )=> {
+                if(!any){
+                    return false
+                }else{
+                    return true
+                }               
+            },
+            getIcon:( item ) => false,
             getSubitems:( folder )=>{
                 return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
             }
