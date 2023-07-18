@@ -286,20 +286,18 @@ class TreeCell extends ItemView{
 
             this.set({ isExpandable:this._options.isFolder ? this._options.isFolder( this.#data ) : false });
 
-            if (this._options.getIcon){
-                const setIcon=()=>{
-                    let icon = undefined;
-                    if (typeof this._options.getIcon === "function"){
-                        icon = this._options.getIcon( this.#data );
-                    }
-                    if (typeof icon !== "string"){
-                        icon = this._options.isExpandable ? `${folderIcon}` : `${fileIcon}`;
-                    }
-                    this.set({icon});
-                };
-                this.#data.bind("change",()=>setIcon());
-                setIcon();
-            }
+            const setIcon=()=>{
+                let icon = undefined;
+                if (typeof this._options.getIcon === "function"){
+                    icon = this._options.getIcon( this.#data );
+                }
+                if (typeof icon !== "string"){
+                    icon = this._options.isExpandable ? `${folderIcon}` : `${fileIcon}`;
+                }
+                this.set({icon});
+            };
+            this.#data.bind("change",()=>setIcon());
+            setIcon();
         }
     }
 
