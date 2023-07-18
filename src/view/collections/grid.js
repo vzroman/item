@@ -57,9 +57,9 @@ export class Grid extends Collection{
         if (options.checkbox){
             options.columns.unshift({ view:Checkbox, options:{
                 enable:!options.multiselect,
-                links:{ value:"parent@selected" }},
-                events:{ value:"parent@selected" }
-            })
+                links:{ value:"parent@selected" },
+                events:{ value: "parent@selected" }
+            }})
         }
 
         if (options.numerated){

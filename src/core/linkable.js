@@ -319,13 +319,15 @@ export class Linkable extends Eventful{
     }
 
     destroy(){
-        for (const link of Object.values(this._linked.properties)){
-            link.destroy();
+        if (this._linked){
+            for (const link of Object.values(this._linked.properties)){
+                link.destroy();
+            }
+            for (const link of Object.values(this._linked.events)){
+                link.destroy();
+            }
+            this._linked = undefined;
         }
-        for (const link of Object.values(this._linked.events)){
-            link.destroy();
-        }
-        this._linked = undefined;
 
         this._trigger("destroy");
         this._options = undefined;

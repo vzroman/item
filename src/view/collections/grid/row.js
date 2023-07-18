@@ -191,6 +191,11 @@ class RowsCollection extends Collection{
         row.set({previousRow});
     }
 
+    destroy() {
+        this._options.data?.destroy();
+        super.destroy();
+    }
+
 
 }
 RowsCollection.extend();

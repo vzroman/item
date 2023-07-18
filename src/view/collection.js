@@ -68,6 +68,7 @@ export class View extends Item{
         if (data && data instanceof controllers.Collection && data !== this._collection){
 
             this._collection = data;
+
             let prevId = undefined;
             data.forEach( id => {
                 this._items[id] = this._addItem( id, prevId );

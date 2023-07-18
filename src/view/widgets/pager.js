@@ -214,7 +214,7 @@ export class Pager extends ItemView{
                         }}
                     },
                     events:{
-                        click:{target:"parent@page", handler:()=> Math.ceil( this._options.totalCount??0 / this._options.pageSize??1 )  }
+                        click:{target:"parent@page", handler:()=> Math.ceil( (this._options.totalCount??0) / (this._options.pageSize??1) )  }
                     }
                 }
             },

@@ -59,23 +59,8 @@ export class TreeGrid extends ItemView{
     }
 
     widgets(){
-        this._breadCrumbsController = new controllers.Collection({
-            id:"id",
-            schema:{ 
-                id:{ type: types.primitives.Integer }, 
-                caption:{type: types.primitives.String},
-                item:{type: types.primitives.Any } 
-            },
-            keyCompare:([a],[b])=>{
-                a = +a;
-                b = +b;
-                if ( a > b ) return 1;
-                if ( a < b ) return -1;
-                return 0;
-            },
-            data:[{id:0, caption:"/", item:{id:"clicked item"}}]
-        });
-        
+
+        //----------Wrap the user widget into ThreeCell--------------------
         this._gridOptions = this.get();
         this._gridOptions.columns[0] = {
             view: TreeCell,
@@ -85,12 +70,35 @@ export class TreeGrid extends ItemView{
                 isFolder: this._options.isFolder,
                 getIcon: this._options.getIcon,
                 events:{
-                    drillDown:( path )=>this.drillDown( path )
+                    drillDown:( path )=>this.set({contextPath: [...this._options.contextPath, ...path] } )
                 }
             }
         };
+
+        //--------Init breadcrumbs---------------------------------
+        this._breadCrumbsController = new controllers.Collection({
+            id:"id",
+            schema:{ 
+                id:{ type: types.primitives.Integer }, 
+                caption:{type: types.primitives.String}
+            },
+            keyCompare:([a],[b])=>{
+                a = +a;
+                b = +b;
+                if ( a > b ) return 1;
+                if ( a < b ) return -1;
+                return 0;
+            },
+            data:[{id:0, caption:"/"}]
+        });
+
+        //--------Subscribe to the path---------------------------------
+        this.bind("contextPath", path =>{
+            this._contextPath( path );
+        });
+
         return {
-            grid:{ view:Grid, options:this._gridOptions },
+            //grid:{ view:Grid, options:this._gridOptions }, the grid will be created dynamically on changing contextPath
             breadcrumbs:{
                 view:Flex,
                 options:{
@@ -101,12 +109,11 @@ export class TreeGrid extends ItemView{
                         options:{
                             links:{text:"data@caption" },
                             events:{ click:{ handler:(_,button)=>{
-                                const idx = button.get("data").get("id")-1;
-                                const _contextPath = idx === -1 ? [] : this._options.contextPath.slice(0, idx);
-                                const path = idx === -1 ? [] : [button.get("data").get("item")];
 
-                                this.set({"contextPath": _contextPath});
-                                this.drillDown( path );
+                                const idx = button.get("data").get("id");
+                                const path = this._options.contextPath.slice(0, +idx);
+                                this.set({contextPath:path});
+
                             }}}
                         }
                     }
@@ -116,11 +123,9 @@ export class TreeGrid extends ItemView{
 
     }
 
-    drillDown( path ){
-        if (!path) return;
-        this.set({"contextPath": [...this._options.contextPath, ...path]});
-        path = this._options.contextPath;
+    _contextPath( path ) {
 
+        // ----------update breadcrumbs------------------------------
         const set = this._breadCrumbsController.get();
         delete set["0"];
         for (const k in set){
@@ -132,11 +137,33 @@ export class TreeGrid extends ItemView{
         }
 
         this._breadCrumbsController.set(set);
-        const data = path[path.length - 1];
-        const _controller = data ? this._options.getSubitems( data ) : this._options.data;
-        this._widgets.grid.destroy();
-        this._widgets.grid = new Grid({...this._gridOptions, $container: this.$markup.find('[name="grid"]'), data:_controller});
+
+        //--------init grid------------------------------------------
+        this._grid?.destroy();
+        if ( path.length > 0 ){
+            const controller = this._options.getSubitems( path[path.length - 1] );
+            this._grid = new Grid({
+                ...this._gridOptions,
+                $container: this.$markup.find('[name="grid"]'),
+                data: controller,
+                events:{ destroy:()=> controller.destroy() }
+            });
+        }else{
+            this._grid = new Grid({
+                ...this._gridOptions,
+                $container: this.$markup.find('[name="grid"]'),
+                data: this._options.data
+            });
+        }
+
     }
+
+    destroy() {
+        this._breadCrumbsController?.destroy();
+        this._grid?.destroy();
+        super.destroy();
+    }
+
 }
 TreeGrid.extend();
 
@@ -175,6 +202,9 @@ class TreeCell extends ItemView{
     widgets() {
 
         this.$offset = this.$markup.find('[name=offset]');
+
+        // We stop the event because we don't want the row become selected
+        // on expanding
         this.$markup.find('[name=expand]').on("mousedown mouseup", e=>{
             e.stopPropagation();
             e.preventDefault();
@@ -203,17 +233,10 @@ class TreeCell extends ItemView{
                                 this.set({isExpanded:false});
                             }else if(this.#data){
                                 const controller = this._options.getSubitems( this.#data.get() );
-                                this._widgets.total = new Label(
-                                    {
-                                        ...this.get(), $container: this.$markup.find('[name=total]'), 
-                                        data: controller, 
-                                        links:{
-                                            text: {
-                                                source: "$.totalCount",
-                                                handler:(totalCount)=>this.formatTotalCount(totalCount)
-                                            }
-                                        }
-                                    });
+                                this._widgets.total = new Label({ $container: this.$markup.find('[name=total]'), data: controller, links:{text: {
+                                    source: "$.totalCount",
+                                    handler:(totalCount)=>this.formatTotalCount(totalCount)
+                                }}});
                                 this.#parent.unfold( controller );
                                 this.set({isExpanded:true});
                             }
@@ -265,8 +288,11 @@ class TreeCell extends ItemView{
 
             if (this._options.getIcon){
                 const setIcon=()=>{
-                    let icon = this._options.getIcon( this.#data );
-                    if (!icon){
+                    let icon = undefined;
+                    if (typeof this._options.getIcon === "function"){
+                        icon = this._options.getIcon( this.#data );
+                    }
+                    if (typeof icon !== "string"){
                         icon = this._options.isExpandable ? `${folderIcon}` : `${fileIcon}`;
                     }
                     this.set({icon});
@@ -277,8 +303,8 @@ class TreeCell extends ItemView{
         }
     }
 
-    formatTotalCount(value=0) {
-        if (!value) return "";
+    formatTotalCount(value) {
+        if (!value || typeof value!=="number") return "";
         let text = value.toString();
         const n = text.length;
 
