@@ -251,6 +251,7 @@ class TreeCell extends ItemView{
                 options: {
                     links:{
                         html:{source:"parent", event: ["icon"], handler:({icon})=>{
+                            icon = icon ?? fileIcon;
                             return `<div style="background-image: url(${icon})" class="${style.icon}"></div>`
                         }}
                     }
@@ -292,7 +293,7 @@ class TreeCell extends ItemView{
                     icon = this._options.getIcon( this.#data );
                 }
                 if (typeof icon !== "string"){
-                    icon = this._options.isExpandable ? `${folderIcon}` : `${fileIcon}`;
+                    icon = this._options.isExpandable ? folderIcon : fileIcon;
                 }
                 this.set({icon});
             };
