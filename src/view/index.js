@@ -28,6 +28,7 @@ import {primitives} from "./primitives/index.js";
 import {controls} from "./controls/index.js";
 import {layout} from "./layout/index.js";
 import {collections} from "./collections/index.js";
+import {widgets} from "./widgets/index.js";
 
 export const view = {
     Item,
@@ -35,5 +36,6 @@ export const view = {
     primitives,
     controls,
     layout,
-    collections
+    collections,
+    widgets
 };

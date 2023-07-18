@@ -27,7 +27,6 @@ import {View as Item} from "./item.js";
 import {controllers} from "../controllers/index.js";
 import {util} from "../utilities/index.js";
 import {types} from "../types/index.js";
-import {Linkable} from "../core/linkable.js";
 
 export class View extends Item{
 
@@ -70,12 +69,14 @@ export class View extends Item{
 
             this._collection = data;
 
+            let prevId = undefined;
             data.forEach( id => {
-                this._items[id] = this._addItem( id );
+                this._items[id] = this._addItem( id, prevId );
+                prevId = id;
             });
 
-            const addId = data.bind("add", id=>{
-                this._items[id] = this._addItem( id );
+            const addId = data.bind("add", (id, prevId)=>{
+                this._items[id] = this._addItem( id, prevId );
             });
             this._subscriptions.push(()=>data.unbind( addId ));
 
@@ -84,6 +85,11 @@ export class View extends Item{
                 delete this._items[id];
             });
             this._subscriptions.push(()=>data.unbind(removeId));
+
+            const editId = data.bind("edit", (id, prevId)=>{
+                this._editItem( id, prevId );
+            });
+            this._subscriptions.push(()=>data.unbind( editId ));
         }
 
         return context;
@@ -96,18 +102,37 @@ export class View extends Item{
         return this._collection.set({ [id]: item });
     }
 
-    _addItem( id ){
+    _editItem( id, prevId ){
+        
+        const item = this.getItem( id );
 
-        const item = this.newItem( id );
+        const prevItem = this.getItem( prevId );
+
+        this._placeItem( item, prevItem );
+    }
+
+    _placeItem( item, prevItem ){
+        if (prevItem){
+            item.$markup.insertAfter( prevItem.$markup );
+        }
+        // TODO. If the previousItem is undefined then we need to put the item on the first position in the collection
+    }
+
+
+    _addItem( id, prevId ){
+
+        const prevItem = this.getItem( prevId );
+
+        const item = this.newItem( id, prevItem );
 
         // Link the item to the data
         const controller = this._collection.fork( id, this._options.itemController );
         item.link( {data:controller, parent:this} );
 
-        return item;
+        return [item, controller];
     }
 
-    newItem( id ){
+    newItem( id, prevItem ){
         // To be overridden
         throw new Error("not implemented");
     }
@@ -118,13 +143,20 @@ export class View extends Item{
     }
 
     _removeItem( id ){
-        this._items[id].destroy();
+        this._items[id][0].destroy();
+        this._items[id][1].destroy();
+    }
+
+    getItem( id ){
+        const [item] = this._items[id] || [];
+        return item;
     }
 
     destroy(){
         if (this._items){
             Object.values(this._items).forEach(item =>{
-                item.destroy();
+                item[0].destroy();
+                item[1].destroy();
             });
             this._items = undefined;
         }

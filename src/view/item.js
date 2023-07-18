@@ -36,11 +36,13 @@ export class View extends Item{
         enable:{type:types.primitives.Bool, virtual:true},
         visible:{type:types.primitives.Bool, default:true, virtual:true},
         focus:{type:types.primitives.Bool, default:false, virtual:true},
+        opacity:{type:types.primitives.Float, default:1},
         widgets:{type:types.primitives.Set}
     };
 
     static events = {
-        click:true
+        click:true,
+        dblClick:true
     };
 
     static markup = undefined;
@@ -55,16 +57,24 @@ export class View extends Item{
         return this.constructor.widgets;
     }
 
+    static getItem( $item ){
+        return $item.data("@item");
+    }
+
     constructor( options ){
         super( options );
 
         this.$markup = $( this.markup() ).appendTo( this._options.$container );
+        this.$markup.data("@item", this);
 
         this._widgets = this.widgets();
 
         // init widgets
         const $widgets = Object.keys( this._widgets ).reduce((acc,id)=>{
-            const $container = this.$markup.find(`[name="${ id }"]`).addBack(`[name="${ id }"]`);
+            let $container = this.$markup.find(`[name="${ id }"]`);
+            if (!$container.length && this.$markup.attr("name") === id){
+                $container = this.$markup;
+            }
             if (!$container.length){
                 console.warn("undefined container for widget", id);
             }else{
@@ -109,6 +119,10 @@ export class View extends Item{
             if (typeof value === "boolean") this.enable( value );
         });
 
+        this.bind("opacity", value =>
+            this.$markup.css("opacity", value.toString())
+        );
+
         let _displayBackup = this.$markup.css("display");
         this._controller.bind("visible", value=>{
             // TODO. Or use visibility instead?
@@ -123,7 +137,21 @@ export class View extends Item{
             }
         });
 
-        this.$markup.on("click",event => this._trigger("click", event) );
+        // Click and double click events
+        let timer = undefined;
+        this.$markup.on("click",event => {
+            if (timer){
+                clearTimeout( timer );
+                timer=undefined;
+                this._trigger("dblClick", event);
+            }else {
+               timer=setTimeout(()=>{
+                    clearTimeout(timer);
+                    timer=undefined;
+                   this._trigger("click", event);
+                },200);
+            }
+        });
     }
 
     link( context ){
@@ -142,8 +170,10 @@ export class View extends Item{
 
         context = {
             ...context,
-            ...this._widgets,
-            parent:this
+            ...{
+                widgets:this._widgets,
+                parent:this
+            },
         };
 
         // Link the widgets to the external data

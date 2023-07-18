@@ -27,20 +27,18 @@ import {View as Parent} from "../item.js";
 import {types} from "../../types/index.js";
 
 // The control is the point where external widgets to be attached
-export class Label extends Parent{
+export class Html extends Parent{
 
     static options = {
-        text:{type:types.primitives.String}
+        html:{type:types.primitives.Any}
     };
-
-    static markup = `<div></div>`;
 
     constructor( options ){
         super( options );
 
-        this.bind("text", value =>
-            this.$markup.text( value ? value : "")
+        this.bind("html", value =>
+            this._options.$container.html( value )
         );
     }
 }
-Label.extend();
+Html.extend();

@@ -23,24 +23,43 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {View as Parent} from "../item.js";
-import {types} from "../../types/index.js";
+import {Control} from "./control";
+import {types} from "../../types";
 
-// The control is the point where external widgets to be attached
-export class Label extends Parent{
+export class Checkbox extends Control{
 
     static options = {
-        text:{type:types.primitives.String}
+        value:{type: types.primitives.Bool}
     };
 
-    static markup = `<div></div>`;
+    static markup = `<input type="checkbox"/>`;
 
     constructor( options ){
         super( options );
 
-        this.bind("text", value =>
-            this.$markup.text( value ? value : "")
-        );
+        ["mousedown","mouseup","click"].forEach(event => this.$markup.on(event, e=>{
+            if (this._options.disabled) return;
+            e.stopPropagation();
+        }));
+
+        this.$markup.on("change", e=>{
+            if (this._options.disabled) return;
+            e.preventDefault();
+            e.stopPropagation();
+            this.set({ value: this.$markup.prop('checked')});
+        });
+    }
+
+    updateValue( value=false, prev ){
+        this.$markup.prop('checked', value);
+    }
+
+    enable( value ){
+        this.$markup.prop('disabled', !value);
+    }
+
+    focus(){
+        this.$markup.focus();
     }
 }
-Label.extend();
+Checkbox.extend();

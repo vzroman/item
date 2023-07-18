@@ -4,7 +4,7 @@
 //-----------------------------------------------------------------
 import {types} from "../../types/index.js";
 import {View as Parent} from "../../view/item.js";
-import {Primitive as Label} from "../primitives/label.js";
+import {Label} from "../primitives/label.js";
 import {text} from "../../i18n/i18n.js";
 import style from "./formField.css";
 

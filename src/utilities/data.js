@@ -197,3 +197,13 @@ export function GUID() {
         return r.toString(16);
     });
 }
+
+export function pathEval( path, context ){
+    if (typeof path !== "string" || typeof context !== "object" || path ==="") return undefined;
+    path = path.split(".");
+    for (let i=0; i < path.length ; i++){
+        context = context[path[i]];
+        if (!context) break
+    }
+    return context;
+}

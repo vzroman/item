@@ -30,8 +30,20 @@ module.exports = {
                     }
                 ]
             },
+            {
+                test: /\.(png|svg|jpg|jpeg|gif)$/i,
+                type: 'asset/resource',
+            },
         ],
     },
     devtool: devMode? 'inline-source-map' : 'source-map',
-    plugins: [new MiniCssExtractPlugin()]
+    plugins: [new MiniCssExtractPlugin()],
+
+    devServer: {
+        static: {
+            directory: __dirname,
+        },
+        compress: true,
+        port: 3000,
+    }
 };

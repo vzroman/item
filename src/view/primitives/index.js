@@ -22,8 +22,10 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {Primitive as Label} from "./label.js";
+import {Label} from "./label.js";
+import {Html} from "./html.js";
 
 export const primitives = {
-    Label
+    Label,
+    Html
 };

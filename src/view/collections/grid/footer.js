@@ -22,25 +22,7 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
+import {Header} from "./header";
 
-import {View as Parent} from "../item.js";
-import {types} from "../../types/index.js";
-
-// The control is the point where external widgets to be attached
-export class Label extends Parent{
-
-    static options = {
-        text:{type:types.primitives.String}
-    };
-
-    static markup = `<div></div>`;
-
-    constructor( options ){
-        super( options );
-
-        this.bind("text", value =>
-            this.$markup.text( value ? value : "")
-        );
-    }
-}
-Label.extend();
+export class Footer extends Header{}
+Footer.extend();

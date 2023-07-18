@@ -25,18 +25,44 @@
 import {Controller as Collection} from "../collection.js";
 import {diff,patch2value} from "../../utilities/data.js";
 
+function oidCompare([a], [b]) {
+    a = a.split(",");
+    a = [
+        parseInt( a[0].substring(1) ),
+        parseInt( a[1] )
+    ];
+    b = b.split(",");
+    b = [
+        parseInt( b[0].substring(1) ),
+        parseInt( b[1] )
+    ];
+
+    if (a[0] > b[0]) return 1;
+    if (a[0] < b[0]) return -1;
+    if (a[1] > b[1]) return 1;
+    if (a[1] < b[1]) return -1;
+
+    return 0;
+}
+
 export class Controller extends Collection{
 
     static options = {
         connection:undefined,
         timeout: 60000,
         subscribe:false,
-        forkCommit:"refresh"
+        forkCommit:"refresh",
+        serverPaging: false
     };
 
     constructor( options ){
+
+        options.id = ".oid";
+        if (!options.keyCompare && options.orderBy === ".oid" ){
+            options.keyCompare = oidCompare
+        }
         // id is always oid
-        super( {...options, id:".oid"} );
+        super( options );
 
         if (typeof this._options.connection !== "function")
             throw new Error("invalid connection: " + this._options.connection);
@@ -59,6 +85,24 @@ export class Controller extends Collection{
 
             }, reject);
         });
+    }
+
+    updatePage() {
+        if (this._options.serverPaging && this._filter) {
+            this.refresh();
+        } else {
+            super._updateView();
+        }
+    }
+
+    forEach( callback ){
+        if (this._view){
+            if (this._options.serverPaging) {
+                this._view.forEach(n => callback( n.key[1] ));
+            } else {
+                super.forEach( callback );
+            }
+        }
     }
 
     rollback(changes, error){
@@ -100,9 +144,41 @@ export class Controller extends Collection{
         return new Promise((resolve, reject)=>{
 
             const fields = [this._options.id, ...this._schema.filter({virtual:false})].join(",");
+            const {
+                serverPaging,
+                page,
+                pageSize,
+                connection,
+                timeout
+            } = this._options;
 
-            this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`, resolve, reject, this._options.timeout );
+            const pagination = serverPaging && page !== undefined && pageSize !== undefined
+                ? `PAGE ${page}:${pageSize}`
+                : "";
+
+            connection().query(`get ${ fields } from * where ${ filter } format $to_json ${pagination}`, result => {
+                if (pagination !== ""){
+                    this._totalCount = result.count;
+                    result = result.result;
+                }else{
+                    this._totalCount = result.length - 1;
+                }
+
+                const [header,...items] = result;
+                result = items.map( fields =>{
+                    const item = {};
+                    for (let i = 0; i < header.length; i++){
+                        item[header[i]] = fields[i]
+                    }
+                    return item;
+                })
+                resolve( result );
+            }, reject, timeout );
         });
+    }
+
+    getCount() {
+        return this._totalCount;
     }
 
     setSubscribe( value ){

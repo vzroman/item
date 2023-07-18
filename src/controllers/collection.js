@@ -33,8 +33,11 @@ export class Controller extends Item{
         id:undefined,
         filter:undefined,
         orderBy:undefined,
-        page:undefined,
-        forkCommit:undefined
+        keyCompare:undefined,
+        page:1,
+        pageSize: undefined,
+        forkCommit:undefined,
+        totalCount: 0
     };
 
     static events = {
@@ -45,13 +48,31 @@ export class Controller extends Item{
         error:true
     };
 
+    constructor( options ) {
+        super( options );
+
+        this._pageItems = new Map();
+
+        this.bind("$.pageSize",()=>{
+            if (this.option("page") === 1){
+                this.updatePage();
+            }else{
+                this.option("page", 1);
+            }
+        });
+
+        this.bind("$.page",()=>{
+            this.updatePage();
+        });
+    }
+
     init( Data ){
         Data = this._coerce( Data );
 
         this._isRefresh = true;
         try{
             if (this._view) this._view.destroy();
-            this._view = new util.AVLTree();
+            this._view = new util.AVLTree(this._options.keyCompare);
             this._data = {};
             this._count = 0;
             const changes = super.set( Data );
@@ -102,7 +123,7 @@ export class Controller extends Item{
         }
 
         // self-destroying bond
-        parent.push(this.bind("destroy",() => child.forEach(id => child.unbind( id ))));
+        parent.push(this.bind("destroy",() => child.forEach(id => item.unbind( id ))));
         child.push(item.bind("destroy",() => parent.forEach(id => this.unbind( id ))));
 
         return item;
@@ -114,9 +135,14 @@ export class Controller extends Item{
         } else if (Array.isArray( id )) {
             const items = Linkable.prototype.get.call(this, id);
             for (const i in items){
-                if (items[i]) items[i] = this._schema.get( items[i] );
+                // If the requested id is an option or item is undefined then return it as is
+                if (i?.startsWith("$.") || !items[i]) continue;
+                // Otherwise validate the item against the schema
+                items[i] = this._schema.get( items[i] );
             }
             return items;
+        }else if(id.startsWith("$.")){
+            return Linkable.prototype.get.call(this, id);
         }else{
             let item = Linkable.prototype.get.call(this, id);
             if (item) item = this._schema.get( item );
@@ -172,7 +198,17 @@ export class Controller extends Item{
 
     forEach( callback ){
         if (this._view){
-            this._view.forEach(n => callback( n.key[1] ));
+            const { page, pageSize } = this._options;
+            if (pageSize === undefined) {
+                this._view.forEach(n => callback( n.key[1] ));
+            } else {
+                const startIndex = (page - 1) * pageSize;
+                let n = this._view.at( startIndex );
+                for (let i = 0; i < pageSize && n; i++) {
+                    callback( n.key[1] );
+                    n = this._view.next(n);
+                }
+            }
         }
     }
 
@@ -180,6 +216,10 @@ export class Controller extends Item{
         const data = [];
         this.forEach(id => data.push([id,this.get(id)]) );
         return data;
+    }
+
+    getCount() {
+        return this._view.size;
     }
 
     count(){
@@ -237,7 +277,9 @@ export class Controller extends Item{
     }
 
     _get( id ){
-
+        if (typeof id === "string" && id.startsWith("$.")) {
+            return super._get( id );
+        }
         let item = this._data ? this._data[ id ] : undefined;
 
         // If item has uncommitted changes
@@ -260,8 +302,9 @@ export class Controller extends Item{
     }
 
     _set( items ){
+        items = super._set_options( items );
         for (const id in items){
-
+            
             if (items[id] === null){
                 // The item is being deleted
                 continue;
@@ -320,24 +363,24 @@ export class Controller extends Item{
     }
 
     _onChange( changes ){
-
+        let isReordered = false;
         Object.entries( changes ).forEach(([id,[item, previous]])=>{
-            if ( previous === undefined ){
-                this._view.insert([this._orderKey(id, item), id]);
-                this._count++;
-                this._trigger("add", [id, item]);
-                this._trigger("count", this._count);
-            }else if( item === null ){
-                this._view.remove([this._orderKey(id, previous), id] );
-                this._count--;
-                this._trigger("remove", [id, previous]);
-                this._trigger("count", this._count)
+            if ( previous === null || previous === undefined ){
+                this._view.insert(this._orderKey(id, item));
+                isReordered = true;
+            }else if( item === null || item === undefined ){
+                isReordered = true;
+                this._view.remove(this._orderKey(id, previous));
             }else{
-                this._view.remove([this._orderKey(id, previous), id] );
-                this._view.insert([this._orderKey(id, item), id]);
-                this._trigger("edit", [id, item, previous]);
+                const prevKey = this._orderKey(id, previous);
+                const actualKey = this._orderKey(id, item);
+                isReordered = isReordered || (prevKey !== actualKey);
+                this._view.remove( prevKey );
+                this._view.insert( actualKey );
             }
         });
+        if (isReordered) this._updateView();
+        this.option("totalCount", this.getCount())
 
         super._onChange( changes );
     }
@@ -351,9 +394,34 @@ export class Controller extends Item{
                 key = this._get(id)[this._options.orderBy];
             }
         }
-        return key;
+        return [key,id];
+    }
+
+    updatePage() {
+        this._updateView();
     }
 
 
+    _updateView(){
+        const newPageItems = new Map();
+        let prevId = null;
+        if (!this._pageItems) this._pageItems = new Map();
+        this.forEach(id =>{
+            if (!this._pageItems.has(id)) {
+                this._trigger("add", [id, prevId]);
+            }else {
+                if (this._pageItems.get(id) !== prevId) {
+                    this._trigger("edit", [id, prevId]);
+                }
+                this._pageItems.delete(id);
+            }
+            newPageItems.set( id, prevId );
+            prevId = id;
+        })
+        for (const id of this._pageItems.keys()) {
+            this._trigger("remove", [id]);
+        }
+        this._pageItems = newPageItems;
+    }
 }
 Controller.extend();

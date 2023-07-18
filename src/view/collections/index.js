@@ -24,8 +24,12 @@
 //------------------------------------------------------------------------------------
 import {View as Flex} from "./flex.js";
 import {View as ItemList} from "./itemList.js";
+import {Grid} from "./grid.js";
+import {TreeGrid} from "./treeGrid";
 
 export const collections = {
     Flex,
-    ItemList
+    ItemList,
+    Grid,
+    TreeGrid
 };
