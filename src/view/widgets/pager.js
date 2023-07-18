@@ -25,10 +25,9 @@
 
 import {View as ItemView} from "../item.js";
 import {types} from "../../types";
-import mainCss from "../../css/main.css";
 import {controls} from "../controls";
 import {deepMerge} from "../../utilities/data";
-
+import style from "../widgets/pager.css";
 import first from "./pager/first.svg"
 import firstBlue from "./pager/first_blue.svg"
 import previous from "./pager/previous.svg"
@@ -48,19 +47,21 @@ export class Pager extends ItemView{
         maxVisible:{type:types.primitives.Integer, default: 11}
     };
 
-    static markup = `<button class="${ mainCss.horizontal }" style="justify-content: space-between">
-        <div class="${ mainCss.horizontal }">
-            <div name="first"></div>
-            <div name="prev"></div>
-            <div name="pages"></div>
-            <div name="next"></div>
-            <div name="last"></div>
-        </div>
-        <div name="pageSize"></div>
-        <div name="total"></div>
-    </button>`;
-
-
+    static markup = `
+    <div class="${style.pager_wrapper}" style="display:flex">
+        <div style="display:flex;flex-grow:1;gap:20px; align-items: stretch;">
+            <div class="${ style.pagination }">
+                <div name="first"></div>
+                <div name="prev"></div>
+                <div name="pages"></div>
+                <div name="next"></div>
+                <div name="last"></div>
+            </div>
+            <div name="pageSize"></div>
+        </div> 
+        <div name="total" class="${style.total}"></div>
+    </div>`;
+ 
     constructor( options ) {
         options = deepMerge({
             links : {

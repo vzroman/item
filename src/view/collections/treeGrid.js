@@ -47,9 +47,9 @@ export class TreeGrid extends ItemView{
         contextPath:{type:types.primitives.Array,default:[]}
     };
 
-    static markup = `<div class="${ mainStyles.vertical }">
-        <div name="breadcrumbs"></div>
-        <div name="grid"></div>
+    static markup = `<div class="${ mainStyles.vertical }" style="height: 100%; width:100%">
+        <div name="breadcrumbs" style="display:flex"></div>
+        <div name="grid" style="flex-grow: 1"></div>
     </div>`;
 
     constructor( options ) {
@@ -191,12 +191,12 @@ class TreeCell extends ItemView{
         super( options );
     }
 
-    static markup = `<div class="${ mainStyles.horizontal }">
+    static markup = `<div class="${style.treeCell}">
         <div name="offset"></div>
         <div name="expand"></div>
         <div name="icon">icon</div>
         <div name="cell"></div>
-        <div name="total"></div>
+        <div name="total" style="margin-left: auto"></div>
     </div>`;
 
     widgets() {
@@ -218,6 +218,9 @@ class TreeCell extends ItemView{
                             if (isExpanded) return "-";
                             if (isExpandable) return "+";
                             return " "
+                        }},
+                        opacity:{source:"parent", event:"isExpandable", handler: (val)=>{
+                            return val ? "1" : "0";
                         }}
                     },
                     events: {
@@ -274,7 +277,7 @@ class TreeCell extends ItemView{
             this.#parent.bind("dblClick",()=>{
                 if (this._options.isExpandable){
                     const path = this.#parent.getPath().map(r => r.get("data").get());
-                    this._trigger("drillDown",[path]);
+                    if (path) this._trigger("drillDown",[path]);
                 }
             })
         }

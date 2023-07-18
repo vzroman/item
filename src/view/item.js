@@ -36,6 +36,7 @@ export class View extends Item{
         enable:{type:types.primitives.Bool, virtual:true},
         visible:{type:types.primitives.Bool, default:true, virtual:true},
         focus:{type:types.primitives.Bool, default:false, virtual:true},
+        opacity:{type:types.primitives.Float, default:1},
         widgets:{type:types.primitives.Set}
     };
 
@@ -117,6 +118,10 @@ export class View extends Item{
         this._controller.bind("enable", value=>{
             if (typeof value === "boolean") this.enable( value );
         });
+
+        this.bind("opacity", value =>
+            this.$markup.css("opacity", value.toString())
+        );
 
         let _displayBackup = this.$markup.css("display");
         this._controller.bind("visible", value=>{
