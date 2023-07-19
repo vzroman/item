@@ -74,6 +74,7 @@ export class TreeGrid extends ItemView{
             }
         };
 
+        //-------------Proxy grid events--------------------------
         this._gridOptions.events = Object.fromEntries(Object.keys( this.constructor.events ).map(e => {
             return [e, (...args)=>this._trigger(e,args)]
         }));
