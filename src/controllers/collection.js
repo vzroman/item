@@ -25,7 +25,6 @@
 import {Controller as Item} from "./item.js";
 import {Linkable} from "../core/linkable.js";
 import * as util from "../utilities/data.js";
-import {Eventful} from "../core/eventful.js";
 
 export class Controller extends Item{
 
@@ -85,6 +84,8 @@ export class Controller extends Item{
     }
 
     fork( id, settings ){
+
+        id = id || util.GUID();
 
         const data = this._get( id );
         if ( this._isRefresh || this._data[ id ] ){

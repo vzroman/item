@@ -95,7 +95,7 @@ export class View extends Parent{
     }
 
     _commit(){
-        this._trigger("commit")
+        this._trigger("commit",[this._options.data?.get()])
     }
 
     _reject( error ){
