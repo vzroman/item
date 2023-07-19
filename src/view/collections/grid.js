@@ -56,9 +56,8 @@ export class Grid extends Collection{
 
         if (options.checkbox){
             options.columns.unshift({ view:Checkbox, options:{
-                enable:!options.multiselect,
-                links:{ value:"parent@selected" },
-                events:{ value: "parent@selected" }
+                pointer_events:"none",
+                links:{ value:"parent@selected" }
             }})
         }
 
@@ -72,17 +71,29 @@ export class Grid extends Collection{
         if (this._options.resizable) {
             this.#initResize();
         }
-        
-        if (this._options.multiselect) {
-            selection({
-               $container: this.$tbody,
-               $selector: 'tr',
-               onSelect: ({add:addItems=[], remove:removeItems=[]}) =>{
-                   addItems.forEach( $item => this.constructor.getItem( $item )?.set({selected:true}) );
-                   removeItems.forEach( $item => this.constructor.getItem( $item )?.set({selected:false}) );
-               }
-            });
-        }
+
+        const selected = new Set();
+        selection({
+            $container: this.$tbody,
+            $selector: 'tr',
+            multiselect: this._options.multiselect,
+            onSelect: ({add:addItems=[], remove:removeItems=[]}) =>{
+                addItems.forEach( $item => {
+                    const row = this.constructor.getItem( $item );
+                    if (!row) return;
+                    row.set({selected:true});
+                    selected.add( row );
+                });
+                removeItems.forEach( $item => {
+                    const row = this.constructor.getItem( $item );
+                    if (!row) return;
+                    row.set({selected:false});
+                    selected.delete( row );
+                });
+
+                this._trigger("onSelect",[[...selected].map(r => r.get("data").get())]);
+            }
+        });
     }
 
     static compileColumn( col ){
@@ -149,7 +160,6 @@ export class Grid extends Collection{
             $container: this.$tbody,
             columns: this._options.columns,
             numerated:this._options.numerated,
-            selectable:!this._options.multiselect,
             parentRow:undefined,
             previousRow:previousRow
         });

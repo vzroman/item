@@ -37,6 +37,7 @@ export class View extends Item{
         visible:{type:types.primitives.Bool, default:true, virtual:true},
         focus:{type:types.primitives.Bool, default:false, virtual:true},
         opacity:{type:types.primitives.Float, default:1},
+        pointer_events:{type:types.primitives.String, default:"unset"},
         widgets:{type:types.primitives.Set}
     };
 
@@ -121,6 +122,10 @@ export class View extends Item{
 
         this.bind("opacity", value =>
             this.$markup.css("opacity", value.toString())
+        );
+
+        this.bind("pointer_events", value =>
+            this.$markup.css("pointer-events", value)
         );
 
         let _displayBackup = this.$markup.css("display");

@@ -63,6 +63,11 @@ export function run( $container ){
             getIcon:( item ) => false,
             getSubitems:( folder )=>{
                 return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
+            },
+            events:{
+                onSelect:items => {
+                    console.log("onSelect", items)
+                }
             }
         });
 

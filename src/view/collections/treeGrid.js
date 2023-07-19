@@ -38,6 +38,10 @@ import fileIcon from "./grid/img/icon_file.png";
 
 export class TreeGrid extends ItemView{
 
+    static events = {
+        onSelect: true
+    }
+
     static options = {
         ...Grid.options,
         getSubitems:{type:types.primitives.Fun},

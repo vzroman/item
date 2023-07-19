@@ -23,6 +23,39 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 export function selection( options ){
+    if (options.multiselect) return multiselect( options );
+
+    const {
+        $container,
+        $selector,
+        onSelect
+    } = options;
+
+    const selection = new Set();
+
+    $container.on("click", (e)=>{
+        const item = $(e.target).closest( $selector )[0];
+        if (!item) return;
+
+        const diff = {
+            add:[], remove:[]
+        }
+
+        if (selection.has( item )){
+            selection.delete( item );
+            diff.remove.push( $(item) )
+        }else{
+            selection.add( item );
+            diff.add.push( $(item) )
+        }
+
+        onSelect( diff );
+
+    });
+}
+
+
+function multiselect( options ){
 
 
     const {
@@ -30,6 +63,7 @@ export function selection( options ){
         $selector,
         onSelect
     } = options;
+
 
     const $lasso = $(`<div></div>`).css({
         "display": "none",
@@ -50,6 +84,10 @@ export function selection( options ){
 
     const selection = new Set();
 
+    const diff = {
+        add:[],
+        remove:[]
+    };
 
     const startSelection = (e) => {
         const $item = $(e.target).closest( $selector );
@@ -60,10 +98,13 @@ export function selection( options ){
             if (!$container[0].contains(i)) selection.delete( i )
         });
 
+        diff.add = [];
+        diff.remove = [];
+
         if (!e.shiftKey) fromIndex = $container.children( $selector ).index( $item );
 
         if (!(e.ctrlKey || e.metaKey || e.shiftKey)) {
-            onSelect({remove:[...selection].map( i => $(i))});
+            diff.remove = [...selection].map( i => $(i));
             selection.clear();
         }
 
@@ -86,11 +127,6 @@ export function selection( options ){
         const toIndex = $container.children( $selector ).index( $item );
 
         const $items = $container.children( $selector ).slice(Math.min(fromIndex, toIndex), Math.max(fromIndex, toIndex)+1);
-
-        const diff = {
-            add:[],
-            remove:[]
-        };
 
         $items.each(function (){
             if (selection.has( this )){

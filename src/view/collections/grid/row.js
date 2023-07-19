@@ -33,7 +33,6 @@ export class Row extends Item{
     static options = {
         columns:{type:types.primitives.Array, required:true},
         numerated:{type:types.primitives.Bool, default:false},
-        selectable:{type:types.primitives.Bool, default:true},
         selected:{type:types.primitives.Bool},
         parentRow:{type: types.primitives.Instance, options:{class:Row}},
         nextRow:{type: types.primitives.Instance, options:{class:Row}},
@@ -52,11 +51,6 @@ export class Row extends Item{
             this.$markup.toggleClass(style.selected_row, val);
         });
 
-        if (this._options.selectable){
-            this.$markup.on("click",()=>{
-               this.set({selected: !this._options.selected });
-            });
-        }
 
         if (this._options.numerated && this._options.parentRow){
             this._options.parentRow.bind("index", parentIndex=>{
