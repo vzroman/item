@@ -34,7 +34,7 @@ export class Control extends Parent{
         length:{type: types.primitives.Integer}
     };
 
-    static markup = `<input type="text"/>`;
+    static markup = `<input type="text" style="width: 100%"/>`;
 
     constructor( options ){
         super( options );
