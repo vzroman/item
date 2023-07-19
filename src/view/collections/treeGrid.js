@@ -56,11 +56,6 @@ export class TreeGrid extends ItemView{
         <div name="grid" style="flex-grow: 1"></div>
     </div>`;
 
-    constructor( options ) {
-
-
-        super( options );
-    }
 
     widgets(){
 
@@ -78,6 +73,10 @@ export class TreeGrid extends ItemView{
                 }
             }
         };
+
+        this._gridOptions.events = Object.fromEntries(Object.keys( this.constructor.events ).map(e => {
+            return [e, (...args)=>this._trigger(e,args)]
+        }));
 
         //--------Init breadcrumbs---------------------------------
         this._breadCrumbsController = new controllers.Collection({
