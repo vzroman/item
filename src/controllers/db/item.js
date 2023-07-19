@@ -88,7 +88,7 @@ export class Controller extends Item{
     rollback(changes, error){
         return this._promise("rollback",(resolve, reject) => {
 
-            if (changes) {
+            if (changes || !this._filter) {
                 resolve( super.rollback(changes, error) );
             }else{
                 this.refresh().then(result =>{
