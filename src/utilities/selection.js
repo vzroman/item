@@ -22,16 +22,46 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-export function selection( options ){
-    if (options.multiselect) return multiselect( options );
 
+export class Selection{
+    constructor( options ) {
+
+        this._selection = new Set();
+
+        options.selection = this._selection;
+
+        if ( options.multiselect ){
+            this._onDestroy = multiSelect( options );
+        }else{
+            this._onDestroy = simpleSelect( options )
+        }
+    }
+
+    selected( $selected ){
+        const selection = this._selection;
+        if ($selected){
+            selection.clear();
+            $selected.each(function(){ selection.add( this ) })
+        }else{
+            return [...selection]
+        }
+    }
+
+    destroy(){
+        this._onDestroy();
+    }
+
+
+}
+
+function simpleSelect( options ){
     const {
         $container,
         $selector,
+        selection,
         onSelect
     } = options;
 
-    const selection = new Set();
 
     $container.on("click", (e)=>{
         const item = $(e.target).closest( $selector )[0];
@@ -52,15 +82,18 @@ export function selection( options ){
         onSelect( diff );
 
     });
+
+    return () => {}
 }
 
 
-function multiselect( options ){
+function multiSelect( options ){
 
 
     const {
         $container,
         $selector,
+        selection,
         onSelect
     } = options;
 
@@ -81,8 +114,6 @@ function multiselect( options ){
     };
 
     let fromIndex = undefined;
-
-    const selection = new Set();
 
     const diff = {
         add:[],

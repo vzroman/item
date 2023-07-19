@@ -30,7 +30,7 @@ import {Row} from "./grid/row";
 import {Html} from "../primitives/html";
 import {Checkbox} from "../controls/checkbox";
 import {Pager} from "../widgets/pager";
-import {selection} from "../../utilities/selection";
+import {Selection} from "../../utilities/selection";
 import {types} from "../../types";
 import style from "./grid.css";
 
@@ -73,7 +73,7 @@ export class Grid extends Collection{
         }
 
         const selected = new Set();
-        selection({
+        this._selection = new Selection({
             $container: this.$tbody,
             $selector: 'tr',
             multiselect: this._options.multiselect,
@@ -222,6 +222,7 @@ export class Grid extends Collection{
 
     destroy() {
         this.heightObserver?.disconnect();
+        this._selection?.destroy();
         super.destroy();
     }
 }
