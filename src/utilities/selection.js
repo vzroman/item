@@ -62,8 +62,7 @@ function simpleSelect( options ){
         onSelect
     } = options;
 
-
-    $container.on("click", (e)=>{
+    const onClick = (e)=>{
         const item = $(e.target).closest( $selector )[0];
         if (!item) return;
 
@@ -80,10 +79,13 @@ function simpleSelect( options ){
         }
 
         onSelect( diff );
+    }
 
-    });
+    $container.on("click", onClick);
 
-    return () => {}
+    return () => {
+        $container.off("click", onClick);
+    }
 }
 
 
@@ -193,7 +195,12 @@ function multiSelect( options ){
 
     $container.on("mousedown", startSelection);
 
-    return ()=> $lasso.remove();
+    return ()=> {
+        $container.off("mousedown", startSelection);
+        window.removeEventListener('mousemove', onDraw);
+        window.removeEventListener('mouseup', endSelection);
+        $lasso.remove()
+    };
 
 }
 
