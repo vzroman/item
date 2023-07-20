@@ -29,6 +29,7 @@ import * as util from "../../utilities/data.js";
 export class Controller extends Item{
 
     static options = {
+        autoCommit:false,
         connection:undefined,
         timeout: 60000,
         subscribe:false
@@ -110,6 +111,8 @@ export class Controller extends Item{
 
                 this.query( this._filter) .then(data => {
 
+                    // If the schema is undefined the controller was already destroyed
+                    if (!this._schema) return;
                     super.refresh( data ).then( resolve, reject );
 
                 }, reject);
@@ -121,6 +124,8 @@ export class Controller extends Item{
 
     query( filter ){
         return new Promise((resolve, reject) => {
+
+            if (!this._schema) return reject( "destroyed" );
 
             const fields = this._schema.filter({virtual:false}).join(",");
 

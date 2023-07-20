@@ -30,12 +30,12 @@ export class Controller extends Item{
 
     static options = {
         id:undefined,
+        autoCommit:false,
         filter:undefined,
         orderBy:undefined,
         keyCompare:undefined,
         page:1,
         pageSize: undefined,
-        forkCommit:undefined,
         totalCount: 0
     };
 
@@ -83,9 +83,10 @@ export class Controller extends Item{
         }
     }
 
-    fork( id, settings ){
+    fork( {id, params, isSource, isConsumer, onCommit} ){
 
         id = id || util.GUID();
+        params = params || {};
 
         const data = this._get( id );
         if ( this._isRefresh || this._data[ id ] ){
@@ -96,31 +97,45 @@ export class Controller extends Item{
             }
         }
 
+        // Create the item controller
         const {controller, options} = util.deepMerge({
             controller: Item,
             options:{
                 autoCommit: true,
                 schema: util.deepCopy( this._options.schema )
-            }}, settings);
+            }}, params);
 
         const item = new controller( options );
-
         item.init(data||{});
 
-        const parent = [this.bind(id, changes => {
-            if (changes){
-                item.set( changes )
-            }else if(changes === null){
-                item.destroy();
-            }
-        })];
-        const child = [
-            item.bind("change",changes => this.set({ [id]:util.patch2value(changes, 0) }))
-        ];
-        if (this._options.forkCommit === "refresh"){
-            child.push( item.bind("commit",()=> this.refresh()) )
-        }else if (this._options.forkCommit === "commit"){
-            child.push( item.bind("commit",()=> this.commit( id )) )
+        //------------Set the relations--------------------------------
+        const parent = [];
+        const child = [];
+
+        // The item is a consumer of changes in the collection
+        if (isConsumer) {
+            parent.push(this.bind(id, changes => {
+                if (changes){
+                    item.set( changes )
+                }else if(changes === null){
+                    item.destroy();
+                }
+            }));
+        }
+
+        // The item is a source of changes in the collection
+        if (isSource || onCommit){
+            child.push( item.bind("commit",() => {
+                if ( onCommit === "refresh" ){
+                    this.refresh();
+                }else{
+                    this.set({ [id]:item.get() });
+                    if ( onCommit === "commit"){
+                        this.commit( id );
+                    }
+                }
+
+            }))
         }
 
         // self-destroying bond

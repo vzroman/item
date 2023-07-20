@@ -34,7 +34,12 @@ export class View extends Item{
         itemController: { type:types.complex.Item, options:{ schema:{
             controller:{ type:types.primitives.Class, options:{ class:controllers.Item }},
             options:{ type:types.primitives.Set }
-        }}}
+        }}},
+        itemRelations:{ type:types.complex.Item, options:{ schema:{
+            isSource:{ type:types.primitives.Bool, default:false },
+            isConsumer:{ type:types.primitives.Bool, default: true },
+            onCommit:{ type:types.primitives.String }
+        }}, default:{ isSource: false, isConsumer: true, onCommit: undefined  }}
     };
 
     static events ={
@@ -126,7 +131,13 @@ export class View extends Item{
         const item = this.newItem( id, prevItem );
 
         // Link the item to the data
-        const controller = this._collection.fork( id, this._options.itemController );
+        const controller = this._collection.fork( {
+            id,
+            params:this._options.itemController,
+            isSource:this._options.itemRelations.isSource,
+            isConsumer:this._options.itemRelations.isConsumer,
+            onCommit: this._options.itemRelations.onCommit
+        } );
         item.link( {data:controller, parent:this} );
 
         return [item, controller];

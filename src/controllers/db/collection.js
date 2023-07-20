@@ -48,10 +48,10 @@ function oidCompare([a], [b]) {
 export class Controller extends Collection{
 
     static options = {
+        autoCommit:false,
         connection:undefined,
         timeout: 60000,
         subscribe:false,
-        forkCommit:"refresh",
         serverPaging: false
     };
 
