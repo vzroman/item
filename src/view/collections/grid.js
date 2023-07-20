@@ -91,10 +91,15 @@ export class Grid extends Collection{
                     selected.delete( row );
                 });
 
-                this._trigger("onSelect",[[...selected].map(r => r.get("data").get())]);
+                this._trigger("onSelect",[[...selected]]);
             }
         });
     }
+
+    getContext(){
+        return this._options.data;
+    }
+
 
     static compileColumn( col ){
         if (typeof col === "string"){

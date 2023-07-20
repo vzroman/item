@@ -27,6 +27,7 @@ import {View as Item} from "../../item";
 import {types} from "../../../types";
 import style from "../grid.css";
 import {View as Collection} from "../../collection";
+import {Controller as CollectionController} from "../../../controllers/collection";
 
 export class Row extends Item{
 
@@ -37,11 +38,13 @@ export class Row extends Item{
         parentRow:{type: types.primitives.Instance, options:{class:Row}},
         nextRow:{type: types.primitives.Instance, options:{class:Row}},
         previousRow:{type: types.primitives.Instance, options:{class:Row}},
-        index:{type:types.primitives.String, default:"1"}
+        index:{type:types.primitives.String, default:"1"},
+        isUnfolded:{type:types.primitives.Bool, default:false},
+        children:{type: types.primitives.Instance, options:{class:CollectionController}}
     };
 
-    #indexPrefix = "";
     #children;
+    #indexPrefix = "";
     #unbind = [];
 
     constructor( options ) {
@@ -95,18 +98,31 @@ export class Row extends Item{
     }
 
     unfold( controller ){
+
         if (this.#children) this.#children.destroy();
+        this._options.children?.destroy();
 
         this.#children = new RowsCollection({
             $container:this._options.$container,
             parent:this,
             data:controller
         });
+
+        this.set({
+            children: controller,
+            isUnfolded: true
+        });
     }
 
     fold(){
         if (this.#children) this.#children.destroy();
+        this._options.children?.destroy();
         this.#children = undefined;
+
+        this.set({
+            children: null,
+            isUnfolded: false
+        });
     }
 
     insertAfter( nextRow ){
@@ -139,6 +155,8 @@ export class Row extends Item{
             this.#children.destroy();
             this.#children = undefined;
         }
+
+        this._options.children?.destroy();
 
         super.destroy();
     }

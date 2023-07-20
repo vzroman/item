@@ -68,6 +68,9 @@ export class TreeGrid extends ItemView{
                 getSubitems: this._options.getSubitems,
                 isFolder: this._options.isFolder,
                 getIcon: this._options.getIcon,
+                links:{
+                    isExpanded: "parent@isUnfolded"
+                },
                 events:{
                     drillDown:( path )=>this.set({contextPath: [...this._options.contextPath, ...path] } )
                 }
@@ -127,6 +130,10 @@ export class TreeGrid extends ItemView{
 
     }
 
+    getContext(){
+        return this._grid?.getContext();
+    }
+
     _contextPath( path ) {
 
         // ----------update breadcrumbs------------------------------
@@ -160,6 +167,19 @@ export class TreeGrid extends ItemView{
             });
         }
 
+    }
+
+    unfold( row ){
+        const itemController = row.get("data");
+        const item = itemController.get();
+        if (this._options.isFolder && this._options.isFolder( item ) ){
+            const controller = this._options.getSubitems( item );
+            row.unfold( controller );
+        }
+    }
+
+    fold( row ){
+        row.fold();
     }
 
     destroy() {
@@ -234,7 +254,6 @@ class TreeCell extends ItemView{
                             if (this._options.isExpanded){
                                 this._widgets.total?.destroy();
                                 this.#parent.fold();
-                                this.set({isExpanded:false});
                             }else if(this.#data){
                                 const controller = this._options.getSubitems( this.#data.get() );
                                 this._widgets.total = new Label({ $container: this.$markup.find('[name=total]'), data: controller, links:{text: {
@@ -242,7 +261,6 @@ class TreeCell extends ItemView{
                                     handler:(totalCount)=>this.formatTotalCount(totalCount)
                                 }}});
                                 this.#parent.unfold( controller );
-                                this.set({isExpanded:true});
                             }
 
                         }
@@ -289,7 +307,7 @@ class TreeCell extends ItemView{
         if (!this.#data && context.data){
             this.#data = context.data;
 
-            this.set({ isExpandable:this._options.isFolder ? this._options.isFolder( this.#data ) : false });
+            this.set({ isExpandable:this._options.isFolder ? this._options.isFolder( this.#data.get() ) : false });
 
             const setIcon=()=>{
                 let icon = undefined;
