@@ -111,8 +111,6 @@ export class Controller extends Item{
 
                 this.query( this._filter) .then(data => {
 
-                    // If the schema is undefined the controller was already destroyed
-                    if (!this._schema) return;
                     super.refresh( data ).then( resolve, reject );
 
                 }, reject);
@@ -124,8 +122,6 @@ export class Controller extends Item{
 
     query( filter ){
         return new Promise((resolve, reject) => {
-
-            if (!this._schema) return reject( "destroyed" );
 
             const fields = this._schema.filter({virtual:false}).join(",");
 
@@ -163,6 +159,7 @@ export class Controller extends Item{
                         super.commit().then(resolve, reject);
 
                         // Request the updated item from the database
+                        if (!this._schema) return; // if the schema is undefined then the object is already destroyed
                         this.refresh();
 
                     }, onReject, this._options.timeout);
@@ -178,6 +175,7 @@ export class Controller extends Item{
 
                     super.commit().then(resolve, reject);
 
+                    if (!this._schema) return; // if the schema is undefined then the object is already destroyed
                     this.refresh();
 
                 },onReject, this._options.timeout);
