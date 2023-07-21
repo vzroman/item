@@ -196,7 +196,9 @@ class RowsCollection extends Collection{
             nextRow: undefined,
             previousRow:previousRow,
             selected: false,
-            index:undefined
+            isUnfolded:false,
+            index:undefined,
+            children:undefined
         }});
     }
 

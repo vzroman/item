@@ -48,7 +48,8 @@ export class Grid extends Collection{
         numerated:{type:types.primitives.Bool},
         checkbox:{type:types.primitives.Bool},
         multiselect:{type:types.primitives.Bool, default:false},
-        pager:{type:types.primitives.Set}
+        pager:{type:types.primitives.Set},
+        row:{type: types.primitives.Set }
     };
 
     constructor( options ) {
@@ -174,14 +175,14 @@ export class Grid extends Collection{
     };
 
     newItem( id, previousRow ){
-        return new Row({
+        return new Row({...this._options.row,...{
             id:id,
             $container: this.$tbody,
             columns: this._options.columns,
             numerated:this._options.numerated,
             parentRow:undefined,
             previousRow:previousRow
-        });
+        }});
     }
 
     _placeItem( row, previousRow ){

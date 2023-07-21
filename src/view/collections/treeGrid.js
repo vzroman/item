@@ -157,7 +157,7 @@ export class TreeGrid extends ItemView{
                 ...this._gridOptions,
                 $container: this.$markup.find('[name="grid"]'),
                 data: controller,
-                events:{ destroy:()=> controller.destroy() }
+                events:{...this._gridOptions.events, destroy:()=> controller.destroy() }
             });
         }else{
             this._grid = new Grid({

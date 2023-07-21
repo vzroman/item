@@ -53,6 +53,7 @@ export function run( $container ){
             multiselect:true,
             checkbox:true,
             pager:{},
+            //row:{ links:{ selected:{source:"data@.name", handler:name=> name === "chemical" } }},
             itemName:(item)=>item[".name"],
             isFolder:( any )=> true,
             getIcon:( item ) => false,
