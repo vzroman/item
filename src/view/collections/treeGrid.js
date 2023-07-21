@@ -35,6 +35,7 @@ import {Html} from "../primitives/html";
 import style from "./grid.css";
 import folderIcon from "./grid/img/icon_folder.png";
 import fileIcon from "./grid/img/icon_file.png";
+import {deepMerge} from "../../utilities/data";
 
 export class TreeGrid extends ItemView{
 
@@ -44,7 +45,7 @@ export class TreeGrid extends ItemView{
 
     static options = {
         ...Grid.options,
-        getSubitems:{type:types.primitives.Fun},
+        getSubitems:{type:types.primitives.Fun, required:true},
         isFolder:{type:types.primitives.Fun},
         getIcon:{type:types.primitives.Fun},
         itemName:{type:types.primitives.Fun},
@@ -61,6 +62,7 @@ export class TreeGrid extends ItemView{
 
         //----------Wrap the user widget into ThreeCell--------------------
         this._gridOptions = this.get();
+        this._gridOptions.row = deepMerge({getSubitems: this._options.getSubitems}, this._gridOptions.row  );
         this._gridOptions.columns[0] = {
             view: TreeCell,
             options: {
@@ -173,8 +175,7 @@ export class TreeGrid extends ItemView{
         const itemController = row.get("data");
         const item = itemController.get();
         if (this._options.isFolder && this._options.isFolder( item ) ){
-            const controller = this._options.getSubitems( item );
-            row.unfold( controller );
+            row.unfold();
         }
     }
 
@@ -255,12 +256,13 @@ class TreeCell extends ItemView{
                                 this._widgets.total?.destroy();
                                 this.#parent.fold();
                             }else if(this.#data){
-                                const controller = this._options.getSubitems( this.#data.get() );
-                                this._widgets.total = new Label({ $container: this.$markup.find('[name=total]'), data: controller, links:{text: {
+                                this.#parent.unfold();
+                                const children = this.#parent.get("children");
+                                this._widgets.total = new Label({ $container: this.$markup.find('[name=total]'), data: children, links:{text: {
                                     source: "$.totalCount",
                                     handler:(totalCount)=>this.formatTotalCount(totalCount)
                                 }}});
-                                this.#parent.unfold( controller );
+
                             }
 
                         }

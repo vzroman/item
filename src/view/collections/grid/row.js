@@ -35,10 +35,12 @@ export class Row extends Item{
         columns:{type:types.primitives.Array, required:true},
         numerated:{type:types.primitives.Bool, default:false},
         selected:{type:types.primitives.Bool},
+        getSubitems:{type:types.primitives.Fun},
         parentRow:{type: types.primitives.Instance, options:{class:Row}},
         nextRow:{type: types.primitives.Instance, options:{class:Row}},
         previousRow:{type: types.primitives.Instance, options:{class:Row}},
         index:{type:types.primitives.String, default:"1"},
+        level:{type: types.primitives.Integer, default:0},
         isUnfolded:{type:types.primitives.Bool, default:false},
         children:{type: types.primitives.Instance, options:{class:CollectionController}}
     };
@@ -98,10 +100,14 @@ export class Row extends Item{
         },{});
     }
 
-    unfold( controller ){
+    unfold(  ){
+
+        if (!this._options.getSubitems) return;
 
         if (this.#children) this.#children.destroy();
         this._options.children?.destroy();
+
+        const controller = this._options.getSubitems( this._options.data.get() );
 
         this.#children = new RowsCollection({
             $container:this._options.$container,
@@ -198,6 +204,7 @@ class RowsCollection extends Collection{
             selected: false,
             isUnfolded:false,
             index:undefined,
+            level: this._options.parent.get("level") + 1,
             children:undefined
         }});
     }
