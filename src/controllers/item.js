@@ -258,7 +258,7 @@ export class Controller extends Linkable{
     // Clean UP
     //-------------------------------------------------------------------
     destroy(){
-        this._schema.destroy();
+        this._schema?.destroy();
         this._schema = undefined;
         this._data = undefined;
         this._changes = undefined;

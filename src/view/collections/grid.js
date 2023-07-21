@@ -72,7 +72,16 @@ export class Grid extends Collection{
             this.#initResize();
         }
 
-        const selected = new Set();
+        let timer = undefined;
+        this.$tbody.bind("item-grid-row-select",()=>{
+            if (!timer) timer = setTimeout(()=>{
+                timer = undefined;
+                const selected = this.getSelected();
+                this._selection.selected( $( selected.map( r => r.$markup[0] )) );
+                this._trigger("onSelect",[selected]);
+            });
+        });
+
         this._selection = new Selection({
             $container: this.$tbody,
             $selector: 'tr',
@@ -82,22 +91,27 @@ export class Grid extends Collection{
                     const row = this.constructor.getItem( $item );
                     if (!row) return;
                     row.set({selected:true});
-                    selected.add( row );
                 });
                 removeItems.forEach( $item => {
                     const row = this.constructor.getItem( $item );
                     if (!row) return;
                     row.set({selected:false});
-                    selected.delete( row );
                 });
-
-                this._trigger("onSelect",[[...selected]]);
             }
         });
     }
 
     getContext(){
         return this._options.data;
+    }
+
+    getSelected(){
+        const selected = [];
+        this.$tbody.children(`tr.${ style.selected_row }`).each(function (){
+            const row = Row.getItem( $(this) );
+            if (row) selected.push( row );
+        });
+        return selected;
     }
 
 

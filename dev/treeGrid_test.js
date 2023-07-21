@@ -40,11 +40,6 @@ export function run( $container ){
             page:1,
             pageSize: 30,
         }
-        const schema = {
-            ".name":{ type:item.types.primitives.String },
-            ".pattern":{type:item.types.primitives.String},
-            ".path":{type:item.types.primitives.String}
-        };
 
         const controller = new item.controllers.db.Collection({...options,data:[".folder","=","$oid('/root/PROJECT')"]});
 
