@@ -28,6 +28,7 @@ import {Control as TextInput} from "./textInput.js";
 import {Checkbox} from "./checkbox.js";
 import {Control as NumberInput} from "./numberInput.js";
 import {Control as Dropdown} from "./dropdown.js";
+import {SelectList} from "./selectList.js";
 
 export const controls = {
     Control,
@@ -35,5 +36,6 @@ export const controls = {
     TextInput,
     Checkbox,
     NumberInput,
-    Dropdown
+    Dropdown,
+    SelectList
 };
