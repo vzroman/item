@@ -48,28 +48,47 @@ export function run( $container ){
 
         const controller = new item.controllers.db.Collection({...options,data:[".folder","=","$oid('/root/PROJECT')"]});
 
-        const grid = new item.view.collections.TreeGrid({
+        const a = new item.view.controls.SelectList({
             $container,
-            data:controller,
-            columns:[".name",".pattern"],    // string | { fields, handler } | Item }
-            header:["name", "pattern"],                    // string | Item | function -> string | $markup
-            resizable:true,
-            numerated:true,
-            multiselect:true,
-            checkbox:true,
-            pager:{},
-            itemName:(item)=>item[".name"],
-            isFolder:( any )=> true,
-            getIcon:( item ) => false,
-            getSubitems:( folder )=>{
-                return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
-            },
+            items: ["item 1", "item 2", "item 3"],
             events:{
-                onSelect:items => {
-                    console.log("onSelect", items)
+                value:(val)=>{
+                    console.log(val);
                 }
             }
-        });
+        })
+
+        setTimeout(() => {
+            a.set({value: ["item 2", "item 3"]})
+        }, 2000)
+
+        setTimeout(() => {
+            a.set({items: ["item 1","item 2", "item 5", "item 6"]})
+        }, 5000)
+
+
+        // const grid = new item.view.collections.TreeGrid({
+        //     $container,
+        //     data:controller,
+        //     columns:[".name",".pattern"],    // string | { fields, handler } | Item }
+        //     header:["name", "pattern"],                    // string | Item | function -> string | $markup
+        //     resizable:true,
+        //     numerated:true,
+        //     multiselect:true,
+        //     checkbox:true,
+        //     pager:{},
+        //     itemName:(item)=>item[".name"],
+        //     isFolder:( any )=> true,
+        //     getIcon:( item ) => false,
+        //     getSubitems:( folder )=>{
+        //         return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
+        //     },
+        //     events:{
+        //         onSelect:items => {
+        //             console.log("onSelect", items)
+        //         }
+        //     }
+        // });
 
     }
 }
