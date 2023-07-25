@@ -79,7 +79,7 @@ export class Controller extends Collection{
 
             this.query( _filter ).then(data => {
 
-                this._filter = filter;
+                this._filter = _filter;
                 this.option("filter", filter);
 
                 resolve( super.init(data) );
