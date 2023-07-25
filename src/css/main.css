@@ -36,3 +36,26 @@
     align-items: stretch;
     height: 100%;
 }
+
+.multiselect {
+
+}
+
+.multiselect > div[name="selected"] {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+    border: 1px solid lightgray;
+    padding: 0 2px;
+    border-radius: 5px;
+    height: 30px;
+}
+
+.multiselect > div[name="selected"] > button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}

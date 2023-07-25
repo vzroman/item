@@ -48,23 +48,36 @@ export function run( $container ){
 
         const controller = new item.controllers.db.Collection({...options,data:[".folder","=","$oid('/root/PROJECT')"]});
 
-        const a = new item.view.controls.SelectList({
+        // const a = new item.view.controls.SelectList({
+        //     $container,
+        //     items: ["item 1", "item 2", "item 3"],
+        //     events:{
+        //         value:(val)=>{
+        //             console.log(val);
+        //         }
+        //     }
+        // })
+
+        const b = new item.view.controls.MultiSelect({
             $container,
-            items: ["item 1", "item 2", "item 3"],
+            items: [{id: 1, text: "item 1"}, {id: 2, text: "item 2"}, {id: 3, text: "item 3"},],
+            // items: ["item 1", "item 2", "item 3"],
+            itemText: "text",
+            itemValue: "id",
             events:{
                 value:(val)=>{
-                    console.log(val);
+                    console.log(111, val);
                 }
             }
         })
 
-        setTimeout(() => {
-            a.set({value: ["item 2", "item 3"]})
-        }, 2000)
+        // setTimeout(() => {
+        //     a.set({value: ["item 2", "item 3"]})
+        // }, 2000)
 
-        setTimeout(() => {
-            a.set({items: ["item 1","item 2", "item 5", "item 6"]})
-        }, 5000)
+        // setTimeout(() => {
+        //     b.set({items: [{id: 1, text: "item 1"}, {id: 2, text: "item 2"}, {id: 3, text: "item 3"},]})
+        // }, 5000)
 
 
         // const grid = new item.view.collections.TreeGrid({
