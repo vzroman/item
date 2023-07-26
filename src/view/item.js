@@ -90,6 +90,7 @@ export class View extends Item{
             let {view, options} = this._widgets[id];
 
             options = {
+                data:this._options.data,
                 links:{
                     enable:{source:"parent@enable" }
                 },
