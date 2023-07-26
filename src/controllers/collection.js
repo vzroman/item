@@ -78,6 +78,7 @@ export class Controller extends Item{
             this._data = util.patch(this._data, changes);
             this._changes = undefined;
             this._trigger("count", this._count);
+            this._trigger("init");
         }finally {
             this._isRefresh = false;
         }

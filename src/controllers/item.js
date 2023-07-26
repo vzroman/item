@@ -36,6 +36,7 @@ export class Controller extends Linkable{
     };
 
     static events = {
+        init:true,
         committable:true,
         commit:true,
         rollback:true,
@@ -158,9 +159,20 @@ export class Controller extends Linkable{
             const changes = super.set( this._schema.coerce( Data ) );
             this._data = util.patch(this._data, changes);
             this._changes = undefined;
+            this._trigger("init");
         }finally {
             this._isRefresh = false;
         }
+    }
+
+    onReady(){
+        return new Promise((resolve)=>{
+            if (this._data) return resolve();
+            const id = this.bind("init",()=>{
+                this.unbind(id);
+                resolve();
+            })
+        });
     }
 
     commit(){
