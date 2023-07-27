@@ -151,7 +151,7 @@ export class Controller extends Linkable{
     }
 
     //------------------------------------------------------------------
-    // Bind controller only when it's ready
+    // Bind controller properties only when it's ready
     //------------------------------------------------------------------
     bind(event, callback){
 
