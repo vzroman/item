@@ -91,9 +91,6 @@ export class View extends Item{
 
             options = {
                 data:this._options.data,
-                links:{
-                    enable:{source:"parent@enable" }
-                },
                 ...options
             };
 
