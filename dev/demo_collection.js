@@ -36,7 +36,9 @@ export function run( $container ){
                 ".folder":{ type:item.types.primitives.String, default:"/root" },
                 ".pattern":{ type:item.types.primitives.String, default:"/root/.patterns/test" },
                 prop1:{ type:item.types.primitives.String },
-                prop2:{ type:item.types.primitives.Integer }
+                prop2:{ type:item.types.primitives.Integer },
+                prop3:{ type:item.types.primitives.Any },
+                prop4:{ type:item.types.primitives.Any }
             },
             data:["and",[
                 [".pattern",'=',"$oid('/root/.patterns/test')"]
