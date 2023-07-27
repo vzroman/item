@@ -150,6 +150,26 @@ export class Controller extends Linkable{
         this._schema.link( sources );
     }
 
+    //------------------------------------------------------------------
+    // Bind controller only when it's ready
+    //------------------------------------------------------------------
+    bind(event, callback){
+        const id = [null];
+        this.onReady().then(()=>{
+            if (id[0]===null){
+                id[0] = super.bind( event, callback );
+            }
+        })
+        return id;
+    }
+
+    unbind(id) {
+        if (id[0]){
+            super.unbind(id[0]);
+        }
+        id.pop();
+    }
+
     //-------------------------------------------------------------------
     // Data access API
     //-------------------------------------------------------------------
