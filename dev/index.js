@@ -1,6 +1,7 @@
 import {run as grid_test} from "./grid_test.js";
 import {run as treeGrid_test} from "./treeGrid_test.js";
 import {run as selectlist_test} from "./selectlist_test.js"
+import {run as demo_test} from "./demo_test.js"
 
 
 $(function () {
@@ -11,7 +12,7 @@ $(function () {
 
 
 
-    selectlist_test( $container );
+    demo_test( $container );
 
 
 
