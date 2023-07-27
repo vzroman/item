@@ -154,6 +154,11 @@ export class Controller extends Linkable{
     // Bind controller only when it's ready
     //------------------------------------------------------------------
     bind(event, callback){
+
+        if ( this._data || this.constructor.events[event] ){
+            return [ super.bind( event, callback ) ]
+        }
+
         const id = [null];
         this.onReady().then(()=>{
             if (id[0]===null){
