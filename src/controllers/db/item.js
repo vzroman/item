@@ -123,7 +123,7 @@ export class Controller extends Item{
     query( filter ){
         return new Promise((resolve, reject) => {
 
-            const fields = this._schema.filter({virtual:false}).join(",").map(this.constructor.toSafeFieldName);
+            const fields = this._schema.filter({virtual:false}).map(this.constructor.toSafeFieldName).join(",");
 
             this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`,Items=>{
                  let item = Object.entries( Items[0] ).map(([name, value])=>{ return [ this.constructor.fromSafeFieldName(name), value ] });
