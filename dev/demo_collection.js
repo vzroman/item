@@ -37,8 +37,7 @@ export function run( $container ){
                 ".pattern":{ type:item.types.primitives.String, default:"/root/.patterns/test" },
                 prop1:{ type:item.types.primitives.String },
                 prop2:{ type:item.types.primitives.Integer },
-                prop3:{ type:item.types.primitives.Any },
-                prop4:{ type:item.types.primitives.Any }
+                in:{ type:item.types.primitives.String },
             },
             data:["and",[
                 [".pattern",'=',"$oid('/root/.patterns/test')"]
@@ -111,6 +110,7 @@ class ItemWidget extends item.view.Item{
     static markup = `<tr style="width: 100%; height: 100%">
         <td name="text"></td>
         <td name="number"></td>
+        <td name="in"></td>
     </tr>`;
 
     static widgets = {
@@ -126,6 +126,13 @@ class ItemWidget extends item.view.Item{
             options:{
                 links:{ value:"prop2" },
                 events:{ value:"prop2" }
+            }
+        },
+        in:{
+            view:item.view.controls.TextInput,
+            options:{
+                links:{ value:"in" },
+                events:{ value:"in" }
             }
         }
     };

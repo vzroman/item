@@ -23,6 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Controller as Collection} from "../collection.js";
+import {Controller as ItemController} from "./item.js";
 import {diff,patch2value} from "../../utilities/data.js";
 
 function oidCompare([a], [b]) {
@@ -144,7 +145,10 @@ export class Controller extends Collection{
 
         return new Promise((resolve, reject)=>{
 
-            const fields = [this._options.id, ...this._schema.filter({virtual:false})].join(",");
+            const fields = [this._options.id, ...this._schema.filter({virtual:false})]
+                .map(name => ItemController.toSafeFieldName( name ))
+                .join(",");
+
             const {
                 serverPaging,
                 page,
@@ -165,7 +169,9 @@ export class Controller extends Collection{
                     this._totalCount = result.length - 1;
                 }
 
-                const [header,...items] = result;
+                let [header,...items] = result;
+                header = header.map( f => ItemController.fromSafeFieldName(f) );
+
                 result = items.map( fields =>{
                     const item = {};
                     for (let i = 0; i < header.length; i++){
@@ -281,7 +287,7 @@ export class Controller extends Collection{
                 : typeof v === "string" || typeof v === "number"
                     ? v
                     : JSON.stringify(v);
-            return f +"='"+ v +"'";
+            return ItemController.toSafeFieldName( f ) +"='"+ v +"'";
         } ).join(",");
     }
 
