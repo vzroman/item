@@ -36,7 +36,6 @@ export class Controller extends Linkable{
     };
 
     static events = {
-        init:true,
         committable:true,
         commit:true,
         rollback:true,
@@ -57,6 +56,7 @@ export class Controller extends Linkable{
 
         this._isValid = false;
         this._isRefresh = false;
+        this._waitReady = [];
 
         if (this._options.data){
             this.init( this._options.data )
@@ -150,6 +150,31 @@ export class Controller extends Linkable{
         this._schema.link( sources );
     }
 
+    //------------------------------------------------------------------
+    // Bind controller properties only when it's ready
+    //------------------------------------------------------------------
+    bind(event, callback){
+
+        if ( this._data || this.constructor.events[event] ){
+            return [ super.bind( event, callback ) ]
+        }
+
+        const id = [null];
+        this.onReady().then(()=>{
+            if (id[0]===null){
+                id[0] = super.bind( event, callback );
+            }
+        })
+        return id;
+    }
+
+    unbind(id) {
+        if (id[0]){
+            super.unbind(id[0]);
+        }
+        id.pop();
+    }
+
     //-------------------------------------------------------------------
     // Data access API
     //-------------------------------------------------------------------
@@ -159,7 +184,7 @@ export class Controller extends Linkable{
             const changes = super.set( this._schema.coerce( Data ) );
             this._data = util.patch(this._data, changes);
             this._changes = undefined;
-            this._trigger("init");
+            this._onReady();
         }finally {
             this._isRefresh = false;
         }
@@ -168,11 +193,19 @@ export class Controller extends Linkable{
     onReady(){
         return new Promise((resolve)=>{
             if (this._data) return resolve();
-            const id = this.bind("init",()=>{
-                this.unbind(id);
-                resolve();
-            })
+            this._waitReady.push( resolve );
         });
+    }
+
+    _onReady(){
+        for (const callback of this._waitReady){
+            try {
+                callback()
+            }catch(e){
+                console.error("onReady callback error", e)
+            }
+        }
+        this._waitReady=[];
     }
 
     commit(){

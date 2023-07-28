@@ -23,6 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Controller as Collection} from "../collection.js";
+import {Controller as ItemController} from "./item.js";
 import {diff,patch2value} from "../../utilities/data.js";
 
 function oidCompare([a], [b]) {
@@ -144,7 +145,10 @@ export class Controller extends Collection{
 
         return new Promise((resolve, reject)=>{
 
-            const fields = [this._options.id, ...this._schema.filter({virtual:false})].join(",");
+            const fields = [this._options.id, ...this._schema.filter({virtual:false})]
+                .map(name => ItemController.toSafeFieldName( name ))
+                .join(",");
+
             const {
                 serverPaging,
                 page,
@@ -165,7 +169,9 @@ export class Controller extends Collection{
                     this._totalCount = result.length - 1;
                 }
 
-                const [header,...items] = result;
+                let [header,...items] = result;
+                header = header.map( f => ItemController.fromSafeFieldName(f) );
+
                 result = items.map( fields =>{
                     const item = {};
                     for (let i = 0; i < header.length; i++){
@@ -243,54 +249,58 @@ export class Controller extends Collection{
     }
 
     static async transaction( changes, connection, timeout ){
-        const query = query => {
-            return new Promise((resolve, reject)=>{
-                connection.query(query, resolve, reject, timeout);
-            })
-        };
 
-        const create = fields => {
-            return new Promise((resolve, reject)=>{
-                connection.create_object(fields, resolve, reject, timeout);
-            })
-        };
+        changes = Object.entries(changes);
+        if (!changes.length) return "ok";
 
-        const update = (id,fields) => {
-            return new Promise((resolve, reject)=>{
-                connection.edit_object(id, fields, resolve, reject, timeout);
-            })
-        };
+        let updates = [];
 
-        const remove = (id) => {
-            return new Promise((resolve, reject)=>{
-                connection.delete_object(id, resolve, reject, timeout);
-            })
-        };
-
-        try{
-            await query("TRANSACTION_START");
-
-            for(const id in changes){
-                if(changes[id][0] && !changes[id][1]){
-                    await create( changes[id][0] );
-                }else if(!changes[id][0] && changes[id][1]){
-                    await remove( id );
-                }else{
-                    let changedFields = diff( changes[id][1], changes[id][0] );
-                    if (changedFields){
-                        changedFields = patch2value(changedFields, 0);
-                        await update(id, changedFields);
-                    }
+        for(const [id,[actual, prev]] of changes){
+            if(actual && !prev){
+                updates.push( this.create( this.encodeFields(actual) ) );
+            }else if(!actual && prev){
+                updates.push( this.remove( id ) );
+            }else{
+                let changedFields = diff( prev, actual);
+                if (changedFields){
+                    changedFields = patch2value(changedFields, 0);
+                    updates.push( this.update( id, this.encodeFields(changedFields) ) );
                 }
             }
-
-            return await query("TRANSACTION_COMMIT");
-        }catch (e){
-            connection.query("TRANSACTION_ROLLBACK",()=>{}, error=>{
-                console.error("error on transaction rollback", error, e);
-            });
-            throw e;
         }
+
+        updates = updates.length === 1 ? updates[0] : ["TRANSACTION_START",...updates,"TRANSACTION_COMMIT"].join(";");
+
+        return await this.query(connection, updates, timeout );
+    }
+
+    static query(connection, statement, timeout ){
+        return new Promise((resolve, reject)=>{
+            connection.query(statement, resolve, reject, timeout);
+        })
+    };
+
+    static encodeFields( fields ){
+        return Object.entries(fields).map(([f,v])=> {
+            v = v === undefined
+                ? null
+                : typeof v === "string" || typeof v === "number"
+                    ? v
+                    : JSON.stringify(v);
+            return ItemController.toSafeFieldName( f ) +"='"+ v +"'";
+        } ).join(",");
+    }
+
+    static create( fields ){
+        return `insert ${ fields } format $from_json`;
+    }
+
+    static update(id, fields ){
+        return `set ${ fields } in * where .oid=$oid('${ id }') format $from_json`;
+    }
+
+    static remove( id ){
+        return `delete from * where .oid=$oid('${ id }')`;
     }
 }
 Controller.extend();
