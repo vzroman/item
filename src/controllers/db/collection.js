@@ -168,7 +168,7 @@ export class Controller extends Collection{
                     ? this._options.DBs
                     : "*";
 
-            const orderBy = this._options.orderBy === ".oid"
+            const orderBy = this._options.orderBy && this._options.orderBy === ".oid"
                 ? ""
                 : "order by " + this._options.orderBy;
 
