@@ -235,7 +235,7 @@ export class Controller extends Collection{
 
     static filter2query( filter ){
         if ( filter[0] === "and" || filter[0] === "or"){
-            return `${ filter[0] }(${ filter[1].map( this.filter2query ).join(",") })`;
+            return `${ filter[0] }(${ filter[1].map( f => this.filter2query( f ) ).join(",") })`;
         }else if(filter[0] === "andnot"){
             return `andnot(${ this.filter2query(filter[1][0]) }, ${ this.filter2query(filter[1][1]) })`;
         }else{
