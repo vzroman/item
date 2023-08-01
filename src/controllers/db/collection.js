@@ -168,7 +168,11 @@ export class Controller extends Collection{
                     ? this._options.DBs
                     : "*";
 
-            connection().query(`get ${ fields } from ${ DBs } where ${ filter } format $to_json ${pagination}`, result => {
+            const orderBy = this._options.orderBy === ".oid"
+                ? ""
+                : "order by " + this._options.orderBy;
+
+            connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
                 if (pagination !== ""){
                     this._totalCount = result.count;
                     result = result.result;
