@@ -152,7 +152,10 @@ export class Control extends Parent{
             $(`<option value="${ value }" ${selected}>${ text }</option>`).appendTo( this.$markup );
         });
 
-        if (this.$markup.val() !== currentValue) this.setValue( null );
+        if (this.$markup.val() !== currentValue) {
+            this.updateValue(null);
+            this.setValue( null );
+        }
 
     }
 
