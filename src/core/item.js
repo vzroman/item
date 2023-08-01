@@ -59,7 +59,10 @@ export class Item extends Linkable{
         this._controller.bind("change", changes => this._update( changes ));
 
         setTimeout(()=>{
-            this.link({self:this, data:this._options.data});
+            // If the options are undefined then the item is already destroyed
+            if (this._options){
+                this.link({self:this, data:this._options.data});
+            }
         });
     }
 
