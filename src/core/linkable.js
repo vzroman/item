@@ -88,7 +88,7 @@ export class Linkable extends Eventful{
                 });
             }else{
                 //Empty list means all properties
-                data = this.get( event );
+                data = this.get();
                 id = super.bind("change", (changes,...args) => {
                     data = {
                         ...data,
