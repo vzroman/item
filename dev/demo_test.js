@@ -48,7 +48,6 @@ export function run( $container ){
             }
         });
 
-        debugger
 
         data.set({prop1:"green"})
 

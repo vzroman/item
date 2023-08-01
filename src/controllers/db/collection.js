@@ -161,7 +161,7 @@ export class Controller extends Collection{
                 ? `PAGE ${page}:${pageSize}`
                 : "";
 
-            connection().query(`get ${ fields } from * where ${ filter } format $to_json ${pagination}`, result => {
+                connection().query(`get ${ fields } from * where ${ filter } format $to_json ${pagination}`, result => {
                 if (pagination !== ""){
                     this._totalCount = result.count;
                     result = result.result;

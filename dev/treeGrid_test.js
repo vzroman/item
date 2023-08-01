@@ -55,14 +55,31 @@ export function run( $container ){
             pager:{},
             //row:{ links:{ selected:{source:"data@.name", handler:name=> name === "chemical" } }},
             itemName:(item)=>item[".name"],
-            isFolder:( any )=> true,
+            isFolder:( item )=> {
+                return !item['.path'].startsWith("/root/PROJECT/LOCALIZATION/");
+            },
             getIcon:( item ) => false,
             getSubitems:( folder )=>{
                 return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
             },
+            search:(v)=>{
+                console.log(v);
+                return new item.controllers.db.Collection({...options, data:[".path","like", v]});
+            },
+            getItemContext:(item) => {
+                let path = item[".path"].split("/");
+                path.pop();
+                if (path.length<=3) return undefined;
+                const name = path[path.length-1];
+                path = path.join("/");
+                return {".name":name,".path":path, ".oid":path};
+            },
             events:{
                 onSelect:items => {
                     console.log("onSelect", items)
+                },
+                rowDblClick:row=>{
+                    console.log(1111, row);
                 }
             }
         });

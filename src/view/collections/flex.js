@@ -32,6 +32,7 @@ export class View extends Collection{
 
     static options = {
         direction:{type:types.primitives.String, default:"vertical"},
+        flexWrap:{type:types.primitives.String, default:"nowrap"},
         item:{type:types.complex.Item, options:{schema:{
             view:{type: types.primitives.Class, options:{class:Item}, required:true },
             options:{type: types.primitives.Set }
@@ -40,7 +41,7 @@ export class View extends Collection{
 
 
     markup(){
-        return `<div class="${ mainCss[this._options.direction] }"></div>`;
+        return `<div class="${ mainCss[this._options.direction] }" style="flex-wrap: ${this._options.flexWrap}" name="flex_wrapper"></div>`;
     };
 
     newItem( id ){

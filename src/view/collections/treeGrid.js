@@ -35,12 +35,13 @@ import {Html} from "../primitives/html";
 import style from "./grid.css";
 import folderIcon from "./grid/img/icon_folder.png";
 import fileIcon from "./grid/img/icon_file.png";
-import {deepMerge} from "../../utilities/data";
+import {deepCopy, deepMerge} from "../../utilities/data";
 
 export class TreeGrid extends ItemView{
 
     static events = {
-        onSelect: true
+        onSelect: true,
+        rowDblClick:true
     }
 
     static options = {
@@ -49,11 +50,17 @@ export class TreeGrid extends ItemView{
         isFolder:{type:types.primitives.Fun},
         getIcon:{type:types.primitives.Fun},
         itemName:{type:types.primitives.Fun},
-        contextPath:{type:types.primitives.Array,default:[]}
+        contextPath:{type:types.primitives.Array,default:[]},
+        search:{type:types.primitives.Fun},
+        getItemContext:{type:types.primitives.Fun}
     };
 
     static markup = `<div class="${ mainStyles.vertical }" style="height: 100%; width:100%">
-        <div name="breadcrumbs" style="display:flex"></div>
+        <div style="display:flex;">
+            <div name="breadcrumbs" style="display:flex; flex-grow:1"></div>
+            <div name="search_bar" style="flex-grow:1"></div>
+            <div name="search_icon"></div>
+        </div>
         <div name="grid" style="flex-grow: 1"></div>
     </div>`;
 
@@ -66,7 +73,7 @@ export class TreeGrid extends ItemView{
         this._gridOptions.columns[0] = {
             view: TreeCell,
             options: {
-                cell: this._gridOptions.columns[0],
+                cell: Grid.compileColumn( this._gridOptions.columns[0] ),
                 getSubitems: this._options.getSubitems,
                 isFolder: this._options.isFolder,
                 getIcon: this._options.getIcon,
@@ -127,9 +134,112 @@ export class TreeGrid extends ItemView{
                         }
                     }
                 }
+            },
+            search_bar:{
+                view:SearchBar,
+                options:{
+                    visible:false,
+                    events:{
+                        onSearch:(val)=>{
+                            this.search(val);
+                        },
+                        onClose:()=>{
+                            this._widgets.breadcrumbs.set({"visible": true});
+                            this._widgets.search_bar.set({"visible": false});
+                            if (!(this._grid.get("columns")[0].view instanceof TreeCell)) {
+                                this._contextPath( this._options.contextPath );
+                            }
+                        }
+                    }
+                }
+            },
+            search_icon:{
+                view: controls.Button,
+                options:{
+                    visible: !!(this._options.search && this._options.getItemContext),
+                    icon: "TODO search icon",
+                    events:{
+                        click:() => {
+                            this._widgets.breadcrumbs.set({"visible": false});
+                            this._widgets.search_bar.set({"visible": true});
+                        }
+                    }
+                }
             }
         }
 
+    }
+
+    search( value ) {
+        const controller = this._options.search( value, this._options.contextPath );
+        this._grid?.destroy();
+        const _options = deepCopy(this._gridOptions);
+        _options.columns[0] = {
+            view: SearchCell,
+            options:{
+                cell: _options.columns[0].options.cell,
+                links:{
+                    itemPath:{source: "data", event:[], handler:async(item)=>{
+                        if (!this._options.itemName) return "undefined";
+                        try{
+                            const list = [];
+                            while (item) {
+                                list.push(this._options.itemName(item));
+                                item = await this._options.getItemContext( item );
+                            }
+                            list.shift();
+                            return "/"+list.reverse().join("/");
+                        }catch(e){
+                            console.error(e);
+                            return "undefined";
+                        }
+                    }},
+                    icon:{source:"data", event:[],handler:(item) =>{
+                        let icon = undefined;
+                        if (typeof this._options.getIcon === "function"){
+                            icon = this._options.getIcon( item );
+                        }
+                        if (typeof icon !== "string"){
+                            const _isFolder = this._options.isFolder && this._options.isFolder(item);
+                            icon = _isFolder ? folderIcon : fileIcon;
+                        }
+                        return icon;
+                    }}
+                }
+            }
+        }
+        this._grid = new Grid({
+            ..._options,
+            $container: this.$markup.find('[name="grid"]'),
+            data: controller,
+            checkbox: false,
+            numerated: false,
+            events:{
+                ..._options.events,
+                rowDblClick:async row=>{
+                    try {
+                        let item = row.get("data").get();
+                        const _isFolder = this._options.isFolder && this._options.isFolder(item);
+                        if (!_isFolder) return this._trigger("rowDblClick", [row]);;
+
+                        this._widgets.breadcrumbs.set({"visible": true});
+                        this._widgets.search_bar.set({"visible": false});
+                        
+                        const path = [];
+                        while (item) {
+                            path.push(item);
+                            item = await this._options.getItemContext( item );
+                        }
+                        path.reverse();
+                        this.set({"contextPath": path});
+                    }catch(e){
+                        console.error(e);
+                        this._contextPath( this._options.contextPath );
+                    }
+                },
+                destroy:()=> controller.destroy()
+            }
+        });
     }
 
     linkWidgets( context ){
@@ -142,7 +252,6 @@ export class TreeGrid extends ItemView{
     }
 
     _contextPath( path ) {
-
         // ----------update breadcrumbs------------------------------
         const set = this._breadCrumbsController.get();
         delete set["0"];
@@ -197,6 +306,78 @@ export class TreeGrid extends ItemView{
 }
 TreeGrid.extend();
 
+class SearchBar extends ItemView{
+    static events = {
+        onSearch: true,
+        onClose: true
+    }
+
+    static markup = `<div style="display: flex">
+        <div name="icon">todo search</div>
+        <input type="text" />
+        <div name="close">todo X</div>
+    </div>`;
+
+    constructor( options ){
+        super( options );
+
+        this.$markup.find('[name="close"]').on("click", ()=>this._trigger("onClose"));
+
+        const $input = this.$markup.find('input');
+
+        this.bind("visible", ()=>$input.val(null));
+        $input.on("keypress", event=>{
+            if (event.which === 13){
+                event.preventDefault();
+                this._trigger("onSearch", $input.val());
+            }
+        });
+    }
+}
+SearchBar.extend();
+
+class SearchCell extends ItemView{
+
+    static options = {
+        cell: {type: types.primitives.Any},
+        icon:{type:types.primitives.String, default: fileIcon},
+        itemPath:{type:types.primitives.String}
+    }
+    
+    static markup = `<div>
+        <div style="display: flex;">
+            <div name="icon" style="margin-right: 12px;"></div>
+            <div name="cell"></div>
+        </div>
+        <div name="context_path"></div>
+    </div>`;
+
+    widgets() {
+        return {
+            icon:{
+                view:Html,
+                options: {
+                    links:{
+                        html:{source:"parent@icon", handler:icon=>{
+                            return `<div style="background-image: url(${icon})" class="${style.icon}"></div>`
+                        }}
+                    }
+                }
+            },
+            cell:this._options.cell,
+            context_path:{
+                view:Html,
+                options:{
+                    links:{
+                        html:"parent@itemPath"
+                    }
+                }
+            }
+        }
+    }
+}
+SearchCell.extend();
+
 class TreeCell extends ItemView{
 
     static options = {
@@ -215,11 +396,6 @@ class TreeCell extends ItemView{
 
     #parent;
     #data;
-
-    constructor( options ) {
-        options.cell = Grid.compileColumn( options.cell );
-        super( options );
-    }
 
     static markup = `<div class="${style.treeCell}">
         <div name="offset"></div>
@@ -319,7 +495,7 @@ class TreeCell extends ItemView{
             const setIcon=()=>{
                 let icon = undefined;
                 if (typeof this._options.getIcon === "function"){
-                    icon = this._options.getIcon( this.#data );
+                    icon = this._options.getIcon( this.#data.get() );
                 }
                 if (typeof icon !== "string"){
                     icon = this._options.isExpandable ? folderIcon : fileIcon;
