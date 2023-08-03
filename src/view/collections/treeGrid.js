@@ -428,8 +428,8 @@ class TreeCell extends ItemView{
                             if (isExpandable) return "+";
                             return " "
                         }},
-                        opacity:{source:"parent", event:"isExpandable", handler: (val)=>{
-                            return val ? "1" : "0";
+                        css:{source:"parent", event:"isExpandable", handler: (val)=>{
+                            return {opacity: val ? 1 : 0 };
                         }}
                     },
                     events: {

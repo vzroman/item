@@ -36,9 +36,8 @@ export class View extends Item{
         enable:{type:types.primitives.Bool, virtual:true},
         visible:{type:types.primitives.Bool, default:true, virtual:true},
         focus:{type:types.primitives.Bool, default:false, virtual:true},
-        opacity:{type:types.primitives.Float, default:1},
-        pointer_events:{type:types.primitives.String, default:"unset"},
         classes:{type:types.primitives.Array},
+        css:{type:types.primitives.Set, default:{}},
         widgets:{type:types.primitives.Set}
     };
 
@@ -119,24 +118,47 @@ export class View extends Item{
             if (typeof value === "boolean") this.enable( value );
         });
 
-        this.bind("classes",(Actual = [], Previous = [])=>{
+        //-------------------dynamic classes-----------------------------------------
+        this.bind("classes",(actual = [], previous = [])=>{
 
-            for (const c of Previous){
-                if (!Actual.includes(c)) this.$markup.removeClass( c );
+            for (const c of previous){
+                if (!actual.includes(c)) this.$markup.removeClass( c );
             }
 
-            for (const c of Actual){
-                if (!Previous.includes(c)) this.$markup.addClass( c );
+            for (const c of actual){
+                if (!previous.includes(c)) this.$markup.addClass( c );
             }
-        })
+        });
 
-        this.bind("opacity", value =>
-            this.$markup.css("opacity", value.toString())
-        );
+        //-------------------handle css properties-----------------------------------
+        const _css = this._options.css || {}; // accumulate controlled css
+        this._controller.bind("beforeChange", changes =>{
+            if (!changes.hasOwnProperty("css")) return;
+            const css = changes.css || {};
+            for (const [prop, val] of Object.entries( css ) ){
+                if (val === null || val === undefined){
+                    delete _css[prop];
+                    delete css[prop]
+                }else{
+                    _css[prop] = val;
+                }
+            }
+            // Add accumulated properties
+            for (const [prop, val] of Object.entries( _css ) ){
+                if (!css.hasOwnProperty(prop)) css[prop] = val;
+            }
+        });
+        this.bind("css", (actual={}, previous={}) =>{
+            const updates = {};
+            for (const [prop, val] of Object.entries( actual ) ){
+                if (previous[prop] !== val) updates[prop] = val;
+            }
+            for (const prop of Object.keys( previous ) ){
+                if ( !actual.hasOwnProperty(prop) ) updates[prop] = '';
+            }
+            this.$markup.css(updates);
+        });
 
-        this.bind("pointer_events", value =>
-            this.$markup.css("pointer-events", value)
-        );
 
         let _displayBackup = this.$markup.css("display");
         this._controller.bind("visible", value=>{
