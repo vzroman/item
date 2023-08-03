@@ -33,8 +33,8 @@ import { controllers } from "../../controllers";
 import { controls } from "../controls";
 import {Html} from "../primitives/html";
 import style from "./grid.css";
-import folderIcon from "./grid/img/icon_folder.png";
-import fileIcon from "./grid/img/icon_file.png";
+import folderIcon from "./grid/img/folder_icon.svg";
+import fileIcon from "./grid/img/file_icon.svg";
 import {deepCopy, deepMerge} from "../../utilities/data";
 
 export class TreeGrid extends ItemView{
@@ -56,8 +56,8 @@ export class TreeGrid extends ItemView{
     };
 
     static markup = `<div class="${ mainStyles.vertical }" style="height: 100%; width:100%">
-        <div style="display:flex;">
-            <div name="breadcrumbs" style="display:flex; flex-grow:1"></div>
+        <div style="display:flex;margin: 6px 0;">
+            <div class="${ style.breadcrumbs }" name="breadcrumbs" style="display:flex; flex-grow:1"></div>
             <div name="search_bar" style="flex-grow:1"></div>
             <div name="search_icon"></div>
         </div>
@@ -105,7 +105,7 @@ export class TreeGrid extends ItemView{
                 if ( a < b ) return -1;
                 return 0;
             },
-            data:[{id:0, caption:"/"}]
+            data:[{id:0, caption:""}]
         });
 
         //--------Subscribe to the path---------------------------------
@@ -120,6 +120,9 @@ export class TreeGrid extends ItemView{
                 options:{
                     data: this._breadCrumbsController,
                     direction:"horizontal",
+                    links: {
+                        visible: { source: "data", event:"$.totalCount", handler:v => v > 1 }
+                    },
                     item:{
                         view:controls.Button,
                         options:{
@@ -456,8 +459,9 @@ class TreeCell extends ItemView{
                 options: {
                     links:{
                         html:{source:"parent", event: ["icon"], handler:({icon})=>{
-                            icon = icon ?? fileIcon;
-                            return `<div style="background-image: url(${icon})" class="${style.icon}"></div>`
+                            const $icon = $(`<div class="${style.icon}"></div>`);
+                            $icon.css({"background-image": icon ?? fileIcon});
+                            return $icon;
                         }}
                     }
                 }
@@ -478,7 +482,7 @@ class TreeCell extends ItemView{
                 level++;
                 row = row.get("parentRow");
             }
-            this.$offset.width(level * 5);
+            this.$offset.width(level * 20);
 
             this.#parent.bind("dblClick",()=>{
                 if (this._options.isExpandable){
@@ -498,7 +502,7 @@ class TreeCell extends ItemView{
                     icon = this._options.getIcon( this.#data.get() );
                 }
                 if (typeof icon !== "string"){
-                    icon = this._options.isExpandable ? folderIcon : fileIcon;
+                    icon = this._options.isExpandable ? `url(${folderIcon})` : `url(${fileIcon})`;
                 }
                 this.set({icon});
             };

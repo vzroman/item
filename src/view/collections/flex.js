@@ -47,7 +47,7 @@ export class View extends Collection{
 
 
     markup(){
-        return `<div class="${ mainCss[this._options.direction] }"></div>`;
+        return `<div class="${ mainCss[this._options.direction] } flex-collection"></div>`;
     };
 
     newItem( id ){
