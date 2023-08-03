@@ -75,7 +75,7 @@ export class View extends Parent{
                     text:i18n("save"),
                     enable:false,
                     links:{ enable:"committable" },
-                    events:{ click:this._options.commit }
+                    events:{ click:() => this._options.commit( this._options.data ) }
                 }
             },
             cancel: {
@@ -84,7 +84,7 @@ export class View extends Parent{
                     text:i18n("cancel"),
                     enable:false,
                     links:{ enable:"committable"},
-                    events:{ click: { target:"!rollback",handler:()=> undefined} }
+                    events:{ click: this._options.rollback( this._options.data ) }
                 }
             }
         }
