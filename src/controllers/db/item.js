@@ -123,11 +123,12 @@ export class Controller extends Item{
     query( filter ){
         return new Promise((resolve, reject) => {
 
-            const fields = this._schema.filter({virtual:false}).join(",");
+            const fields = this._schema.filter({virtual:false}).map(name => this.constructor.toSafeFieldName( name )).join(",");
 
             this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`,Items=>{
-
-                resolve( Items[0] );
+                 let item = Object.entries( Items[0] ).map(([name, value])=>{ return [ this.constructor.fromSafeFieldName(name), value ] });
+                 item = Object.fromEntries( item );
+                resolve( item );
 
             }, reject, this._options.timeout );
         });
@@ -182,6 +183,25 @@ export class Controller extends Item{
             }
         });
     }
+
+    static keywords = new Set(["AND", "ANDNOT", "AS", "BY", "DELETE", "DESC", "GROUP","GET","FROM","SUBSCRIBE","UNSUBSCRIBE",
+                "INSERT","UPDATE","LOCK","OR","ORDER","PAGE","READ", "SET","IN","TRANSACTION_START","TRANSACTION_COMMIT",
+                "TRANSACTION_ROLLBACK","WHERE","WRITE","STATELESS","NO_FEEDBACK","FORMAT","TEXT","HEX","COMMENT_MULTILINE",
+                "WHITESPACE","INTNUM","FLOATDEC","FLOATSCI","FIELD","ATOM","S","ALL","EQ","EQS","GTS","LTS","GTES","LTES","NES",
+                "LIKE","LIKES","OPEN","CLOSE","LIST_OPEN","LIST_CLOSE","COMMA","SEMICOLON","COLON"]);
+
+    static toSafeFieldName( name ){
+        return this.keywords.has(name.toUpperCase()) ? `'${ name }'` : name ;
+    }
+
+    static fromSafeFieldName( field ){
+        if (field.startsWith("'") && field.slice(-1) ==="'"){
+            return field.slice(1,-1);
+        }else{
+            return field;
+        }
+    }
+
 
 }
 Controller.extend();

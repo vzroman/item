@@ -32,15 +32,22 @@ export class View extends Collection{
 
     static options = {
         direction:{type:types.primitives.String, default:"vertical"},
+        flexWrap:{type:types.primitives.String, default:"nowrap"},
         item:{type:types.complex.Item, options:{schema:{
             view:{type: types.primitives.Class, options:{class:Item}, required:true },
             options:{type: types.primitives.Set }
         }}, required:true},
     };
 
+    constructor(options) {
+        super( options );
+
+        this.bind("flexWrap", val => this.$markup.css({"flex-wrap":val}))
+    }
+
 
     markup(){
-        return `<div class="${ mainCss[this._options.direction] }"></div>`;
+        return `<div class="${ mainCss[this._options.direction] } flex-collection"></div>`;
     };
 
     newItem( id ){

@@ -37,7 +37,8 @@ import style from "./grid.css";
 export class Grid extends Collection{
 
     static events = {
-        onSelect: true
+        onSelect: true,
+        rowDblClick: true
     }
 
     static options = {
@@ -82,6 +83,13 @@ export class Grid extends Collection{
                 this._trigger("onSelect",[selected]);
             });
         });
+
+        this.bind("dblClick", e=>{
+            const $row = $(e.target).closest( 'tr' );
+            if (!$row) return;
+            const item = this.constructor.getItem( $row );
+            this._trigger("rowDblClick", [item]);
+        })
 
         this._selection = new Selection({
             $container: this.$tbody,

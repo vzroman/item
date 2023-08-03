@@ -23,6 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Controller as Collection} from "../collection.js";
+import {Controller as ItemController} from "./item.js";
 import {diff,patch2value} from "../../utilities/data.js";
 
 function oidCompare([a], [b]) {
@@ -48,6 +49,7 @@ function oidCompare([a], [b]) {
 export class Controller extends Collection{
 
     static options = {
+        DBs:undefined,
         autoCommit:false,
         connection:undefined,
         timeout: 60000,
@@ -144,7 +146,10 @@ export class Controller extends Collection{
 
         return new Promise((resolve, reject)=>{
 
-            const fields = [this._options.id, ...this._schema.filter({virtual:false})].join(",");
+            const fields = [this._options.id, ...this._schema.filter({virtual:false})]
+                .map(name => ItemController.toSafeFieldName( name ))
+                .join(",");
+
             const {
                 serverPaging,
                 page,
@@ -157,7 +162,17 @@ export class Controller extends Collection{
                 ? `PAGE ${page}:${pageSize}`
                 : "";
 
-            connection().query(`get ${ fields } from * where ${ filter } format $to_json ${pagination}`, result => {
+            const DBs = Array.isArray( this._options.DBs)
+                ? this._options.DBs.join(",")
+                : typeof this._options.DBs === "string"
+                    ? this._options.DBs
+                    : "*";
+
+            const orderBy = !this._options.orderBy || this._options.orderBy === ".oid"
+                ? ""
+                : "order by " + this._options.orderBy;
+
+            connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
                 if (pagination !== ""){
                     this._totalCount = result.count;
                     result = result.result;
@@ -165,7 +180,9 @@ export class Controller extends Collection{
                     this._totalCount = result.length - 1;
                 }
 
-                const [header,...items] = result;
+                let [header,...items] = result;
+                header = header.map( f => ItemController.fromSafeFieldName(f) );
+
                 result = items.map( fields =>{
                     const item = {};
                     for (let i = 0; i < header.length; i++){
@@ -199,7 +216,13 @@ export class Controller extends Collection{
 
                 if ( !this.isCommittable() ) return onReject("not ready");
 
-                this.constructor.transaction(this._changes,  this._options.connection(), this._options.timeout)
+                const DBs = Array.isArray( this._options.DBs)
+                    ? this._options.DBs.join(",")
+                    : typeof this._options.DBs === "string"
+                        ? this._options.DBs
+                        : "*";
+
+                this.constructor.transaction(DBs, this._changes,  this._options.connection(), this._options.timeout)
                     .then(()=>{
 
                         // The changes settled to the database
@@ -216,7 +239,7 @@ export class Controller extends Collection{
 
     static filter2query( filter ){
         if ( filter[0] === "and" || filter[0] === "or"){
-            return `${ filter[0] }(${ filter[1].map( this.filter2query ).join(",") })`;
+            return `${ filter[0] }(${ filter[1].map( f => this.filter2query( f ) ).join(",") })`;
         }else if(filter[0] === "andnot"){
             return `andnot(${ this.filter2query(filter[1][0]) }, ${ this.filter2query(filter[1][1]) })`;
         }else{
@@ -242,55 +265,59 @@ export class Controller extends Collection{
         }
     }
 
-    static async transaction( changes, connection, timeout ){
-        const query = query => {
-            return new Promise((resolve, reject)=>{
-                connection.query(query, resolve, reject, timeout);
-            })
-        };
+    static async transaction(DBs, changes, connection, timeout ){
 
-        const create = fields => {
-            return new Promise((resolve, reject)=>{
-                connection.create_object(fields, resolve, reject, timeout);
-            })
-        };
+        changes = Object.entries(changes);
+        if (!changes.length) return "ok";
 
-        const update = (id,fields) => {
-            return new Promise((resolve, reject)=>{
-                connection.edit_object(id, fields, resolve, reject, timeout);
-            })
-        };
+        let updates = [];
 
-        const remove = (id) => {
-            return new Promise((resolve, reject)=>{
-                connection.delete_object(id, resolve, reject, timeout);
-            })
-        };
-
-        try{
-            await query("TRANSACTION_START");
-
-            for(const id in changes){
-                if(changes[id][0] && !changes[id][1]){
-                    await create( changes[id][0] );
-                }else if(!changes[id][0] && changes[id][1]){
-                    await remove( id );
-                }else{
-                    let changedFields = diff( changes[id][1], changes[id][0] );
-                    if (changedFields){
-                        changedFields = patch2value(changedFields, 0);
-                        await update(id, changedFields);
-                    }
+        for(const [id,[actual, prev]] of changes){
+            if(actual && !prev){
+                updates.push( this.create( this.encodeFields(actual) ) );
+            }else if(!actual && prev){
+                updates.push( this.remove( id, DBs ) );
+            }else{
+                let changedFields = diff( prev, actual);
+                if (changedFields){
+                    changedFields = patch2value(changedFields, 0);
+                    updates.push( this.update( id, this.encodeFields(changedFields), DBs ) );
                 }
             }
-
-            return await query("TRANSACTION_COMMIT");
-        }catch (e){
-            connection.query("TRANSACTION_ROLLBACK",()=>{}, error=>{
-                console.error("error on transaction rollback", error, e);
-            });
-            throw e;
         }
+
+        updates = updates.length === 1 ? updates[0] : ["TRANSACTION_START",...updates,"TRANSACTION_COMMIT"].join(";");
+
+        return await this.query(connection, updates, timeout );
+    }
+
+    static query(connection, statement, timeout ){
+        return new Promise((resolve, reject)=>{
+            connection.query(statement, resolve, reject, timeout);
+        })
+    };
+
+    static encodeFields( fields ){
+        return Object.entries(fields).map(([f,v])=> {
+            v = v === undefined
+                ? null
+                : typeof v === "string" || typeof v === "number"
+                    ? v
+                    : JSON.stringify(v);
+            return ItemController.toSafeFieldName( f ) +"='"+ v +"'";
+        } ).join(",");
+    }
+
+    static create( fields ){
+        return `insert ${ fields } format $from_json`;
+    }
+
+    static update(id, fields ,DBs){
+        return `set ${ fields } in ${ DBs } where .oid=$oid('${ id }') format $from_json`;
+    }
+
+    static remove( id, DBs ){
+        return `delete from ${ DBs } where .oid=$oid('${ id }')`;
     }
 }
 Controller.extend();

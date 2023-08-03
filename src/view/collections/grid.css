@@ -63,7 +63,7 @@ table>td {
 }
 .table>tbody>tr:hover {
     cursor: pointer;
-    background: #f9f8f8;
+    background-color: #86B0CC;
 }
 .table>tfoot>tr>td,
 .table>thead>tr>td {
@@ -109,7 +109,7 @@ table>td {
 }
 
 .selected_row {
-    background: #e9f0fd !important;
+    background-color: #86B0CC !important;
 }
 
 .treeCell{
@@ -121,7 +121,7 @@ table>td {
     line-height: 1.5;
 }
 
-.treeCell > [name="expand"]{
+.treeCell > [name="expand"] > div{
     width: 15px;
     height: 15px;
     line-height: 15px;
@@ -150,16 +150,38 @@ table>td {
     pointer-events: unset !important;
 }
 
-.breadcrumbs {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 6px;
+.breadcrumbs button {
+    background: transparent;
+    border: none;
+    margin-right: 12px;
+    position: relative;
 }
-
-.breadcrumbs > div {
-    flex-shrink: 0;
-    border: 1px solid black;
-    padding: 4px 12px;
-    cursor: pointer;
+.breadcrumbs button::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    margin: auto 0;
+    bottom: 0;
+    right: -7px;
+    height: 14px;
+    transform: rotate(17deg);
+    width: 1px;
+    background: #000;
+}
+.breadcrumbs button:first-of-type {
+    background-image: url('./grid/img/home.svg');
+    padding: 0 13px;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 26px !important;
+    background-size: 19px;
+}
+.breadcrumbs button:last-of-type {
+    margin-right: 0;
+}
+.breadcrumbs button:hover div:last-of-type {
+    text-decoration: underline;
+}
+.breadcrumbs button:last-of-type::before {
+    display: none;
 }
