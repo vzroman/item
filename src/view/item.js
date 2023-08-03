@@ -38,6 +38,7 @@ export class View extends Item{
         focus:{type:types.primitives.Bool, default:false, virtual:true},
         opacity:{type:types.primitives.Float, default:1},
         pointer_events:{type:types.primitives.String, default:"unset"},
+        classes:{type:types.primitives.Array},
         widgets:{type:types.primitives.Set}
     };
 
@@ -117,6 +118,17 @@ export class View extends Item{
         this._controller.bind("enable", value=>{
             if (typeof value === "boolean") this.enable( value );
         });
+
+        this.bind("classes",(Actual = [], Previous = [])=>{
+
+            for (const c of Previous){
+                if (!Actual.includes(c)) this.$markup.removeClass( c );
+            }
+
+            for (const c of Actual){
+                if (!Previous.includes(c)) this.$markup.addClass( c );
+            }
+        })
 
         this.bind("opacity", value =>
             this.$markup.css("opacity", value.toString())
