@@ -55,13 +55,13 @@ export class TreeGrid extends ItemView{
         getItemContext:{type:types.primitives.Fun}
     };
 
-    static markup = `<div class="${ mainStyles.vertical }" style="height: 100%; width:100%">
+    static markup = `<div class="${ mainStyles.vertical }" style="height: 100%; width:100%; flex-grow: 1">
         <div style="display:flex;margin: 6px 0;">
             <div class="${ style.breadcrumbs }" name="breadcrumbs" style="display:flex; flex-grow:1"></div>
             <div name="search_bar" style="flex-grow:1"></div>
             <div name="search_icon"></div>
         </div>
-        <div name="grid" style="flex-grow: 1"></div>
+        <div name="grid" style="flex-grow: 1;display: flex;flex-direction: column"></div>
     </div>`;
 
 
