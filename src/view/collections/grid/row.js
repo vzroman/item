@@ -154,7 +154,7 @@ export class Row extends Item{
     destroy() {
         this.$markup.trigger("item-grid-row-select",[this, false]);
 
-        this.#unbind.forEach( u => u());
+        this.#unbind?.forEach( u => u());
         this.#unbind = undefined;
 
         this._options.nextRow?.set({previousRow: this._options.previousRow});
