@@ -1,0 +1,36 @@
+.button_style {
+    background: red;
+}
+
+.horizontal {
+    flex-direction: column;
+}
+
+.vertical {
+    flex-direction: row;
+}
+
+.tab_container {
+    display: flex;
+    gap: 20px;
+}
+
+.tab_content {
+    width: 100%;
+}
+
+.tab_nav {
+    font-family: "Raleway";
+    float: left;
+    padding: 15px 25px;
+    background: #eeeeee;
+    color: #444;
+}
+
+.tab_nav:hover{
+    background: #dddddd;
+}
+
+.tab_nav .active {
+    background: #ffffff;
+}
