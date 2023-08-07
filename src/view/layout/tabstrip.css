@@ -31,6 +31,7 @@
     background: #dddddd;
 }
 
-.tab_nav .active {
+.active {
     background: #ffffff;
+    border: 1px solid black;
 }

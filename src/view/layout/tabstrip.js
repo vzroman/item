@@ -2,10 +2,7 @@ import {View as ItemView} from "../item.js";
 import {types} from "../../types/index.js";
 import {controllers} from "../../controllers";
 import {View as Flex} from "../collections/flex.js"
-// import {controls} from "../controls";
 import {Control as Parent} from "../controls/control.js";
-// import {types} from "../../types/index.js";
-// import mainCss from "../../css/main.css";
 import style from "./tabstrip.css";
 
 export class View extends ItemView {
@@ -50,11 +47,12 @@ export class View extends ItemView {
 
     widgets() {
         const _menuController = new controllers.Collection({
-            id:"text",
+            id:"id",
             schema:{
                 text:{type: types.primitives.String },
                 icon:{type: types.primitives.String },
-                id: {type: types.primitives.Integer }
+                id: {type: types.primitives.Integer },
+                isActive:{type: types.primitives.Bool }
                 // view:{type: types.primitives.Class, options:{ class:ItemView }, required:true },
                 // options:{type: types.primitives.Set }
             },
@@ -67,6 +65,12 @@ export class View extends ItemView {
              } )
         });
 
+        this.bind("active", active=>{
+            for (const id of Object.keys(_menuController.get())) {
+                _menuController.set({[id]:{isActive: Number(id) ===active}})
+            }
+        });
+
         return {
             menu: {
                 view: Flex,
@@ -77,10 +81,10 @@ export class View extends ItemView {
                         view: Control,
                         options:{
                             links: {text: "data@text", icon: "data@icon", classes: {
-                                source:"data@id",
-                                handler:(id)=> { 
-                                    if (id === this._options.active){
-                                        return ["active"]
+                                source:"data@isActive",
+                                handler:(isActive)=> { 
+                                    if (isActive){
+                                        return [style.active]
                                     }else{ return [] }
                                 }
                             }},
