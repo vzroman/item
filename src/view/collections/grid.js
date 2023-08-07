@@ -58,7 +58,7 @@ export class Grid extends Collection{
 
         if (options.checkbox){
             options.columns.unshift({ view:Checkbox, options:{
-                pointer_events:"none",
+                css:{pointer_events:"none"},
                 links:{ value:"parent@selected" }
             }})
         }

@@ -41,7 +41,7 @@ export class TreeGrid extends ItemView{
 
     static events = {
         onSelect: true,
-        rowDblClick:true
+        rowDblClick: true
     }
 
     static options = {
@@ -55,13 +55,13 @@ export class TreeGrid extends ItemView{
         getItemContext:{type:types.primitives.Fun}
     };
 
-    static markup = `<div class="${ mainStyles.vertical }" style="height: 100%; width:100%">
+    static markup = `<div class="${ mainStyles.vertical }" style="height: 100%; width:100%; flex-grow: 1">
         <div style="display:flex;margin: 6px 0;">
             <div class="${ style.breadcrumbs }" name="breadcrumbs" style="display:flex; flex-grow:1"></div>
             <div name="search_bar" style="flex-grow:1"></div>
             <div name="search_icon"></div>
         </div>
-        <div name="grid" style="flex-grow: 1"></div>
+        <div name="grid" style="flex-grow: 1;display: flex;flex-direction: column"></div>
     </div>`;
 
 
@@ -87,8 +87,8 @@ export class TreeGrid extends ItemView{
         };
 
         //-------------Proxy grid events--------------------------
-        this._gridOptions.events = Object.fromEntries(Object.keys( this.constructor.events ).map(e => {
-            return [e, (...args)=>this._trigger(e,args)]
+        this._gridOptions.events = Object.fromEntries(["onSelect","rowDblClick"].map(e => {
+            return [e, (...args)=>this._trigger(e,args) ]
         }));
 
         //--------Init breadcrumbs---------------------------------
@@ -269,7 +269,10 @@ export class TreeGrid extends ItemView{
         this._breadCrumbsController.set(set);
 
         //--------init grid------------------------------------------
-        this._grid?.destroy();
+        if (this._grid){
+            this._trigger("onSelect",[[]]);
+            this._grid.destroy();
+        }
         if ( path.length > 0 ){
             const controller = this._options.getSubitems( path[path.length - 1] );
             this._grid = new Grid({
@@ -362,7 +365,9 @@ class SearchCell extends ItemView{
                 options: {
                     links:{
                         html:{source:"parent@icon", handler:icon=>{
-                            return `<div style="background-image: url(${icon})" class="${style.icon}"></div>`
+                            const $icon=$(`<div class="${style.icon}"></div>`);
+                            $icon.css({"background-image": icon});
+                            return $icon;
                         }}
                     }
                 }
@@ -428,8 +433,8 @@ class TreeCell extends ItemView{
                             if (isExpandable) return "+";
                             return " "
                         }},
-                        opacity:{source:"parent", event:"isExpandable", handler: (val)=>{
-                            return val ? "1" : "0";
+                        css:{source:"parent", event:"isExpandable", handler: (val)=>{
+                            return {opacity: val ? 1 : 0 };
                         }}
                     },
                     events: {
