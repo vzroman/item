@@ -68,10 +68,10 @@ export class View extends Item{
         this.$markup = $( this.markup() ).appendTo( this._options.$container );
         this.$markup.data("@item", this);
 
-        this._widgets = this.widgets();
+        const widgets = this.widgets();
 
         // init widgets
-        const $widgets = Object.keys( this._widgets ).reduce((acc,id)=>{
+        const $widgets = Object.keys( widgets ).reduce((acc,id)=>{
             let $container = this.$markup.find(`[name="${ id }"]`);
             if (!$container.length && this.$markup.attr("name") === id){
                 $container = this.$markup;
@@ -87,7 +87,7 @@ export class View extends Item{
         this._widgets = Object.entries($widgets).reduce((acc,[id, $container])=>{
 
             // Initialize the widget with default options
-            let {view, options} = this._widgets[id];
+            let {view, options} = widgets[id];
 
             options = {
                 data:this._options.data,
