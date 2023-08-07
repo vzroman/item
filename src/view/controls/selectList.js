@@ -25,9 +25,10 @@
 
 import {Control as Dropdown} from "./dropdown";
 import {types} from "../../types/index.js";
+import mainCss from "../../css/main.css";
 
 export class SelectList extends Dropdown{
-    static markup = `<div style="height:100%; width:100%;"></div>`;
+    static markup = `<div class="${mainCss.selectList}" style="height:100%; width:100%;"></div>`;
 
     static options = {
         value:{type: types.primitives.Array},

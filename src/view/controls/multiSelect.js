@@ -32,6 +32,7 @@ import mainCss from "../../css/main.css";
 import { controllers } from "../../controllers";
 import { controls } from "./index.js";
 import { Label } from "../primitives/label.js";
+import close from "../../img/icons_cancel.svg"
 
 export class MultiSelect extends Parent{
     static markup = `<div class="${ mainCss.multiselect }" style="height:100%; width:100%;">
@@ -101,6 +102,7 @@ export class MultiSelect extends Parent{
                 view:Flex,
                 options:{
                     direction:"horizontal",
+                    flexWrap:"wrap",
                     item:{
                         view:SelectButton,
                         options:{
@@ -161,7 +163,7 @@ class SelectButton extends ItemView{
         text:{type: types.primitives.String}
     }
 
-    static markup = `<div style="height:100%; width:100%;">
+    static markup = `<div class="${mainCss.selectButton}">
         <div name="text"></div>
         <div name="close"></div>
     </div>`;
