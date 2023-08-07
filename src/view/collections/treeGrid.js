@@ -245,6 +245,10 @@ export class TreeGrid extends ItemView{
         });
     }
 
+    refresh(){
+        this._grid?.refresh();
+    }
+
     linkWidgets( context ){
         super.linkWidgets( context );
         this._grid?.link( {...context,parent:this} );

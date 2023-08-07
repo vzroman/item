@@ -123,6 +123,13 @@ export class Grid extends Collection{
         return selected;
     }
 
+    refresh(){
+        this._options.data?.refresh();
+        for (const [item] of Object.values( this._items )){
+            item.refresh();
+        }
+    }
+
 
     static compileColumn( col ){
         if (typeof col === "string"){

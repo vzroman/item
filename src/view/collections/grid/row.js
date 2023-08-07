@@ -142,6 +142,10 @@ export class Row extends Item{
         return path;
     }
 
+    refresh(){
+        this._options.children?.refresh();
+    }
+
     destroy() {
         this.$markup.trigger("item-grid-row-select",[this, false]);
 
