@@ -36,3 +36,76 @@
     align-items: stretch;
     height: 100%;
 }
+
+.multiselect {
+    font-family: Arial, verdana, sans-serif;
+    color:#515967;
+    display: inline-block;
+    position: relative;
+}
+.multiselect div[name="items"] {
+    font-family: Arial, verdana, sans-serif;
+    color:#515967;
+    z-index: 1000;
+    overflow: scroll;
+    max-height: 15vh;
+}
+
+.selectButton{
+    display:flex; 
+    gap:4px; 
+    margin:5px; 
+    padding:2px; 
+    border: 1px solid #515967; 
+    border-radius:5px;  
+    background-color: #f3f3f4;
+}
+
+.selectButton div[name="close"] button{
+    position: relative;
+    background-color: #f3f3f4;
+    border: 2px solid #f3f3f4;
+}
+.selectButton div[name="close"] button::before{
+    display: block;
+    position: absolute;
+    content:"";
+    width: 12px;
+    height: 2px;
+    transform: rotate(45deg);
+    pointer-events: none;
+    background-color: #515967;
+    border-radius: 25px;
+    top:6px;
+    left:-2px;
+}
+
+.selectButton div[name="close"] button::after{
+    border-radius: 25px;
+    display: block;
+    position: absolute;
+    content:"";
+    width: 12px;
+    height: 2px;
+    transform: rotate(135deg);
+    pointer-events: none;
+    background-color: #515967;
+    top:6px;
+    left:-2px;
+}
+
+.selectButton:hover{
+    background-color: #b6bdca;
+    color: #263248;
+}
+
+.selectList div{
+    background-color: #EEE;
+}
+
+.selectList div:hover{
+    background-color: #b6bdca;
+    color: #263248;
+}
+
+

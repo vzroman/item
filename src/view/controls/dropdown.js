@@ -101,7 +101,7 @@ export class Control extends Parent{
 
                 // The minimal schema is defined
                 const schema = {
-                    [itemValue]:{type: types.primitives.String }
+                    [itemValue]:{type: types.primitives.Any }
                 };
                 if (itemText !== itemValue){
                     schema[itemText] = {type: types.primitives.String }
