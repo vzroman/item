@@ -35,10 +35,12 @@ export class Row extends Item{
         columns:{type:types.primitives.Array, required:true},
         numerated:{type:types.primitives.Bool, default:false},
         selected:{type:types.primitives.Bool},
+        getSubitems:{type:types.primitives.Fun},
         parentRow:{type: types.primitives.Instance, options:{class:Row}},
         nextRow:{type: types.primitives.Instance, options:{class:Row}},
         previousRow:{type: types.primitives.Instance, options:{class:Row}},
         index:{type:types.primitives.String, default:"1"},
+        level:{type: types.primitives.Integer, default:0},
         isUnfolded:{type:types.primitives.Bool, default:false},
         children:{type: types.primitives.Instance, options:{class:CollectionController}}
     };
@@ -50,8 +52,11 @@ export class Row extends Item{
     constructor( options ) {
         super( options );
 
+        this.#placeAfter( this._options.previousRow );
+
         this.bind("selected", (val=false) => {
             this.$markup.toggleClass(style.selected_row, val);
+            this.$markup.trigger("item-grid-row-select",[this, val]);
         });
 
 
@@ -72,8 +77,6 @@ export class Row extends Item{
                 });
                 this.#unbind.push(()=> row.unbind( id ));
             }
-
-            this.#placeAfter( row )
         });
     }
 
@@ -97,10 +100,14 @@ export class Row extends Item{
         },{});
     }
 
-    unfold( controller ){
+    unfold(  ){
+
+        if (!this._options.getSubitems) return;
 
         if (this.#children) this.#children.destroy();
         this._options.children?.destroy();
+
+        const controller = this._options.getSubitems( this._options.data.get() );
 
         this.#children = new RowsCollection({
             $container:this._options.$container,
@@ -125,15 +132,6 @@ export class Row extends Item{
         });
     }
 
-    insertAfter( nextRow ){
-        if (this._options.nextRow){
-            nextRow.$markup.insertBefore( this._options.nextRow.$markup );
-        }else{
-            nextRow.$markup.insertAfter( this.$markup );
-        }
-        this.set({nextRow});
-    }
-
     getPath(){
         const path = [];
         let row = this;
@@ -144,8 +142,14 @@ export class Row extends Item{
         return path;
     }
 
+    refresh(){
+        this._options.children?.refresh();
+    }
+
     destroy() {
-        this.#unbind.forEach( u => u());
+        this.$markup.trigger("item-grid-row-select",[this, false]);
+
+        this.#unbind?.forEach( u => u());
         this.#unbind = undefined;
 
         this._options.nextRow?.set({previousRow: this._options.previousRow});
@@ -162,13 +166,34 @@ export class Row extends Item{
     }
 
     #placeAfter( previousRow ){
+        let nextRow;
         if (previousRow){
-            previousRow.insertAfter( this );
+            nextRow = previousRow.get("nextRow");
+            if (nextRow){
+                this.$markup.insertBefore( nextRow.$markup );
+            }else{
+                this.$markup.insertAfter( previousRow.$markup );
+            }
+            previousRow.set({nextRow:this});
         }else if(this._options.parentRow){
+            if (this._options.parentRow.get("children").get("$.totalCount") > 1){
+                nextRow = this.constructor.getItem( this._options.parentRow.$markup.next() );
+            }
             this.$markup.insertAfter( this._options.parentRow.$markup );
         }else{
-            this.$markup.prependTo(this._options.$container)
+            this.$markup.prependTo(this._options.$container);
+            const $firstRow = this._options.$container.children('tr:nth-child(1)');
+            if ( $firstRow.length>0 ){
+                nextRow = this.constructor.getItem( $firstRow );
+                if (nextRow === this) nextRow = undefined;
+            }
         }
+
+        if (nextRow){
+            nextRow.set({previousRow: this});
+            this.set({nextRow});
+        }
+
     }
 
     #updateIndex(){
@@ -195,7 +220,10 @@ class RowsCollection extends Collection{
             nextRow: undefined,
             previousRow:previousRow,
             selected: false,
-            index:undefined
+            isUnfolded:false,
+            index:undefined,
+            level: this._options.parent.get("level") + 1,
+            children:undefined
         }});
     }
 

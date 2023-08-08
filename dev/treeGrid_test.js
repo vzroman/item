@@ -40,68 +40,49 @@ export function run( $container ){
             page:1,
             pageSize: 30,
         }
-        const schema = {
-            ".name":{ type:item.types.primitives.String },
-            ".pattern":{type:item.types.primitives.String},
-            ".path":{type:item.types.primitives.String}
-        };
 
         const controller = new item.controllers.db.Collection({...options,data:[".folder","=","$oid('/root/PROJECT')"]});
 
-        // const a = new item.view.controls.SelectList({
-        //     $container,
-        //     items: ["item 1", "item 2", "item 3"],
-        //     events:{
-        //         value:(val)=>{
-        //             console.log(val);
-        //         }
-        //     }
-        // })
-
-        const b = new item.view.controls.MultiSelect({
+        const grid = new item.view.collections.TreeGrid({
             $container,
-            items: [{id: 1, text: "item 1"}, {id: 2, text: "item 2"}, {id: 3, text: "item 3"},{id: 4, text: "item 4"},{id: 5, text: "item 5"},{id: 6, text: "item 6"},{id: 7, text: "item 7"}],
-            // items: ["item 1", "item 2", "item 3"],
-            itemText: "text",
-            itemValue: "id",
+            data:controller,
+            columns:[".name",".pattern"],    // string | { fields, handler } | Item }
+            header:["name", "pattern"],                    // string | Item | function -> string | $markup
+            resizable:true,
+            numerated:true,
+            multiselect:true,
+            checkbox:true,
+            pager:{},
+            //row:{ links:{ selected:{source:"data@.name", handler:name=> name === "chemical" } }},
+            itemName:(item)=>item[".name"],
+            isFolder:( item )=> {
+                return !item['.path'].startsWith("/root/PROJECT/LOCALIZATION/");
+            },
+            getIcon:( item ) => false,
+            getSubitems:( folder )=>{
+                return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
+            },
+            search:(v)=>{
+                console.log(v);
+                return new item.controllers.db.Collection({...options, data:[".path","like", v]});
+            },
+            getItemContext:(item) => {
+                let path = item[".path"].split("/");
+                path.pop();
+                if (path.length<=3) return undefined;
+                const name = path[path.length-1];
+                path = path.join("/");
+                return {".name":name,".path":path, ".oid":path};
+            },
             events:{
-                value:(val)=>{
-                    console.log(111, val);
+                onSelect:items => {
+                    console.log("onSelect", items)
+                },
+                rowDblClick:row=>{
+                    console.log(1111, row);
                 }
             }
-        })
-
-        // setTimeout(() => {
-        //     a.set({value: ["item 2", "item 3"]})
-        // }, 2000)
-
-        setTimeout(() => {
-            b.set({items: [{id: 1, text: "item 1"}, {id: 2, text: "item 2"}, {id: 3, text: "item 3"},{id: 4, text: "item 4"},{id: 5, text: "item 5"},{id: 6, text: "item 6"},{id: 7, text: "item 7"}]})
-        }, 5000)
-
-
-        // const grid = new item.view.collections.TreeGrid({
-        //     $container,
-        //     data:controller,
-        //     columns:[".name",".pattern"],    // string | { fields, handler } | Item }
-        //     header:["name", "pattern"],                    // string | Item | function -> string | $markup
-        //     resizable:true,
-        //     numerated:true,
-        //     multiselect:true,
-        //     checkbox:true,
-        //     pager:{},
-        //     itemName:(item)=>item[".name"],
-        //     isFolder:( any )=> true,
-        //     getIcon:( item ) => false,
-        //     getSubitems:( folder )=>{
-        //         return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
-        //     },
-        //     events:{
-        //         onSelect:items => {
-        //             console.log("onSelect", items)
-        //         }
-        //     }
-        // });
+        });
 
     }
 }
