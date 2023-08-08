@@ -29,26 +29,43 @@ export function run( $container ){
     connect();
 
     function doTest(){
-        const data = new item.controllers.Item({
-            schema:{
-                prop1:{ type:item.types.primitives.String },
-                prop2:{ type:item.types.primitives.Integer }
+        // const data = new item.controllers.db.Item({
+        //     connection:()=>connection,
+        //     autoCommit:true,
+        //     schema:{
+        //         prop1:{ type:item.types.primitives.String },
+        //         prop2:{ type:item.types.primitives.Integer }
+        //     },
+        //     data:"/root/o1"
+        // });
+        const tabs = [
+            {
+                text: "Tab 1",
+                view: MyWidget,
+                options: {
+                    color:"green"
+                }
             },
-            data: {prop1:"green", prop2:72}
-        });
+            {
+                text: "Tab 2",
+                view: MyWidget,
+                options: {
+                    color:"black"
+                }
+            },
+        ]
 
-
-        const widget = new MyWidget({
+        const widget = new item.view.layout.TabStrip({
             $container,
-            data,
-            links:{
-                color:"prop1"
-            }
+            tabs,
+            events: {
+                onChange: v => console.log("bindedd", v)
+            },
+            horizontal: true
         });
 
 
-        debugger
-        data.set({prop1:"green"})
+        // data.set({prop1:"green"})
 
     }
 
