@@ -36,8 +36,10 @@ import close from "../../img/icons_cancel.svg"
 
 export class MultiSelect extends Parent{
     static markup = `<div class="${ mainCss.multiselect }" style="height:100%; width:100%;">
-        <div name="selected"></div>
-        <div name="toggle"></div>
+        <div class="${mainCss.toggle_wrapper}">
+            <div name="selected"></div>
+            <div name="toggle" style="text-align:center; margin-left:auto"></div>
+        </div>
         <div name="items"></div>
     </div>`;
 
@@ -122,7 +124,7 @@ export class MultiSelect extends Parent{
             toggle:{
                 view: controls.Button,
                 options:{
-                    text: ">",
+                    text: "V",
                     events:{
                         click:{handler:() => this._widgets.items.set({visible: !this._widgets.items.get("visible")})}
                     }
