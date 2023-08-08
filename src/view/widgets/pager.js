@@ -218,8 +218,7 @@ export class Pager extends ItemView{
                 }
             },
             pageSize: {view: controls.Dropdown, options: {
-                items:  this.get("pageSizeValues").map(num => ({id:num})),
-                itemValue:"id",
+                items:  this.get("pageSizeValues"),
                 links: { value: "parent@pageSize" },
                 events: { value: "parent@pageSize" }
             }},

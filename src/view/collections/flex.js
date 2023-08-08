@@ -39,9 +39,15 @@ export class View extends Collection{
         }}, required:true},
     };
 
+    constructor(options) {
+        super( options );
+
+        this.bind("flexWrap", val => this.$markup.css({"flex-wrap":val}))
+    }
+
 
     markup(){
-        return `<div class="${ mainCss[this._options.direction] }" style="flex-wrap: ${this._options.flexWrap}" name="flex_wrapper"></div>`;
+        return `<div class="${ mainCss[this._options.direction] } flex-collection"></div>`;
     };
 
     newItem( id ){

@@ -29,14 +29,12 @@ export function run( $container ){
     connect();
 
     function doTest(){
-        const data = new item.controllers.db.Item({
-            connection:()=>connection,
-            autoCommit:true,
+        const data = new item.controllers.Item({
             schema:{
                 prop1:{ type:item.types.primitives.String },
                 prop2:{ type:item.types.primitives.Integer }
             },
-            data:"/root/o1"
+            data: {prop1:"green", prop2:72}
         });
 
 
@@ -49,6 +47,7 @@ export function run( $container ){
         });
 
 
+        debugger
         data.set({prop1:"green"})
 
     }

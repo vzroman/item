@@ -49,6 +49,7 @@ function oidCompare([a], [b]) {
 export class Controller extends Collection{
 
     static options = {
+        DBs:undefined,
         autoCommit:false,
         connection:undefined,
         timeout: 60000,
@@ -161,7 +162,17 @@ export class Controller extends Collection{
                 ? `PAGE ${page}:${pageSize}`
                 : "";
 
-                connection().query(`get ${ fields } from * where ${ filter } format $to_json ${pagination}`, result => {
+            const DBs = Array.isArray( this._options.DBs)
+                ? this._options.DBs.join(",")
+                : typeof this._options.DBs === "string"
+                    ? this._options.DBs
+                    : "*";
+
+            const orderBy = !this._options.orderBy || this._options.orderBy === ".oid"
+                ? ""
+                : "order by " + this._options.orderBy;
+
+            connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
                 if (pagination !== ""){
                     this._totalCount = result.count;
                     result = result.result;
@@ -205,7 +216,13 @@ export class Controller extends Collection{
 
                 if ( !this.isCommittable() ) return onReject("not ready");
 
-                this.constructor.transaction(this._changes,  this._options.connection(), this._options.timeout)
+                const DBs = Array.isArray( this._options.DBs)
+                    ? this._options.DBs.join(",")
+                    : typeof this._options.DBs === "string"
+                        ? this._options.DBs
+                        : "*";
+
+                this.constructor.transaction(DBs, this._changes,  this._options.connection(), this._options.timeout)
                     .then(()=>{
 
                         // The changes settled to the database
@@ -222,7 +239,7 @@ export class Controller extends Collection{
 
     static filter2query( filter ){
         if ( filter[0] === "and" || filter[0] === "or"){
-            return `${ filter[0] }(${ filter[1].map( this.filter2query ).join(",") })`;
+            return `${ filter[0] }(${ filter[1].map( f => this.filter2query( f ) ).join(",") })`;
         }else if(filter[0] === "andnot"){
             return `andnot(${ this.filter2query(filter[1][0]) }, ${ this.filter2query(filter[1][1]) })`;
         }else{
@@ -248,7 +265,7 @@ export class Controller extends Collection{
         }
     }
 
-    static async transaction( changes, connection, timeout ){
+    static async transaction(DBs, changes, connection, timeout ){
 
         changes = Object.entries(changes);
         if (!changes.length) return "ok";
@@ -259,12 +276,12 @@ export class Controller extends Collection{
             if(actual && !prev){
                 updates.push( this.create( this.encodeFields(actual) ) );
             }else if(!actual && prev){
-                updates.push( this.remove( id ) );
+                updates.push( this.remove( id, DBs ) );
             }else{
                 let changedFields = diff( prev, actual);
                 if (changedFields){
                     changedFields = patch2value(changedFields, 0);
-                    updates.push( this.update( id, this.encodeFields(changedFields) ) );
+                    updates.push( this.update( id, this.encodeFields(changedFields), DBs ) );
                 }
             }
         }
@@ -295,12 +312,12 @@ export class Controller extends Collection{
         return `insert ${ fields } format $from_json`;
     }
 
-    static update(id, fields ){
-        return `set ${ fields } in * where .oid=$oid('${ id }') format $from_json`;
+    static update(id, fields ,DBs){
+        return `set ${ fields } in ${ DBs } where .oid=$oid('${ id }') format $from_json`;
     }
 
-    static remove( id ){
-        return `delete from * where .oid=$oid('${ id }')`;
+    static remove( id, DBs ){
+        return `delete from ${ DBs } where .oid=$oid('${ id }')`;
     }
 }
 Controller.extend();

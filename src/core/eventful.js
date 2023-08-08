@@ -62,7 +62,7 @@ export class Eventful{
 
             Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
                 try{
-                    callbacks[id].apply(this, [...params,this]);
+                    callbacks[id]?.apply(this, [...params,this]);
                 }catch(e){
                     console.error("invalid event callback",e);
                 }
