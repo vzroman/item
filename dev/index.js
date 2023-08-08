@@ -13,7 +13,7 @@ $(function () {
 
 
 
-    demo_test( $container );
+    treeGrid_test( $container );
 
 
 
