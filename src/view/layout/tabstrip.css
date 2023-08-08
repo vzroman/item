@@ -12,26 +12,35 @@
 
 .tab_container {
     display: flex;
-    gap: 20px;
+    height: 100%;
+}
+
+.tab_container.vertical>[name="menu"] .tab_nav{
+    writing-mode: vertical-lr;
 }
 
 .tab_content {
     width: 100%;
+    height: 100%;
 }
 
 .tab_nav {
     font-family: "Raleway";
     float: left;
-    padding: 15px 25px;
+    padding: 6px 12px;
     background: #eeeeee;
-    color: #444;
+    border: 1px solid #e5e5e5;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    margin-bottom: -1px;
 }
 
 .tab_nav:hover{
-    background: #dddddd;
+    color: #1274AC;
 }
 
 .active {
     background: #ffffff;
-    border: 1px solid black;
+    border-bottom-color: transparent;
+    color: #424242;
 }

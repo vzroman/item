@@ -21,7 +21,6 @@ export class View extends ItemView {
     };
 
     markup() {
-        // TODO. css styles
         return `<div class="${style.tab_container} ${ this._options.horizontal ? style.horizontal : style.vertical  } ">
             <div name="menu"></div>
             <div name="tab" class="${style.tab_content}"></div>
@@ -53,8 +52,6 @@ export class View extends ItemView {
                 icon:{type: types.primitives.String },
                 id: {type: types.primitives.Integer },
                 isActive:{type: types.primitives.Bool }
-                // view:{type: types.primitives.Class, options:{ class:ItemView }, required:true },
-                // options:{type: types.primitives.Set }
             },
             data: this._options.tabs.map((tab,i)=>{ 
                 return {
@@ -110,7 +107,7 @@ class Control extends Parent{
         icon:{type:types.primitives.String},
         white_space:{type:types.primitives.String, default:"nowrap"}
     };
-    static markup = `<div class="${ style.tab_nav }" style="width:100%;height:100%;align-items: center;cursor: pointer">
+    static markup = `<div class="${ style.tab_nav }" style="align-items: center;cursor: pointer">
         <div name="icon" style="display: none; width: 20px; height: 20px; background-size: contain; background-repeat: no-repeat;"></div>
         <div name="text"></div>
     </div>`;

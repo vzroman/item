@@ -61,7 +61,7 @@ export function run( $container ){
             events: {
                 onChange: v => console.log("bindedd", v)
             },
-            horizontal: true
+            horizontal: false
         });
 
 
