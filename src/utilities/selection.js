@@ -70,13 +70,10 @@ function simpleSelect( options ){
             add:[], remove:[]
         }
 
-        if (selection.has( item )){
-            selection.delete( item );
-            diff.remove.push( $(item) )
-        }else{
-            selection.add( item );
-            diff.add.push( $(item) )
-        }
+        selection.forEach(v => diff.remove.push( $(v) ));
+        selection.clear();
+        selection.add( item );
+        diff.add.push( $(item) )
 
         onSelect( diff );
     }

@@ -45,6 +45,7 @@ export class View extends Collection{
         this.bind("flexWrap", val => this.$markup.css({"flex-wrap":val}))
     }
 
+
     markup(){
         return `<div class="${ mainCss[this._options.direction] } flex-collection"></div>`;
     };

@@ -34,7 +34,9 @@ export class View extends Parent{
 
     static options = {
         view:{type: types.primitives.Class, options:{class:Parent}, required:true },
-        options:{type: types.primitives.Set }
+        options:{type: types.primitives.Set },
+        commit:{type: types.primitives.Fun, default:data => data.commit() },
+        rollback:{type: types.primitives.Fun, default:data => data.rollback() }
     };
 
     static links = {
@@ -73,7 +75,7 @@ export class View extends Parent{
                     text:i18n("save"),
                     enable:false,
                     links:{ enable:"committable" },
-                    events:{ click:{ target:"!commit", handler:()=> undefined} }
+                    events:{ click:() => this._options.commit( this._options.data ) }
                 }
             },
             cancel: {
@@ -82,7 +84,7 @@ export class View extends Parent{
                     text:i18n("cancel"),
                     enable:false,
                     links:{ enable:"committable"},
-                    events:{ click: { target:"!rollback",handler:()=> undefined} }
+                    events:{ click:()=> this._options.rollback( this._options.data ) }
                 }
             }
         }

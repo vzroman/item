@@ -88,7 +88,7 @@ export class Linkable extends Eventful{
                 });
             }else{
                 //Empty list means all properties
-                data = this.get( event );
+                data = this.get();
                 id = super.bind("change", (changes,...args) => {
                     data = {
                         ...data,
@@ -319,6 +319,9 @@ export class Linkable extends Eventful{
     }
 
     destroy(){
+
+        this._trigger("destroy");
+
         if (this._linked){
             for (const link of Object.values(this._linked.properties)){
                 link.destroy();
@@ -329,7 +332,6 @@ export class Linkable extends Eventful{
             this._linked = undefined;
         }
 
-        this._trigger("destroy");
         this._options = undefined;
         super.destroy();
     }
@@ -346,12 +348,6 @@ class Link{
 
         this._target = target;
         this._targetSubscriptions = [];
-
-        // Self-destruction
-        this._sourceSubscriptions.push( this._source.bind("destroy",() => this.destroy()) );
-        if (this._target){
-            this._targetSubscriptions.push( this._target.bind("destroy",() => this.destroy()) );
-        }
 
         // Default handler
         handler = handler || (v=>v);
@@ -394,6 +390,12 @@ class Link{
                 setTarget( value )
             }
         }));
+
+        // Self-destruction
+        this._sourceSubscriptions.push( this._source.bind("destroy",() => this.destroy()) );
+        if (this._target){
+            this._targetSubscriptions.push( this._target.bind("destroy",() => this.destroy()) );
+        }
     }
 
     destroy(){

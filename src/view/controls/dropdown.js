@@ -90,13 +90,12 @@ export class Control extends Parent{
             this._itemsController = data;
         }else if( Array.isArray(data) ){
 
-            if (typeof data[0] === "string"){
+            const itemValue = this._options.itemValue || "value";
+            const itemText = this._options.itemText || itemValue;
+            if (typeof data[0] !== "object"){
                 // The data is a simple list of values, transform it to the list of items
                 data = data.map( value => { return {value} });
             }
-
-            const itemValue = this._options.itemValue || "value";
-            const itemText = this._options.itemText || itemValue;
 
             if (typeof itemValue === "string" && typeof itemText === "string"){
 
@@ -152,7 +151,10 @@ export class Control extends Parent{
             $(`<option value="${ value }" ${selected}>${ text }</option>`).appendTo( this.$markup );
         });
 
-        if (this.$markup.val() !== currentValue) this.setValue( null );
+        if (this.$markup.val() !== currentValue) {
+            this.updateValue(null);
+            this.setValue( null );
+        }
 
     }
 

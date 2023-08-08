@@ -37,7 +37,8 @@ import style from "./grid.css";
 export class Grid extends Collection{
 
     static events = {
-        onSelect: true
+        onSelect: true,
+        rowDblClick: true
     }
 
     static options = {
@@ -48,7 +49,8 @@ export class Grid extends Collection{
         numerated:{type:types.primitives.Bool},
         checkbox:{type:types.primitives.Bool},
         multiselect:{type:types.primitives.Bool, default:false},
-        pager:{type:types.primitives.Set}
+        pager:{type:types.primitives.Set},
+        row:{type: types.primitives.Set }
     };
 
     constructor( options ) {
@@ -56,7 +58,7 @@ export class Grid extends Collection{
 
         if (options.checkbox){
             options.columns.unshift({ view:Checkbox, options:{
-                pointer_events:"none",
+                css:{pointer_events:"none"},
                 links:{ value:"parent@selected" }
             }})
         }
@@ -72,7 +74,23 @@ export class Grid extends Collection{
             this.#initResize();
         }
 
-        const selected = new Set();
+        let timer = undefined;
+        this.$tbody.bind("item-grid-row-select",()=>{
+            if (!timer) timer = setTimeout(()=>{
+                timer = undefined;
+                const selected = this.getSelected();
+                this._selection.selected( $( selected.map( r => r.$markup[0] )) );
+                this._trigger("onSelect",[selected]);
+            });
+        });
+
+        this.bind("dblClick", e=>{
+            const $row = $(e.target).closest( 'tr' );
+            if (!$row) return;
+            const item = this.constructor.getItem( $row );
+            this._trigger("rowDblClick", [item]);
+        })
+
         this._selection = new Selection({
             $container: this.$tbody,
             $selector: 'tr',
@@ -82,22 +100,34 @@ export class Grid extends Collection{
                     const row = this.constructor.getItem( $item );
                     if (!row) return;
                     row.set({selected:true});
-                    selected.add( row );
                 });
                 removeItems.forEach( $item => {
                     const row = this.constructor.getItem( $item );
                     if (!row) return;
                     row.set({selected:false});
-                    selected.delete( row );
                 });
-
-                this._trigger("onSelect",[[...selected]]);
             }
         });
     }
 
     getContext(){
         return this._options.data;
+    }
+
+    getSelected(){
+        const selected = [];
+        this.$tbody.children(`tr.${ style.selected_row }`).each(function (){
+            const row = Row.getItem( $(this) );
+            if (row) selected.push( row );
+        });
+        return selected;
+    }
+
+    refresh(){
+        this._options.data?.refresh();
+        for (const [item] of Object.values( this._items )){
+            item.refresh();
+        }
     }
 
 
@@ -160,14 +190,14 @@ export class Grid extends Collection{
     };
 
     newItem( id, previousRow ){
-        return new Row({
+        return new Row({...this._options.row,...{
             id:id,
             $container: this.$tbody,
             columns: this._options.columns,
             numerated:this._options.numerated,
             parentRow:undefined,
             previousRow:previousRow
-        });
+        }});
     }
 
     _placeItem( row, previousRow ){

@@ -44,7 +44,7 @@ export class Pager extends ItemView{
         totalCount:{type:types.primitives.Integer},
         pageSize:{type:types.primitives.Integer},
         pageSizeValues:{type:types.primitives.Array, default: [30, 100, 10000]},
-        maxVisible:{type:types.primitives.Integer, default: 11}
+        maxVisible:{type:types.primitives.Integer, default: 10}
     };
 
     static markup = `
@@ -218,8 +218,7 @@ export class Pager extends ItemView{
                 }
             },
             pageSize: {view: controls.Dropdown, options: {
-                items:  this.get("pageSizeValues").map(num => ({id:num})),
-                itemValue:"id",
+                items:  this.get("pageSizeValues"),
                 links: { value: "parent@pageSize" },
                 events: { value: "parent@pageSize" }
             }},
