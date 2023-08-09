@@ -74,11 +74,27 @@ export class Grid extends Collection{
             this.#initResize();
         }
 
-        let timer = undefined;
-        this.$tbody.bind("item-grid-row-select",()=>{
+        let timer = undefined, selectedRow;
+        this.$tbody.bind("item-grid-row-select",(e, row, value)=>{
+            if (!this._options.multiselect) { 
+                if (value){
+                    selectedRow = row
+                }else if(row === selectedRow){
+                    selectedRow = undefined
+                }
+                
+            };
             if (!timer) timer = setTimeout(()=>{
                 timer = undefined;
-                const selected = this.getSelected();
+                if (!this._options) return;
+                let selected = this.getSelected();
+                if (!this._options.multiselect){
+                    for (const r of selected){
+                        if (r !== selectedRow) r.set({selected:false});
+                    }
+                    selected = selectedRow ? [selectedRow] : [];
+                }
+
                 this._selection.selected( $( selected.map( r => r.$markup[0] )) );
                 this._trigger("onSelect",[selected]);
             });
