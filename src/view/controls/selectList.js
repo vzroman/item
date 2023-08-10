@@ -25,9 +25,10 @@
 
 import {Control as Dropdown} from "./dropdown";
 import {types} from "../../types/index.js";
+import mainCss from "../../css/main.css";
 
 export class SelectList extends Dropdown{
-    static markup = `<div style="height:100%; width:100%;"></div>`;
+    static markup = `<div class="${mainCss.selectList}" style="height:100%; width:100%;"></div>`;
 
     static options = {
         value:{type: types.primitives.Array},
@@ -46,7 +47,7 @@ export class SelectList extends Dropdown{
     updateValue( value, prev ){
         value = Array.isArray(value) ? value : [];
         this.$markup.find('input').each(function() {
-            const isChecked = value.includes($(this).attr("name"));
+            const isChecked = value.includes($(this).data("value"));
             $(this).attr("checked", isChecked);
         })
     }
@@ -65,10 +66,12 @@ export class SelectList extends Dropdown{
             const text = itemTextFun( item );
             const checked = currentValue.includes(value) ? "checked" : "";
 
-            $(`<div>
-                <input type="checkbox" name="${ value }" ${checked}/>
+            const $elem = $(`<div>
+                <input type="checkbox" ${checked}/>
                 ${ text }
-            </div>`).appendTo( this.$markup );
+            </div>`);
+            $elem.children('input').data("value", value);
+            $elem.appendTo( this.$markup );
         });
         this.setValue( this._getValues() );
 
@@ -77,7 +80,7 @@ export class SelectList extends Dropdown{
     _getValues() {
         const _values = [];
         this.$markup.find('input:checked').each(function() {
-            _values.push($(this).attr("name"));
+            _values.push($(this).data("value"));
         })
         return _values;
     }

@@ -36,6 +36,7 @@ import style from "./grid.css";
 import folderIcon from "./grid/img/folder_icon.svg";
 import fileIcon from "./grid/img/file_icon.svg";
 import {deepCopy, deepMerge} from "../../utilities/data";
+import icon_search from "../../img/zoom.png";
 
 export class TreeGrid extends ItemView{
 
@@ -160,7 +161,7 @@ export class TreeGrid extends ItemView{
                 view: controls.Button,
                 options:{
                     visible: !!(this._options.search && this._options.getItemContext),
-                    icon: "TODO search icon",
+                    icon: `url("${icon_search}")`,
                     events:{
                         click:() => {
                             this._widgets.breadcrumbs.set({"visible": false});
@@ -245,6 +246,10 @@ export class TreeGrid extends ItemView{
         });
     }
 
+    refresh(){
+        this._grid?.refresh();
+    }
+
     linkWidgets( context ){
         super.linkWidgets( context );
         this._grid?.link( {...context,parent:this} );
@@ -318,10 +323,12 @@ class SearchBar extends ItemView{
         onClose: true
     }
 
-    static markup = `<div style="display: flex">
-        <div name="icon">todo search</div>
-        <input type="text" />
-        <div name="close">todo X</div>
+    static markup = `<div class="${style.search_bar}">
+        <div name="search_bar_wrapper">
+            <input type="text" placeholder="Search..."/>
+            <div name="close" class="${style.close_search}"></div>
+        </div>
+        <div name="searcher" class="${style.searcher}"></div>
     </div>`;
 
     constructor( options ){
@@ -330,8 +337,13 @@ class SearchBar extends ItemView{
         this.$markup.find('[name="close"]').on("click", ()=>this._trigger("onClose"));
 
         const $input = this.$markup.find('input');
+        const $searcher = this.$markup.find('[name="searcher"]');
 
         this.bind("visible", ()=>$input.val(null));
+        $searcher.on("click", event =>{
+            event.preventDefault();
+            this._trigger("onSearch", $input.val());
+        })
         $input.on("keypress", event=>{
             if (event.which === 13){
                 event.preventDefault();

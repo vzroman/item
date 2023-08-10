@@ -29,6 +29,7 @@ import {Checkbox} from "./checkbox.js";
 import {Control as NumberInput} from "./numberInput.js";
 import {Control as Dropdown} from "./dropdown.js";
 import {SelectList} from "./selectList.js";
+import { MultiSelect } from "./multiSelect.js";
 
 export const controls = {
     Control,
@@ -37,5 +38,6 @@ export const controls = {
     Checkbox,
     NumberInput,
     Dropdown,
-    SelectList
+    SelectList,
+    MultiSelect
 };

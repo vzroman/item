@@ -3,6 +3,7 @@ import {run as treeGrid_test} from "./treeGrid_test.js";
 import {run as selectlist_test} from "./selectlist_test.js"
 import {run as demo_test} from "./demo_test.js"
 import {run as demo_collection} from "./demo_collection.js"
+import {run as multiselect_test} from "./multiselect_test.js"
 
 
 $(function () {
@@ -14,8 +15,5 @@ $(function () {
 
 
     demo_test( $container );
-
-
-
 
 });

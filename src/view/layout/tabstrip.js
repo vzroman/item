@@ -21,25 +21,27 @@ export class View extends ItemView {
     };
 
     markup() {
-        return `<div class="${style.tab_container} ${ this._options.horizontal ? style.horizontal : style.vertical  } ">
+        const $markup= $(`<div class="${style.tab_container} ${ this._options.horizontal ? style.horizontal : style.vertical  } ">
             <div name="menu"></div>
             <div name="tab" class="${style.tab_content}"></div>
-        </div>`;
+        </div>`);
+
+        this.$tabContainer = $markup.find('[name="tab"]');
+        return $markup;
     }
 
     constructor(options){
         super(options);
-        this._tabContainer = this.$markup.find('[name="tab"]');
         this.bind("active", tab => this.changeView(tab));
     }
 
     changeView(id){
         this._tab?.destroy();
-        this._tabContainer.empty();
+        this.$tabContainer.empty();
 
         const { view, options } = this._options.tabs[id] || this._options.tabs[0];
         this._tab = new view({
-            $container: this._tabContainer,
+            $container: this.$tabContainer,
             ...options,
         })
     }
@@ -107,15 +109,23 @@ class Control extends Parent{
         icon:{type:types.primitives.String},
         white_space:{type:types.primitives.String, default:"nowrap"}
     };
-    static markup = `<div class="${ style.tab_nav }" style="align-items: center;cursor: pointer">
-        <div name="icon" style="display: none; width: 20px; height: 20px; background-size: contain; background-repeat: no-repeat;"></div>
-        <div name="text"></div>
-    </div>`;
+
+    markup(){
+        const $markup = $(`<div class="${ style.tab_nav }" style="align-items: center;cursor: pointer">
+            <div name="icon" style="display: none; width: 20px; height: 20px; background-size: contain; background-repeat: no-repeat;"></div>
+            <div name="text"></div>
+        </div>`);
+
+        this.$text = $markup.find('[name="text"]');
+        this.$icon = $markup.find('[name="icon"]');
+
+        return $markup;
+    };
 
     constructor( options ){
         super( options );
 
-        this.bind("text", value => this.$markup.find('[name="text"]').text( value ));
+        this.bind("text", value => this.$text.text( value ));
 
         this.bind("icon", value => {
             let css = value
@@ -127,11 +137,11 @@ class Control extends Parent{
                     "background-image":"",
                     "display":"none"
                 };
-            this.$markup.find('[name="icon"]').css( css );
+            this.$icon.css( css );
         });
 
         this.bind("title", value => this.$markup.attr("title", value));
-        this.bind("white_space", value => this.$markup.find('[name="text"]').css("white-space",value))
+        this.bind("white_space", value => this.$text.css("white-space",value))
     }
 
     enable( value ){

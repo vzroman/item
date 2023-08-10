@@ -1,3 +1,4 @@
+
 .button_style {
     background: red;
 }
@@ -17,7 +18,13 @@
 
 .tab_container.vertical>[name="menu"] .tab_nav{
     writing-mode: vertical-lr;
+    width:1.2em;
 }
+
+.tab_container.horizontal>[name="menu"] .tab_nav{
+    height:1.2em;
+}
+
 
 .tab_content {
     width: 100%;
@@ -25,7 +32,6 @@
 }
 
 .tab_nav {
-    font-family: "Raleway";
     float: left;
     padding: 6px 12px;
     background: #eeeeee;
