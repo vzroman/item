@@ -35,12 +35,15 @@ import { Label } from "../primitives/label.js";
 import close from "../../img/icons_cancel.svg"
 
 export class MultiSelect extends Parent{
-    static markup = `<div class="${ mainCss.multiselect }" style="height:100%; width:100%;">
+    static markup = `<div class="${ mainCss.multiselect }" style="height:42px;">
         <div class="${mainCss.toggle_wrapper}">
-            <div name="selected"></div>
+            <div name="selected" style="display:flex; flex-direction:row; overflow-x:scroll;"></div>
             <div name="toggle" style="text-align:center; margin-left:auto"></div>
         </div>
-        <div name="items"></div>
+        <div style="position: absolute; top: 100%; width:100%;">
+            <div name="items"></div>
+        </div>
+        
     </div>`;
 
     static options = {
@@ -103,8 +106,8 @@ export class MultiSelect extends Parent{
             selected:{
                 view:Flex,
                 options:{
+                    data: this._selectedController,
                     direction:"horizontal",
-                    flexWrap:"wrap",
                     item:{
                         view:SelectButton,
                         options:{

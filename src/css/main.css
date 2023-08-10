@@ -42,19 +42,21 @@
     color:#515967;
     display: inline-block;
     position: relative;
+    width: 100%;
 }
 
 .multiselect div[name="items"] {
     font-family: Arial, verdana, sans-serif;
     color:#515967;
-    z-index: 1000;
     overflow: scroll;
+    width: 100%;
     max-height: 15vh;
 }
 .toggle_wrapper{
-    display:flex;
+    display:grid;
+    grid-template-columns: 4fr 1fr;
+    min-height: 36px;
     border:1px solid #CFD7DC;
-    
 }
 
 .selectButton{
@@ -65,6 +67,7 @@
     border: 1px solid #515967; 
     border-radius:5px;  
     background-color: #f3f3f4;
+    min-height:20px;
 }
 
 .selectButton div[name="close"] button{
