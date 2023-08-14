@@ -39,19 +39,25 @@ export class Control extends Parent{
         itemGroup:{type: types.primitives.Any}
     };
 
-    static markup = `<select style="height:100%; width:100%;"></select>`;
+    static markup = `<div style="position: relative;">
+        <select style="height:100%; width:100%;"></select>
+        <span style="position:absolute; top: 0; right: 20px; cursor: pointer;">x</span>
+    </div>`;
 
     constructor( options ){
         super( options );
+
+        this.$select = this.$markup.find("select");
+        this.$reset = this.$markup.find("span");
 
         this._itemsController = undefined;
         this._subscription = undefined;
 
         this.bind("size", value =>{
             if (value){
-                this.$markup.prop("size",value);
+                this.$select.prop("size",value);
             }else{
-                this.$markup.removeProp("size");
+                this.$select.removeProp("size");
             }
         });
 
@@ -66,20 +72,21 @@ export class Control extends Parent{
             }
         });
 
-        this.$markup.on("change",() => this.set({ value:this.$markup.val() }));
+        this.$select.on("change",() => this.set({ value:this.$select.val() }));
+        this.$reset.on("click", () => {this.set({ value: null }); } );
 
     }
 
     updateValue( value, prev ){
-        this.$markup.val( value )
+        this.$select.val( value )
     }
 
     enable( value ){
-        this.$markup.prop('disabled', !value);
+        this.$select.prop('disabled', !value);
     }
 
     focus(){
-        this.$markup.focus();
+        this.$select.focus();
     }
 
     _initItemsController( data ){
@@ -135,7 +142,7 @@ export class Control extends Parent{
     }
 
     _updateItems(){
-        this.$markup.empty();
+        this.$select.empty();
 
         const itemValue = this._options.itemValue || "value";
         const itemText = this._options.itemText || itemValue;
@@ -148,10 +155,10 @@ export class Control extends Parent{
             const text = itemTextFun( item );
             const selected = value === currentValue ? "selected" : "";
 
-            $(`<option value="${ value }" ${selected}>${ text }</option>`).appendTo( this.$markup );
+            $(`<option value="${ value }" ${selected}>${ text }</option>`).appendTo( this.$select );
         });
 
-        if (this.$markup.val() !== currentValue) {
+        if (this.$select.val() !== currentValue) {
             this.updateValue(null);
             this.setValue( null );
         }
