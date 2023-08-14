@@ -59,23 +59,23 @@ export function run( $container ){
         
                 const b = new item.view.controls.MultiSelect({
                     $container,
-                    items: [{id: 1, text: "item 1"}, {id: 2, text: "item 2"}, {id: 3, text: "item 3"},{id: 4, text: "item 4"},{id: 5, text: "item 5"},{id: 6, text: "item 6"},{id: 7, text: "item 7"}],
-                    itemText: "text",
-                    itemValue: "id",
-                    events:{
-                        value:(val)=>{
-                            console.log(111, val);
-                        }
-                    }
+                    items: ["item1", "item2", "item3", "item322", "item5", "item6"],
+                    // itemText: "text",
+                    // itemValue: "id",
+                    // events:{
+                    //     value:(val)=>{
+                    //         console.log(111, val);
+                    //     }
+                    // }
                 })
 
-                 // setTimeout(() => {
-        //     a.set({value: ["item 2", "item 3"]})
+        //          setTimeout(() => {
+        //     b.set({value: [1, 2]})
         // }, 2000)
 
-        setTimeout(() => {
-            b.set({items: [{id: 1, text: "item 1"}, {id: 2, text: "item 2"}, {id: 3, text: "item 3"},{id: 4, text: "item 4"},{id: 5, text: "item 5"},{id: 6, text: "item 6"},{id: 7, text: "item 7"}]})
-        }, 5000)
+        // setTimeout(() => {
+        //     b.set({items: [{id: 1, text: "item 1"}, {id: 2, text: "item 2"}, {id: 3, text: "item 3"},{id: 4, text: "item 4"},{id: 5, text: "item 5"},{id: 6, text: "item 6"},{id: 7, text: "item 7"}]})
+        // }, 5000)
 
 
         // const grid = new item.view.collections.TreeGrid({

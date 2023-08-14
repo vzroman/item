@@ -46,18 +46,16 @@ html{
     color:#515967;
     display: inline-block;
     position: relative;
+    height:42px;
 }
 
 .multiselect div[name="items"] {
     color:#515967;
-    z-index: 1000;
     overflow: scroll;
     max-height: 15vh;
 }
 .toggle_wrapper{
-    display:flex;
     border:1px solid #CFD7DC;
-    
 }
 
 .selectButton{
@@ -68,6 +66,7 @@ html{
     border: 1px solid #515967; 
     border-radius:5px;  
     background-color: #f3f3f4;
+    min-height:20px;
 }
 
 .selectButton div[name="close"] button{

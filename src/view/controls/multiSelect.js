@@ -34,12 +34,15 @@ import { controls } from "./index.js";
 import { Label } from "../primitives/label.js";
 
 export class MultiSelect extends Parent{
-    static markup = `<div class="${ mainCss.multiselect }" style="height:100%; width:100%;">
-        <div class="${mainCss.toggle_wrapper}">
-            <div name="selected"></div>
-            <div name="toggle" style="text-align:center; margin-left:auto"></div>
+    static markup = `<div class="${ mainCss.multiselect }">
+        <div class="${mainCss.toggle_wrapper}" style="display: flex;flex-direction: row;align-items: stretch">
+            <div name="selected" style="flex-grow: 1; display:flex; flex-direction:row; overflow-x:scroll;"></div>
+            <div name="toggle" style="text-align:center;"></div>
         </div>
-        <div name="items"></div>
+        <div style="position: absolute; top: 100%; width:100%;">
+            <div name="items"></div>
+        </div>
+        
     </div>`;
 
     static options = {
@@ -102,8 +105,8 @@ export class MultiSelect extends Parent{
             selected:{
                 view:Flex,
                 options:{
+                    data: this._selectedController,
                     direction:"horizontal",
-                    flexWrap:"wrap",
                     item:{
                         view:SelectButton,
                         options:{
