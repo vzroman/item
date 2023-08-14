@@ -48,6 +48,7 @@ export class Control extends View{
         // We do it asynchronously because descendants should be
         // able to init their widget
         setTimeout(()=>{
+            if (!this._controller) return;
             this.bind("value",(value, prev) => {
                 if ( this._validator ){
                     const _value = this._validator.coerce( value );
