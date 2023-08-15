@@ -139,6 +139,15 @@ export class Grid extends Collection{
         return selected;
     }
 
+    getRows(){
+        const rows = [];
+        this.$tbody.children(`tr`).each(function (){
+            const row = Row.getItem( $(this) );
+            if (row) rows.push( row );
+        });
+        return rows;
+    }
+
     refresh(){
         this._options.data?.refresh();
         for (const [item] of Object.values( this._items )){

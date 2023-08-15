@@ -246,6 +246,18 @@ export class TreeGrid extends ItemView{
         });
     }
 
+    getSelected(){
+        return this._grid?.getSelected();
+    }
+
+    getRows(){
+        return this._grid?.getRows();
+    }
+
+    getContext(){
+        return this._grid?.getContext();
+    }
+
     refresh(){
         this._grid?.refresh();
     }
@@ -253,10 +265,6 @@ export class TreeGrid extends ItemView{
     linkWidgets( context ){
         super.linkWidgets( context );
         this._grid?.link( {...context,parent:this} );
-    }
-
-    getContext(){
-        return this._grid?.getContext();
     }
 
     _contextPath( path ) {
