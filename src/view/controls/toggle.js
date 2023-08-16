@@ -22,24 +22,51 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {Control} from "./control.js";
-import {Control as Button} from "./button.js";
-import {Control as TextInput} from "./textInput.js";
-import {Checkbox} from "./checkbox.js";
-import {Control as NumberInput} from "./numberInput.js";
-import {Control as Dropdown} from "./dropdown.js";
-import {SelectList} from "./selectList.js";
-import { MultiSelect } from "./multiSelect.js";
-import {Toggle} from "./toggle.js";
 
-export const controls = {
-    Control,
-    Button,
-    TextInput,
-    Checkbox,
-    NumberInput,
-    Dropdown,
-    SelectList,
-    MultiSelect,
-    Toggle
-};
+import {Control} from "./control";
+import {types} from "../../types";
+import mainCss from "../../css/main.css";
+
+export class Toggle extends Control{
+
+    static options = {
+        value:{type: types.primitives.Bool}
+    };
+
+    // static markup = `<input type="checkbox"/>`;
+    static markup = `<label class="${ mainCss.switch }">
+        <input name="switch" class="${ mainCss.toggle_input }" type="checkbox">
+        <span class="${ mainCss.slider } ${ mainCss.round }"></span>
+    </label>`;
+
+    constructor( options ){
+        super( options );
+
+        this.switch = this.$markup.find('[name="switch"]');
+
+        ["mousedown","mouseup","click"].forEach(event => this.switch.on(event, e=>{
+            if (this._options.disabled) return;
+            e.stopPropagation();
+        }));
+
+        this.switch.on("change", e=>{
+            if (this._options.disabled) return;
+            e.preventDefault();
+            e.stopPropagation();
+            this.set({ value: this.switch.prop('checked')});
+        });
+    }
+
+    updateValue( value=false, prev ){
+        this.switch.prop('checked', value);
+    }
+
+    enable( value ){
+        this.switch.prop('disabled', !value);
+    }
+
+    focus(){
+        this.switch.focus();
+    }
+}
+Toggle.extend();
