@@ -43,7 +43,7 @@ export function run( $container ){
                 [".pattern",'=',"$oid('/root/.patterns/test')"]
             ]]
         });
-
+        // test
 
         const widget = new MyWidget({
             $container,
