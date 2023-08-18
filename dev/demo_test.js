@@ -55,13 +55,21 @@ export function run( $container ){
             },
         ]
 
-        const widget = new item.view.layout.TabStrip({
+        new item.view.layout.Window({
             $container,
-            tabs,
-            events: {
-                onChange: v => console.log("bindedd", v)
+            options: {
+                actions: ["close", "minimize", "maximize"],
+                width: "500px",
+                height: "300px",
+                resizable: true,
+                draggable: true,
             },
-            horizontal: true
+            content: {
+                view: MyWidget,
+                options: {
+                    color:"black"
+                }
+            }
         });
 
 

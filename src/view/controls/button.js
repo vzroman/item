@@ -36,7 +36,7 @@ export class Control extends Parent{
         icon:{type:types.primitives.String},
         white_space:{type:types.primitives.String, default:"nowrap"}
     };
-    static markup = `<button class="${ mainCss.horizontal }" style="width:100%;height:100%;align-items: center;cursor: pointer">
+    static markup = `<button class="${ mainCss.horizontal } item_grid_button" style="width:100%;height:100%;align-items: center;cursor: pointer">
         <div name="icon" style="display: none; width: 20px; height: 20px; background-size: contain; background-repeat: no-repeat;"></div>
         <div name="text"></div>
     </button>`;
