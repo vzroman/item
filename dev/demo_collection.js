@@ -53,7 +53,6 @@ export function run( $container ){
             }
         });
 
-        // test
         //data.set({prop1:"green"})
 
     }
