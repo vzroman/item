@@ -183,8 +183,8 @@ export class View extends ItemView {
     }
 
     onResize(callback) {
-        const resizers = element.find('[name^="resizer"]'), minimum_size = 20;
         let $window = $(window), element = this.$markup;
+        const resizers = element.find('[name^="resizer"]'), minimum_size = 20;
         let original_width = 0;
         let original_height = 0;
         let original_x = 0;
@@ -308,6 +308,8 @@ export class View extends ItemView {
             width: $(window).width() + "px"
         });
 
+        $('body').css({overflow: "hidden"});
+
         this._prevDimension = {
             top: top + "px", 
             left: left + "px", 
@@ -324,6 +326,7 @@ export class View extends ItemView {
     }
 
     restore() {
+        $('body').css({overflow: "unset"});
         this.$markup.css({...this._prevDimension, overflow: "scroll"});
     }
 
