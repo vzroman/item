@@ -9,8 +9,6 @@ import maximize from "../../img/maximize.svg";
 import restore from "../../img/restore.svg";
 
 // TODO. add icon props for modal title
-// TODO. center modal window on initial opening
-// TODO. remove or disable drag event when clicking on maximize button
 // TODO. maximize/minimize modal on doubleclick
 
 export class View extends ItemView {
@@ -87,6 +85,13 @@ export class View extends ItemView {
     constructor(options){
         super(options);
 
+        this.$markup.css({
+            top: Math.max(0, (($(window).height() - $(this.$markup).outerHeight()) / 2) + $(window).scrollTop()) + "px",
+            left: Math.max(0, (($(window).width() - $(this.$markup).outerWidth()) / 2) + $(window).scrollLeft()) + "px",
+        });
+
+        // this.$markup.focus();
+        
         if (this._options.options.resizable) {
             this.onResize((value) => { 
                 this._trigger("resize");
@@ -95,28 +100,31 @@ export class View extends ItemView {
         }
 
         if (this._options.options.draggable) {
-            this.onDrag({
-                dragstart: () => { this._trigger("dragstart"); },
-                dragend: () => { this._trigger("dragend"); },
-                drag: (value) => { 
-                    this._trigger("drag");
-
-                    let nextDimension;
-
-                    if (this.$titlebar.innerHeight() + "px" === value.height) {
-                        nextDimension = {
-                            height: this._prevDimension.height, 
-                            width: value.width, 
-                            top: value.top, 
-                            left: value.left
-                        };
-                    } else {
-                        nextDimension = value; 
-                    }
-
-                    this._prevDimension = nextDimension;
-                },
-            });
+            this.dragFn = () => {
+                this.onDrag({
+                    dragstart: () => { this._trigger("dragstart"); },
+                    dragend: () => { this._trigger("dragend"); },
+                    drag: (value) => { 
+                        this._trigger("drag");
+    
+                        let nextDimension;
+    
+                        if (this.$titlebar.innerHeight() + "px" === value.height) {
+                            nextDimension = {
+                                height: this._prevDimension.height, 
+                                width: value.width, 
+                                top: value.top, 
+                                left: value.left
+                            };
+                        } else {
+                            nextDimension = value; 
+                        }
+    
+                        this._prevDimension = nextDimension;
+                    },
+                });
+            };
+            this.dragFn();
         }
 
         this._prevDimension = {
@@ -125,6 +133,7 @@ export class View extends ItemView {
             top: "auto",
             left: "auto",
         };
+
     }
 
     onDrag({ dragstart, dragend, drag }) {
@@ -354,6 +363,7 @@ export class View extends ItemView {
                     events:{
                         click:{handler: () => {
                             _this.maximize();
+                            _this.$titlebar.off("mousedown");
                             return true;
                         },target:"widgets.restore@visible" }
                     },
@@ -370,6 +380,7 @@ export class View extends ItemView {
                         click:(_,restore) => {
                             restore.set({ visible: false });
                             _this.restore();
+                            _this.dragFn();
                         }
                     },
                     links: { visible: { source: "widgets.minimize@visible", handler: val => {
@@ -384,8 +395,10 @@ export class View extends ItemView {
                 options:{ 
                     events:{
                         click:() => {
-                            // TODO. add animation on close
-                            _this.destroy();
+                            _this.$markup.animate({
+                                opacity: 0, 
+                                height: 0
+                            }, 300, () => { _this.destroy(); });
                         },
                     },
                     classes: [style.item_grid_button],

@@ -9,10 +9,12 @@
     padding: 0;
     border-width: 0px;
     border-style: solid;
-    top: 20%;
-    left: 20%;
     z-index: 1000;
     overflow: scroll;
+}
+
+.widnow:focus{
+    box-shadow: 1px 1px 7px 1px rgba(0, 0, 0, 0.3);
 }
 
 .item_grid_button {
