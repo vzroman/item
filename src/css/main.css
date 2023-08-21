@@ -121,6 +121,7 @@ html{
     display: inline-block;
     width: 60px;
     height: 34px;
+    font-size: 10px;
 }
 
 /* Hide default HTML checkbox */
@@ -176,4 +177,28 @@ html{
   
 .slider.round:before {
     border-radius: 50%;
+}
+
+.switch_text-off, .switch_text-on {
+    display: inline;
+    width: calc(100% + calc( -3em + -10px));
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    text-transform: uppercase;
+    line-height: 3em;
+    overflow: hidden;
+}
+
+.switch_text-on {
+    text-align: left;
+    left: 8px;
+    text-shadow: none;
+}
+
+
+.switch_text-off {
+    text-align: right;
+    right: 8px;
+    text-shadow: none;
 }

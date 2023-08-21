@@ -30,31 +30,53 @@ import mainCss from "../../css/main.css";
 export class Toggle extends Control{
 
     static options = {
-        value:{type: types.primitives.Bool}
+        value:{type: types.primitives.Bool},
+        text: {type: types.primitives.Set}
     };
 
-    // static markup = `<input type="checkbox"/>`;
     static markup = `<label class="${ mainCss.switch }">
-        <input name="switch" class="${ mainCss.toggle_input }" type="checkbox">
+        <input name="switch-input" class="${ mainCss.toggle_input }" type="checkbox">
         <span class="${ mainCss.slider } ${ mainCss.round }"></span>
+        <span name="switch-on" class="${mainCss["switch_text-on"]}"></span>
+        <span name="switch-off" class="${mainCss["switch_text-off"]}"></span>
     </label>`;
 
     constructor( options ){
         super( options );
 
-        this.switch = this.$markup.find('[name="switch"]');
+        this.switch = this.$markup.find('[name="switch-input"]');
 
         ["mousedown","mouseup","click"].forEach(event => this.switch.on(event, e=>{
             if (this._options.disabled) return;
             e.stopPropagation();
         }));
 
+        let on, off;
+
+        if (this._options.text) {
+            on = this.$markup.find('[name="switch-on"]').text(this._options.text.on);
+            on.text(this._options.text.on);
+            off = this.$markup.find('[name="switch-off"]');
+            off.text(this._options.text.off);
+        }
+
         this.switch.on("change", e=>{
             if (this._options.disabled) return;
             e.preventDefault();
             e.stopPropagation();
+
             this.set({ value: this.switch.prop('checked')});
         });
+
+        this.bind("value", v => {
+            if (!v) {
+                on && on.css({color: "transparent"});
+                off && off.css({color: "inherit"});
+            } else {
+                off && off.css({color: "transparent"});
+                on && on.css({color: "white"});
+            }
+        })
     }
 
     updateValue( value=false, prev ){

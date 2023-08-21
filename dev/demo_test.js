@@ -83,7 +83,8 @@ class MyWidget extends item.view.Item{
             view:item.view.controls.Toggle,
             options:{
                 links:{ value:"prop1" },
-                events:{ value:"prop1" }
+                events:{ value:"prop1" },
+                text: {on: "On", off: "Off"}
             }
         }
     };
