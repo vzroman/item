@@ -49,20 +49,24 @@
     color: #424242;
     background-color: #fafafa;
 }
-
-.window_titlebar__title {
+.window_titlebar__title_wrapper {
+    flex: 1;
+    display: flex;
+    flex-flow: row nowrap;
     padding-block: 0.5em;
     padding-inline: 0;
     margin-block: -0.5em;
     margin-inline: 0;
+    align-items: center;
+    gap: 5px
+}
+
+.window_titlebar__title {
     font-size: 16px;
     line-height: 1.25;
     text-overflow: ellipsis;
     overflow: hidden;
     cursor: default;
-    flex: 1;
-    display: flex;
-    flex-flow: row nowrap;
 }
 
 .window_titlebar__actions {

@@ -8,16 +8,13 @@ import minimize from "../../img/minimize.svg";
 import maximize from "../../img/maximize.svg";
 import restore from "../../img/restore.svg";
 
-// TODO. add icon props for modal title
-// TODO. maximize/minimize modal on doubleclick
-
 export class View extends ItemView {
     static options = {
         options:{type: types.primitives.Set },
         content:{type:types.complex.Item, options:{schema:{
             view:{type: types.primitives.Class, options:{class:ItemView}, required:true },
             options:{type: types.primitives.Set }
-        }}, required:true},
+        }}, required:true}
     };
 
     static events = {
@@ -28,25 +25,6 @@ export class View extends ItemView {
         drag: true,
     };
 
-    // this._widget=this.$markup.kendoWindow({
-    //     title: this._options.header,
-    //     position:this._options.position,
-    //     height:this._options.height,
-    //     width:this._options.width,
-    //     maxHeight:this._options.maxHeight,
-    //     maxWidth:this._options.maxWidth,
-    //     visible: false,
-    //     resizable:true,
-    //     draggable: true,
-    //     modal: false,
-    //     actions: this._options.actions,
-
-    //     close: () => {},
-    //     dragstart:() => {},
-    //     resize:() => {}
-
-    // }).data("kendoWindow");
-
     markup() {
         const width = this._options.options?.width || "100px";
         const height = this._options.options?.height || "100px";
@@ -56,7 +34,10 @@ export class View extends ItemView {
 
         const $markup = $(`<div class="${style.window}" style="width: ${width}; height: ${height}; max-height: ${maxHeight}; max-width: ${maxWidth}">
             <div name="titlebar" class="${style.window_titlebar}">
-                <span class="${style.window_titlebar__title}">${this._options.options?.title || "Title"}</span>
+                <div class="${style.window_titlebar__title_wrapper}">
+                    <div name="title-icon" style="display: none; width: 20px; height: 20px; background-size: contain; background-repeat: no-repeat;"></div>
+                    <span class="${style.window_titlebar__title}">${this._options.options?.title || "Title"}</span>
+                </div>
                 <div name="actions" class="${style.window_titlebar__actions}">
                     <div name="restore"></div>
                     <div name="minimize"></div>
@@ -78,6 +59,7 @@ export class View extends ItemView {
         this.$markup = $markup;
         this.$content = $markup.find('[name="window-content"]');
         this.$titlebar = $markup.find('[name="titlebar"]');
+        this.$resizers = $markup.find('[name^="resizer"]');
 
         return $markup;
     }
@@ -90,11 +72,34 @@ export class View extends ItemView {
             left: Math.max(0, (($(window).width() - $(this.$markup).outerWidth()) / 2) + $(window).scrollLeft()) + "px",
         });
 
-        // this.$markup.focus();
+        if (this._options.options.modal) {
+            const overlayStyle = `
+                width:100%; 
+                height: 100%;
+                postion: fixed; 
+                top: 0; 
+                left: 0; 
+                z-index: 10003; 
+                display: inline-flex; 
+                opacity: 0.5; 
+                background-color: #000000`;
+            $(`<div name="window-overlay" style="${overlayStyle}"></div>`).prependTo(this.$markup.parent());
+        }
+    
+        let css = this._options.options.icon
+            ?{
+                "background-image":this._options.options.icon,
+                "display":"block",
+            }
+            :{
+                "background-image":"",
+                "display":"none"
+            };
+        this.$markup.find('[name="title-icon"]').css( css );
         
         if (this._options.options.resizable) {
             this.onResize((value) => { 
-                this._trigger("resize");
+                this._trigger("resize", value);
                 this._prevDimension = { ...this._prevDimension, ...value };
             });
         }
@@ -105,7 +110,7 @@ export class View extends ItemView {
                     dragstart: () => { this._trigger("dragstart"); },
                     dragend: () => { this._trigger("dragend"); },
                     drag: (value) => { 
-                        this._trigger("drag");
+                        this._trigger("drag", value);
     
                         let nextDimension;
     
@@ -127,13 +132,28 @@ export class View extends ItemView {
             this.dragFn();
         }
 
+        this._resizeObserver = new ResizeObserver(() => {
+            this.$markup.css({       
+                height: $(window).height() + "px", 
+                width: $(window).width() + "px"
+            });
+        });
+
         this._prevDimension = {
             width: "auto",
             height: "auto",
             top: "auto",
             left: "auto",
         };
+        this._isMinimized = false;
+    }
 
+    _hideResizers() {
+        this.$resizers?.each(function() { $(this).css({display: "none"}); });
+    }
+
+    _showResizers() {
+        this.$resizers?.each(function() { $(this).css({display: "flex"}); });
     }
 
     onDrag({ dragstart, dragend, drag }) {
@@ -319,6 +339,8 @@ export class View extends ItemView {
 
         $('body').css({overflow: "hidden"});
 
+        this._resizeObserver.observe(document.body);
+
         this._prevDimension = {
             top: top + "px", 
             left: left + "px", 
@@ -349,6 +371,8 @@ export class View extends ItemView {
                     events:{
                         click:{handler:() => {
                             _this.minimize();
+                            this._isMinimized = true;
+                            _this._hideResizers();
                             return true;
                         }, target:"widgets.restore@visible" }
                     },
@@ -364,6 +388,8 @@ export class View extends ItemView {
                         click:{handler: () => {
                             _this.maximize();
                             _this.$titlebar.off("mousedown");
+                            _this._hideResizers();
+                            this._isMinimized = false;
                             return true;
                         },target:"widgets.restore@visible" }
                     },
@@ -378,9 +404,13 @@ export class View extends ItemView {
                     visible:false,
                     events:{
                         click:(_,restore) => {
+                            this._resizeObserver.disconnect();
                             restore.set({ visible: false });
                             _this.restore();
-                            _this.dragFn();
+                            if (!this._isMinimized) {
+                                _this.dragFn();
+                            }
+                            _this._showResizers();
                         }
                     },
                     links: { visible: { source: "widgets.minimize@visible", handler: val => {
@@ -398,7 +428,13 @@ export class View extends ItemView {
                             _this.$markup.animate({
                                 opacity: 0, 
                                 height: 0
-                            }, 300, () => { _this.destroy(); });
+                            }, { duration: 300, queue: false, complete: () => {
+                                _this.destroy(); 
+                            } });
+                            _this.$markup.parent().find("[name='window-overlay']").fadeOut({ queue: false, duration: 300, complete: function() {
+                                $(this).remove();
+                            } });
+                            this._resizeObserver?.disconnect();
                         },
                     },
                     classes: [style.item_grid_button],
