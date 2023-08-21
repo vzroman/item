@@ -42,7 +42,8 @@ export class View extends ItemView {
         const { view, options } = this._options.tabs[id] || this._options.tabs[0];
         this._tab = new view({
             $container: this.$tabContainer,
-            ...options,
+            data:this._options.data,
+            ...options
         })
     }
 
