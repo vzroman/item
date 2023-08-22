@@ -36,7 +36,8 @@ export class Control extends Parent{
         items:{type: types.primitives.Any},
         itemValue:{type: types.primitives.String},
         itemText:{type: types.primitives.Any},
-        itemGroup:{type: types.primitives.Any}
+        itemGroup:{type: types.primitives.Any},
+        hideClear:{type: types.primitives.Bool, default: false}
     };
 
     static markup = `<div style="position: relative;">
@@ -73,7 +74,12 @@ export class Control extends Parent{
         });
 
         this.$select.on("change",() => this.set({ value:this.$select.val() }));
-        this.$reset.on("click", () => {this.set({ value: null }); } );
+
+        if (this._options.hideClear) {
+            this.$reset.css({display: "none"});
+        } else {
+            this.$reset.on("click", () => {this.set({ value: null }); } );
+        }
 
     }
 
