@@ -88,10 +88,9 @@ class MyWidget extends item.view.Item{
 
     static widgets = {
         text:{
-            view:item.view.controls.TextInput,
-            options:{
-                links:{ value:"prop1" },
-                events:{ value:"prop1" }
+            view: item.view.controls.Dropdown,
+            options: {
+                items: ["a", "b", "c"],
             }
         },
         number:{
