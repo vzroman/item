@@ -43,16 +43,9 @@ export function run( $container ){
                 text: "Tab 1",
                 view: MyWidget,
                 options: {
-                    color:"green"
+                    color:"white"
                 }
-            },
-            {
-                text: "Tab 2",
-                view: MyWidget,
-                options: {
-                    color:"black"
-                }
-            },
+            }
         ]
 
         const widget = new item.view.layout.TabStrip({
@@ -83,22 +76,17 @@ class MyWidget extends item.view.Item{
 
     static markup = `<div style="width: 100%; height: 100%">
         <div name="text"></div>
-        <div name="number"></div>
     </div>`;
 
     static widgets = {
         text:{
-            view: item.view.controls.Dropdown,
-            options: {
-                items: ["a", "b", "c"],
-                hideClear:false
-            }
-        },
-        number:{
-            view:item.view.controls.NumberInput,
+            view:item.view.controls.Toggle,
             options:{
-                links:{ value:"prop2" },
-                events:{ value:"prop2" }
+                // links:{ value:"prop1" },
+                // events:{ value:"prop1" },
+                value:true,
+                textOn: "true",
+                textOff:"false"
             }
         }
     };

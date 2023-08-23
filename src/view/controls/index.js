@@ -30,6 +30,7 @@ import {Control as NumberInput} from "./numberInput.js";
 import {Control as Dropdown} from "./dropdown.js";
 import {SelectList} from "./selectList.js";
 import { MultiSelect } from "./multiSelect.js";
+import {Toggle} from "./toggle.js";
 
 export const controls = {
     Control,
@@ -39,5 +40,6 @@ export const controls = {
     NumberInput,
     Dropdown,
     SelectList,
-    MultiSelect
+    MultiSelect,
+    Toggle
 };
