@@ -169,10 +169,20 @@ export class Row extends Item{
         let nextRow;
         if (previousRow){
             nextRow = previousRow.get("nextRow");
-            if (nextRow){
-                this.$markup.insertBefore( nextRow.$markup );
-            }else{
-                this.$markup.insertAfter( previousRow.$markup );
+            if (nextRow) {
+                this.$markup.insertBefore(nextRow.$markup);
+            } else {
+                const $nextRows = previousRow.$markup.nextAll('tr');
+                let $previous = previousRow.$markup;
+                for (let i=0; i<$nextRows.length; i++){
+                    const $row = $($nextRows[i]);
+                    if (this.constructor.getItem( $row ).get("level") > this._options.level){
+                        $previous = $row
+                    }else{
+                        break
+                    }
+                }
+                this.$markup.insertAfter( $previous );
             }
             previousRow.set({nextRow:this});
         }else if(this._options.parentRow){
