@@ -9,11 +9,11 @@ export class Toggle extends Control {
         textOff: { type: types.primitives.String, default: "off" },
     };
 
-    static markup = `<button type="button" role="switch" aria-checked="false" class="${styles["switch"]}">
-        <div class="${styles["switch-handle"]}"></div>
-        <span class="${styles["switch-inner"]}">
-            <span name="on" class="${styles["switch-inner-checked"]}"></span>
-            <span name="off" class="${styles["switch-inner-unchecked"]}"></span>
+    static markup = `<button type="button" role="switch" aria-checked="false" class="${styles["toggle"]}">
+        <div class="${styles["toggle-handle"]}"></div>
+        <span class="${styles["toggle-inner"]}">
+            <span name="on" class="${styles["toggle-inner-checked"]}"></span>
+            <span name="off" class="${styles["toggle-inner-unchecked"]}"></span>
         </span>
     </button>`;
 
@@ -37,7 +37,7 @@ export class Toggle extends Control {
         });
 
         this.bind("value", (val) => {
-            this.$markup.toggleClass(styles["switch-checked"], val);
+            this.$markup.toggleClass(styles["toggle-checked"], val);
             this.$markup.attr("aria-checked", val ? "true" : "false");
         });
     }

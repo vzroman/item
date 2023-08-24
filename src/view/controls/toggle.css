@@ -1,4 +1,4 @@
-.switch {
+.toggle {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -20,7 +20,7 @@
     user-select: none;
 }
 
-.switch .switch-handle {
+.toggle .toggle-handle {
     position: absolute;
     top: 2px;
     inset-inline-start: 2px;
@@ -29,7 +29,7 @@
     transition: all 0.2s ease-in-out;
 }
 
-.switch .switch-inner {
+.toggle .toggle-inner {
     display: block;
     overflow: hidden;
     border-radius: 100px;
@@ -39,12 +39,12 @@
     transition: padding-inline-start 0.2s ease-in-out,padding-inline-end 0.2s ease-in-out;
 }
 
-.switch .switch-inner .switch-inner-checked {
+.toggle .toggle-inner .toggle-inner-checked {
     margin-inline-start: calc(-100% + 22px - 48px);
     margin-inline-end: calc(100% - 22px + 48px);
 }
 
-.switch .switch-inner .switch-inner-checked, .switch .switch-inner .switch-inner-unchecked {
+.toggle .toggle-inner .toggle-inner-checked, .toggle .toggle-inner .toggle-inner-unchecked {
     display: block;
     color: #fff;
     font-size: 12px;
@@ -52,13 +52,13 @@
     pointer-events: none;
 }
 
-.switch .switch-inner .switch-inner-unchecked {
+.toggle .toggle-inner .toggle-inner-unchecked {
     margin-top: -22px;
     margin-inline-start: 0;
     margin-inline-end: 0;
 }
 
-.switch .switch-inner .switch-inner-checked, .switch .switch-inner .switch-inner-unchecked {
+.toggle .toggle-inner .toggle-inner-checked, .toggle .toggle-inner .toggle-inner-unchecked {
     display: block;
     color: #fff;
     font-size: 12px;
@@ -66,7 +66,7 @@
     pointer-events: none;
 }
 
-.switch .switch-handle::before {
+.toggle .toggle-handle::before {
     position: absolute;
     top: 0;
     inset-inline-end: 0;
@@ -79,25 +79,25 @@
     content: "";
 }
 
-.switch.switch-checked .switch-handle {
+.toggle.toggle-checked .toggle-handle {
     inset-inline-start: calc(100% - 20px);
 }
 
-.switch.switch-checked .switch-inner {
+.toggle.toggle-checked .toggle-inner {
     padding-inline-start: 9px;
     padding-inline-end: 24px;
 }
 
-.switch.switch-checked .switch-inner .switch-inner-checked {
+.toggle.toggle-checked .toggle-inner .toggle-inner-checked {
     margin-inline-start: 0;
     margin-inline-end: 0;
 }
 
-.switch.switch-checked .switch-inner .switch-inner-unchecked {
+.toggle.toggle-checked .toggle-inner .toggle-inner-unchecked {
     margin-inline-start: calc(100% - 22px + 48px);
     margin-inline-end: calc(-100% + 22px - 48px);
 }
 
-.switch.switch-checked {
+.toggle.toggle-checked {
     background: #1677ff;
 }
