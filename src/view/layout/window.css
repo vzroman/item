@@ -56,10 +56,11 @@
     background-color: #e6e6e8;
 }
 
-.content{
+.view{
     flex-grow: 1;
     background-color: #ffffff;
     overflow: auto;
+    padding: 6px;
 }
 
 .resize_handle {

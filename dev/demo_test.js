@@ -58,7 +58,7 @@ export function run( $container ){
             draggable: true,
             icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
             modal: false,
-            content: {
+            view: {
                 view: MyWidget,
                 options: {
                     color:"white"
@@ -66,7 +66,7 @@ export function run( $container ){
             }
         });
 
-        new item.view.layout.Window({
+        new item.view.layout.FormWindow({
             actions: ["close",  "maximize"],
             title:"My window2",
             position:{
@@ -79,7 +79,7 @@ export function run( $container ){
             draggable: true,
             icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
             //modal: true,
-            content: {
+            view: {
                 view: MyWidget,
                 options: {
                     color:"green"

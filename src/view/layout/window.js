@@ -9,7 +9,7 @@ import maximize from "../../img/maximize.svg";
 import restore from "../../img/restore.svg";
 
 
-export class View extends ItemView {
+export class Window extends ItemView {
 
     static options = {
 
@@ -34,7 +34,7 @@ export class View extends ItemView {
             top:{type: types.primitives.Float, required:true },
             left:{type: types.primitives.Float, required:true }
         }}},
-        content:{type:types.complex.Item, options:{schema:{
+        view:{type:types.complex.Item, options:{schema:{
             view:{type: types.primitives.Class, options:{class:ItemView}, required:true },
             options:{type: types.primitives.Set }
         }}, required:true},
@@ -56,7 +56,7 @@ export class View extends ItemView {
                     <div name="close"></div>
                 </div>
             </div>
-            <div name="content" class="${style.content}"></div>
+            <div name="view" class="${style.view}"></div>
             <div class="${style.resize_handle} ${style.resize_n}"></div>
             <div class="${style.resize_handle} ${style.resize_e}"></div>
             <div class="${style.resize_handle} ${style.resize_s}"></div>
@@ -92,7 +92,7 @@ export class View extends ItemView {
         });
 
         //---------size------------------------------
-        const $content = this.$markup.find(`.${ style.content }`);
+        const $view = this.$markup.find(`.${ style.view }`);
         this.bind("width", width =>{
             if (typeof width !== "number") return;
             if (typeof this._options.maxWidth === "number" && width > this._options.maxWidth){
@@ -100,7 +100,7 @@ export class View extends ItemView {
             }else if(typeof this._options.minWidth === "number" && width < this._options.minWidth){
                 width = this._options.minWidth;
             }
-            $content.width( width );
+            $view.width( width );
         });
 
         this.bind("height", height =>{
@@ -110,7 +110,7 @@ export class View extends ItemView {
             }else if(typeof this._options.minHeight === "number" && height < this._options.minHeight){
                 height = this._options.minHeight;
             }
-            $content.height( height );
+            $view.height( height );
         });
 
         //---------title------------------------------
@@ -217,9 +217,9 @@ export class View extends ItemView {
         //---------minimize----------------------------------
         this.bind("isMinimized", isMinimized =>{
             if (isMinimized){
-                $content.hide();
+                $view.hide();
             }else{
-                $content.show();
+                $view.show();
             }
         });
 
@@ -324,7 +324,7 @@ export class View extends ItemView {
                     icon: `url("${ close }")`
                 }
             },
-            content: this._options.content,
+            view: this._options.view,
         };
     }
 
@@ -425,4 +425,4 @@ export class View extends ItemView {
 
 }
 
-View.extend();
+Window.extend();

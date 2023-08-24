@@ -27,10 +27,12 @@ import {View as Parent} from "../item.js";
 import {types} from "../../types/index.js";
 import {controls} from "../controls/index.js";
 import {text as i18n} from "../../i18n/i18n.js";
-import mainCss from "../../css/main.css";
 import {deepMerge} from "../../utilities/data.js";
 
-export class View extends Parent{
+import styles from "./form.css";
+
+
+export class Form extends Parent{
 
     static options = {
         view:{type: types.primitives.Class, options:{class:Parent}, required:true },
@@ -51,9 +53,9 @@ export class View extends Parent{
         cancel:true
     };
 
-    static markup = `<div class="${ mainCss.vertical }" style="height: 100%">
+    static markup = `<div class="${ styles.form }">
         <div name="view" style="flex-grow: 1"></div>
-        <div class="${ mainCss.horizontal }" style="justify-content: flex-end; margin-top: 1em">
+        <div class="${ styles.button_block }">
             <div name="save"></div>
             <div name="cancel"></div>
         </div>
@@ -109,4 +111,4 @@ export class View extends Parent{
     }
 
 }
-View.extend();
+Form.extend();
