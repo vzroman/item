@@ -8,6 +8,7 @@ import minimize from "../../img/minimize.svg";
 import maximize from "../../img/maximize.svg";
 import restore from "../../img/restore.svg";
 
+
 export class View extends ItemView {
 
     static options = {
@@ -26,7 +27,7 @@ export class View extends ItemView {
         actions:{type: types.primitives.Array, default:["maximize","minimize","close"]},
 
         modal:{type: types.primitives.Bool},
-        draggable:{type: types.primitives.Bool},
+        draggable:{type: types.primitives.Bool, default:true},
         resizable:{type: types.primitives.Bool},
 
         position:{type:types.complex.Item, options:{schema:{
@@ -39,19 +40,12 @@ export class View extends ItemView {
         }}, required:true},
 
         isFocused:{type: types.primitives.Bool, default:true},
+        z_index:{type: types.primitives.Integer, default:10002},
         isMinimized:{type: types.primitives.Bool, default:false},
         isMaximized:{type: types.primitives.Bool, default:false}
     };
 
-    static events = {
-        maximize: true,
-        resize: true,
-        dragstart: true,
-        dragend: true,
-        drag: true,
-    };
-
-    static markup = `<div class="${style.window}">
+    static markup = `<div class="${style.window}" style="z-index: 10002">
             <div class="${style.titlebar}">
                 <div class="${ style.title_icon }"></div>
                 <div class="${ style.title_text }"></div>
@@ -73,59 +67,23 @@ export class View extends ItemView {
             <div class="${style.resize_handle} ${style.resize_nw}"></div>
         </div>`;
 
-    // markup() {
-    //     // const width = this._options.options?.width || "100px";
-    //     // const height = this._options.options?.height || "100px";
-    //     //
-    //     // const maxWidth = this._options.options?.maxWidth || "auto";
-    //     // const maxHeight = this._options.options?.maxHeight || "auto";
-    //
-    //     return $(`<div class="${style.window}">
-    //         <div class="${style.titlebar}">
-    //             <div class="${ style.title_icon }"></div>
-    //             <div class="${ style.title_text }"></div>
-    //             <div class="${ style.title_actions }">
-    //                 <div name="restore"></div>
-    //                 <div name="minimize"></div>
-    //                 <div name="maximize"></div>
-    //                 <div name="close"></div>
-    //             </div>
-    //         </div>
-    //         <div name="content" class="${style.content}"></div>
-    //         <div class="${style.resize_handle} ${style.resize_n}"></div>
-    //         <div class="${style.resize_handle} ${style.resize_e}"></div>
-    //         <div class="${style.resize_handle} ${style.resize_s}"></div>
-    //         <div class="${style.resize_handle} ${style.resize_w}"></div>
-    //         <div class="${style.resize_handle} ${style.resize_se}"></div>
-    //         <div class="${style.resize_handle} ${style.resize_sw}"></div>
-    //         <div class="${style.resize_handle} ${style.resize_ne}"></div>
-    //         <div class="${style.resize_handle} ${style.resize_nw}"></div>
-    //     </div>`);
-    //
-    //     // this.$content = $markup.find(`.${ style.content }`);
-    //     //
-    //     // this.$titlebar = $markup.find('[name="titlebar"]');
-    //     // this.$resizers = $markup.find('[name^="resizer"]');
-    //     //
-    //     // return $markup;
-    // }
-
     constructor(options){
         options.$container = options.$container || $('body');
         super(options);
 
+        this._onDestroy = [];
+
+        //---------position------------------------------
         if (!this._options.position){
             this.set({position:{
                 top: Math.max(0, (($(window).height() - $(this.$markup).outerHeight()) / 2) + $(window).scrollTop()),
                 left: Math.max(0, (($(window).width() - $(this.$markup).outerWidth()) / 2) + $(window).scrollLeft())
             }});
         }
-
-        //---------position------------------------------
         this.bind("position",position=> {
 
             if (!position) return;
-            if (this._options.isMinimized || this._options.isMaximized) return;
+            if ( this._options.isMaximized ) return;
 
             this.$markup.css({
                 top: position.top + "px",
@@ -133,85 +91,187 @@ export class View extends ItemView {
             });
         });
 
-        // this.$markup.css({
-        //     top: Math.max(0, (($(window).height() - $(this.$markup).outerHeight()) / 2) + $(window).scrollTop()) + "px",
-        //     left: Math.max(0, (($(window).width() - $(this.$markup).outerWidth()) / 2) + $(window).scrollLeft()) + "px",
-        // });
-        //
-        // if (this._options.options.modal) {
-        //     const overlayStyle = `
-        //         width:100%;
-        //         height: 100%;
-        //         postion: fixed;
-        //         top: 0;
-        //         left: 0;
-        //         z-index: 10003;
-        //         display: inline-flex;
-        //         opacity: 0.5;
-        //         background-color: #000000`;
-        //     $(`<div name="window-overlay" style="${overlayStyle}"></div>`).prependTo(this.$markup.parent());
-        // }
-        //
-        // let css = this._options.options.icon
-        //     ?{
-        //         "background-image":this._options.options.icon,
-        //         "display":"block",
-        //     }
-        //     :{
-        //         "background-image":"",
-        //         "display":"none"
-        //     };
-        // this.$markup.find('[name="title-icon"]').css( css );
-        //
-        // if (this._options.options.resizable) {
-        //     this.onResize((value) => {
-        //         this._trigger("resize", value);
-        //         this._prevDimension = { ...this._prevDimension, ...value };
-        //     });
-        // }
-        //
-        // if (this._options.options.draggable) {
-        //     this.dragFn = () => {
-        //         this.onDrag({
-        //             dragstart: () => { this._trigger("dragstart"); },
-        //             dragend: () => { this._trigger("dragend"); },
-        //             drag: (value) => {
-        //                 this._trigger("drag", value);
-        //
-        //                 let nextDimension;
-        //
-        //                 if (this.$titlebar.innerHeight() + "px" === value.height) {
-        //                     nextDimension = {
-        //                         height: this._prevDimension.height,
-        //                         width: value.width,
-        //                         top: value.top,
-        //                         left: value.left
-        //                     };
-        //                 } else {
-        //                     nextDimension = value;
-        //                 }
-        //
-        //                 this._prevDimension = nextDimension;
-        //             },
-        //         });
-        //     };
-        //     this.dragFn();
-        // }
-        //
-        // this._resizeObserver = new ResizeObserver(() => {
-        //     this.$markup.css({
-        //         height: $(window).height() + "px",
-        //         width: $(window).width() + "px"
-        //     });
-        // });
-        //
-        // this._prevDimension = {
-        //     width: "auto",
-        //     height: "auto",
-        //     top: "auto",
-        //     left: "auto",
-        // };
-        // this._isMinimized = false;
+        //---------size------------------------------
+        const $content = this.$markup.find(`.${ style.content }`);
+        this.bind("width", width =>{
+            if (typeof width !== "number") return;
+            if (typeof this._options.maxWidth === "number" && width > this._options.maxWidth){
+                width = this._options.maxWidth;
+            }else if(typeof this._options.minWidth === "number" && width < this._options.minWidth){
+                width = this._options.minWidth;
+            }
+            $content.width( width );
+        });
+
+        this.bind("height", height =>{
+            if (typeof height !== "number") return;
+            if (typeof this._options.maxHeight === "number" && height > this._options.maxHeight){
+                height = this._options.maxHeight;
+            }else if(typeof this._options.minHeight === "number" && height < this._options.minHeight){
+                height = this._options.minHeight;
+            }
+            $content.height( height );
+        });
+
+        //---------title------------------------------
+        const $title = this.$markup.find(`.${ style.title_text }`);
+        this.bind("title",title=> {
+            $title.text( title );
+        });
+
+        //---------icon------------------------------
+        const $icon = this.$markup.find(`.${ style.title_icon }`);
+        this.bind("icon",icon=> {
+            let css = icon
+                ?{
+                    "background-image":icon,
+                    "display":"block"
+                }
+                :{
+                    "background-image":"",
+                    "display":"none"
+                };
+            $icon.css( css );
+        });
+
+        //---------focus------------------------------
+        this.$markup.on("click",()=> this.set({isFocused:true}));
+        const onDocumentClick = e => this.set({isFocused:this.$markup[0].contains(e.target)});
+
+        document.addEventListener("mousedown", onDocumentClick);
+        document.addEventListener("touchstart", onDocumentClick);
+
+        this._onDestroy.push(() => {
+            document.removeEventListener("mousedown", onDocumentClick);
+            document.removeEventListener("touchstart", onDocumentClick);
+        });
+
+        this.bind("isFocused",isFocused=> {
+            this.$markup.toggleClass(style.focused, isFocused);
+            if (isFocused){
+                // Take the maximum z-index among other windows
+                let z_index = +this._options.z_index;
+                const $windows = $(`.${ style.window }`);
+                for (let i=0; i<$windows.length; i++){
+                    const z = +$( $windows[i] ).css("z-index");
+                    if (z >= z_index && $windows[i] !== this.$markup[0]) z_index = z + 2;
+                }
+                this.set({z_index});
+            }
+        });
+
+        //---------z_index------------------------------
+        this.bind("z_index",z_index=> {
+            this.$markup.css({"z-index":z_index});
+        });
+
+
+        //---------drag----------------------------------
+        const $titlebar = this.$markup.find(`.${ style.titlebar }`);
+        let dragPoint, position;
+        const onDragEnd = () => {
+            dragPoint = undefined;
+            position = undefined;
+            window.removeEventListener("mousemove", onDrag);
+            window.removeEventListener("mouseup", onDragEnd);
+        }
+        const onDrag = e => {
+            if (e.buttons !== 1) return onDragEnd();
+
+            const shiftX = e.clientX - dragPoint.x;
+            const shiftY = e.clientY - dragPoint.y;
+
+            this.set({position:{
+                top: position.y + shiftY,
+                left: position.x + shiftX
+             }});
+        };
+        $titlebar.on("mousedown", e =>{
+
+            if ((!this._options.draggable) || this._options.isMaximized) return;
+
+            dragPoint = {
+                x: e.clientX,
+                y: e.clientY
+            };
+            position = {
+                x: this._options.position.left,
+                y: this._options.position.top
+            };
+
+            window.addEventListener('mousemove', onDrag);
+            window.addEventListener('mouseup', onDragEnd);
+        });
+
+        //---------modal----------------------------------
+        this.$overlay = undefined;
+        this.bind("modal", modal=>{
+            if (modal){
+                this.$overlay=$(`<div class="${ style.overlay }" style="z-index: ${ this._options.z_index-1 }"></div>`).appendTo('body');
+            }else if(this.$overlay){
+                this.$overlay.remove();
+            }
+        });
+
+
+        //---------minimize----------------------------------
+        this.bind("isMinimized", isMinimized =>{
+            if (isMinimized){
+                $content.hide();
+            }else{
+                $content.show();
+            }
+        });
+
+        //---------maximize----------------------------------
+        this.bind("isMaximized", isMaximized =>{
+            if (isMaximized){
+                this.$markup.css({
+                    top:0,
+                    left:0,
+                    bottom:0,
+                    right:0
+                });
+            }else{
+                this.$markup.css({
+                    top:this._options.position.top,
+                    left:this._options.position.left,
+                    bottom:"unset",
+                    right:"unset"
+                });
+            }
+        });
+
+        //---------resize----------------------------------
+        const $resizers = this.$markup.find(`.${ style.resize_handle }`);
+        let resizer = undefined;
+        const onEndResize = ()=>{
+            dragPoint = undefined;
+            position = undefined;
+            window.removeEventListener("mousemove", onResize);
+            window.removeEventListener("mouseup", onEndResize);
+        }
+        const onResize = e =>{
+            if (e.buttons !== 1) return onEndResize();
+            resizer( e );
+        }
+        $resizers.on("mousedown", e =>{
+
+            if ((!this._options.resizable) || this._options.isMaximized || this._options.isMinimized) return;
+
+            resizer = this._initResizer( e );
+
+            window.addEventListener('mousemove', onResize);
+            window.addEventListener('mouseup', onEndResize);
+        });
+
+        this.bind("resizable", resizable=>{
+            if (resizable){
+                $resizers.show();
+            }else{
+                $resizers.hide();
+            }
+        });
     }
 
     widgets() {
@@ -222,7 +282,6 @@ export class View extends ItemView {
                     events:{
                         click:()=> this.set({isMinimized: true})
                     },
-                    // classes: [style.item_grid_button],
                     icon: `url("${ minimize }")`,
                     links: { visible: { source: "parent", event:["actions","isMaximized","isMinimized"], handler: ({actions,isMaximized,isMinimized}) => {
                         if (!actions.includes("minimize")) return false;
@@ -236,7 +295,6 @@ export class View extends ItemView {
                     events:{
                         click:()=> this.set({isMaximized: true})
                     },
-                    // classes: [style.item_grid_button],
                     icon: `url("${ maximize }")`,
                     links: { visible: { source: "parent", event:["actions","isMaximized","isMinimized"], handler: ({actions,isMaximized,isMinimized}) => {
                         if (!actions.includes("maximize")) return false;
@@ -254,8 +312,7 @@ export class View extends ItemView {
                     icon: `url("${ restore }")`,
                     links: { visible: { source: "parent", event:["isMaximized","isMinimized"], handler: ({isMaximized,isMinimized}) => {
                         return (isMinimized || isMaximized)
-                    } } },
-                    //classes: [style.item_grid_button],
+                    } } }
                 }
             },
             close:{
@@ -264,7 +321,6 @@ export class View extends ItemView {
                     events:{
                         click:() => this.destroy()
                     },
-                    // classes: [style.item_grid_button],
                     icon: `url("${ close }")`
                 }
             },
@@ -272,217 +328,99 @@ export class View extends ItemView {
         };
     }
 
-    _hideResizers() {
-        this.$resizers?.each(function() { $(this).css({display: "none"}); });
-    }
+    _initResizer( e ){
+        const initX = e.clientX;
+        const initY = e.clientY;
+        const initPosition = this._options.position;
+        const initWidth = this._options.width;
+        const initHeight = this._options.height;
 
-    _showResizers() {
-        this.$resizers?.each(function() { $(this).css({display: "flex"}); });
-    }
-
-    onDrag({ dragstart, dragend, drag }) {
-        let $window = $(window);
-        let isDragStarted = false;
-        let pos1 = 0,
-            pos2 = 0,
-            pos3 = 0,
-            pos4 = 0;
-
-        this.$titlebar.on("mousedown", dragMouseDown);
-
-        const element = this.$markup;
-
-        function dragMouseDown(e) {
-            e.preventDefault();
-            // get the mouse cursor position at startup:
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            // call a function whenever the cursor moves:
-            $window.on("mousemove", elementDrag);
-            $window.on("mouseup", closeDragElement);
-        }
-
-        function elementDrag(e) {
-            e.preventDefault();
-            // calculate the new cursor position:
-            pos1 = pos3 - e.clientX;
-            pos2 = pos4 - e.clientY;
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            // set the element's new position:
-            const offset = element.offset();
-            const top =  offset.top - pos2 + "px";
-            const left = offset.left - pos1 + "px";
-
-            element.css({ top, left });
-
-            if (!isDragStarted) { dragstart(); isDragStarted = true; }
-            
-            drag({
-                top,
-                left,
-                width: element.width() + "px",
-                height: element.height() + "px"
-            });
-        }
-
-        function closeDragElement() {
-            /* stop moving when mouse button is released:*/
-            $window.off("mousemove", elementDrag);
-            $window.off("mouseup", closeDragElement);
-            dragend();
-            isDragStarted = false;
-        }
-    }
-
-    onResize(callback) {
-        let $window = $(window), element = this.$markup;
-        const resizers = element.find('[name^="resizer"]'), minimum_size = 20;
-        let original_width = 0;
-        let original_height = 0;
-        let original_x = 0;
-        let original_y = 0;
-        let original_mouse_x = 0;
-        let original_mouse_y = 0;
-        
-        for (let i = 0; i < resizers.length; i++) {
-            const currentResizer = $(resizers[i]);
-            currentResizer.on("mousedown", function(e) {
-                e.preventDefault();
-                original_width = parseFloat(element.css("width").replace("px", ""));
-                original_height = parseFloat(element.css("height").replace("px", ""));
-                
-                original_x = element[0].getBoundingClientRect().left;
-                original_y = element[0].getBoundingClientRect().top;
-                original_mouse_x = e.pageX;
-                original_mouse_y = e.pageY;
-    
-                $window.on('mousemove', resize);
-                $window.on('mouseup', stopResize);
-            });
-    
-            function resize(e) {
-                const resizerName = currentResizer.attr("name");
-
-                if (resizerName.endsWith("se")) {
-                    const width = original_width + (e.pageX - original_mouse_x);
-                    const height = original_height + (e.pageY - original_mouse_y);
-                    if (width > minimum_size) {
-                        element.width(width + "px");
-                    }
-                    if (height > minimum_size) {
-                        element.height(height + "px");
-                    }
-                } else if (resizerName.endsWith("sw")) {
-                    const height = original_height + (e.pageY - original_mouse_y);
-                    const width = original_width - (e.pageX - original_mouse_x);
-                    if (height > minimum_size) {
-                        element.height(height + "px");
-                    }
-                    if (width > minimum_size) {
-                        element.width(width + "px");
-                        element.css({ "left": original_x + (e.pageX - original_mouse_x) + "px" });
-                    }
-                } else if (resizerName.endsWith("ne")) {
-                    const width = original_width + (e.pageX - original_mouse_x);
-                    const height = original_height - (e.pageY - original_mouse_y);
-                    if (width > minimum_size) {
-                        element.width(width + "px");
-                    }
-                    if (height > minimum_size) {
-                        element.height(height + "px");
-                        element.css({ "top": original_y + (e.pageY - original_mouse_y) + "px" });
-                    }
-                } else if (resizerName.endsWith("nw")) {
-                    const width = original_width - (e.pageX - original_mouse_x);
-                    const height = original_height - (e.pageY - original_mouse_y);
-                    if (width > minimum_size) {
-                        element.width(width + "px");
-                        element.css({ "left": original_x + (e.pageX - original_mouse_x) + "px" });
-                    }
-                    if (height > minimum_size) {
-                        element.height(height + "px");
-                        element.css({ "top": original_y + (e.pageY - original_mouse_y) + "px" });
-                    }
-                } else {
-                    if (resizerName === "resizer s") {
-                        const height = original_height + (e.pageY - original_mouse_y);
-
-                        if (height > minimum_size) {
-                            element.height(height + "px");
-                        }
-                    } else if (resizerName === "resizer w" ) {
-                        const width = original_width - (e.pageX - original_mouse_x);
-                      
-                        if (width > minimum_size) {
-                            element.width(width + "px");
-                            element.css({ "left": original_x + (e.pageX - original_mouse_x) + 'px'});
-                        }
-                    } else if (resizerName === "resizer n") {
-                        const height = original_height - (e.pageY - original_mouse_y);
-
-                        if (height > minimum_size) {
-                            element.height(height + "px");
-                            element.css({ "top": original_y + (e.pageY - original_mouse_y) + "px" });
-                        }
-                    } else {
-                        const width = original_width + (e.pageX - original_mouse_x)
-
-                        if (width > minimum_size) {
-                            element.width(width + "px");
-                        }
-                    }
-                }
-
-                if (typeof callback === "function") {
-                    callback({
-                        width: element.width() + "px",
-                        height: element.height() + "px",
-                    });
-                }
+        if ($(e.target).hasClass(style.resize_n) ){
+            return (e)=>{
+                const shiftY = e.clientY - initY;
+                this.set({
+                    position: { left: initPosition.left, top: initPosition.top + shiftY },
+                    height: initHeight - shiftY
+                })
             }
-    
-            function stopResize() {
-                $window.off('mousemove', resize);
-                $window.off('mouseup', stopResize);
+        }else if($(e.target).hasClass(style.resize_e) ){
+            return (e)=>{
+                const shiftX = e.clientX - initX;
+                this.set({ width: initWidth + shiftX })
+            }
+        }else if($(e.target).hasClass(style.resize_s) ){
+            return (e)=>{
+                const shiftY = e.clientY - initY;
+                this.set({ height: initHeight + shiftY })
+            }
+        }else if ($(e.target).hasClass(style.resize_w) ){
+            return (e)=>{
+                const shiftX = e.clientX - initX;
+                this.set({
+                    position: { left: initPosition.left + shiftX, top: initPosition.top },
+                    width: initWidth - shiftX
+                })
+            }
+        }else if ($(e.target).hasClass(style.resize_se) ){
+            return (e)=>{
+                const shiftX = e.clientX - initX;
+                const shiftY = e.clientY - initY;
+                this.set({
+                    width: initWidth + shiftX,
+                    height: initHeight + shiftY
+                })
+            }
+        }else if ($(e.target).hasClass(style.resize_sw) ){
+            return (e)=>{
+                const shiftX = e.clientX - initX;
+                const shiftY = e.clientY - initY;
+                this.set({
+                    position: {top:initPosition.top, left: initPosition.left + shiftX},
+                    width: initWidth - shiftX,
+                    height: initHeight + shiftY
+                })
+            }
+        }else if ($(e.target).hasClass(style.resize_ne) ){
+            return (e)=>{
+                const shiftX = e.clientX - initX;
+                const shiftY = e.clientY - initY;
+                this.set({
+                    position: {
+                        top:initPosition.top + shiftY,
+                        left: initPosition.left
+                    },
+                    width: initWidth + shiftX,
+                    height: initHeight - shiftY
+                })
+            }
+        }else{
+            return (e)=>{
+                const shiftX = e.clientX - initX;
+                const shiftY = e.clientY - initY;
+                this.set({
+                    position: {
+                        top:initPosition.top + shiftY,
+                        left: initPosition.left + shiftX
+                    },
+                    width: initWidth - shiftX,
+                    height: initHeight - shiftY
+                })
             }
         }
     }
 
-    maximize() {
-        const {top, left} = this.$markup.position();
-        const width = this.$markup.width();
-        const height = this.$markup.height();
-    
-        this.$markup.css({ 
-            top: "0px", 
-            left: "0px", 
-            height: $(window).height() + "px", 
-            width: $(window).width() + "px"
-        });
-
-        $('body').css({overflow: "hidden"});
-
-        this._resizeObserver.observe(document.body);
-
-        this._prevDimension = {
-            top: top + "px", 
-            left: left + "px", 
-            height: height + "px", 
-            width: width + "px"
-        };
-    }
-
-    minimize() {
-        this.$markup.css({ 
-            height: this.$titlebar.innerHeight() + "px", 
-            overflow: "hidden" 
-        });
-    }
-
-    restore() {
-        $('body').css({overflow: "unset"});
-        this.$markup.css({...this._prevDimension, overflow: "scroll"});
+    destroy() {
+        if (this.$overlay){
+            this.$overlay.remove();
+            this.$overlay = undefined;
+        }
+        if (this._onDestroy){
+            for (const d of this._onDestroy){
+                d();
+            }
+            this._onDestroy = undefined;
+        }
+        super.destroy();
     }
 
 }

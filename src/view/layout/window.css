@@ -20,7 +20,7 @@
     /*overflow: scroll;*/
 }
 
-.widnow.focused{
+.window.focused{
     box-shadow: 1px 1px 7px 1px rgba(0, 0, 0, 0.3);
 }
 
@@ -32,8 +32,13 @@
     gap: 1em;
     height: 2.4em;
 
+    padding: 0 6px;
+
     background-color: #f3f3f4;
     color: #324552;
+
+    cursor: grab;
+    user-select: none;
 
     /*border-top-left-radius: 0px;*/
     /*border-top-right-radius: 0px;*/
@@ -64,10 +69,10 @@
 .title_text{
     flex-grow: 1;
     text-overflow: ellipsis;
+    font-size: 16px;
 }
 
 .title_actions{
-    /*align-self: flex-start;*/
     display: flex;
     flex-direction: row;
     align-items: stretch;
@@ -176,6 +181,17 @@
     left: 0;
     width: 6px;
     height: 6px;
+}
+
+.overlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10003;
+    opacity: 0.5;
+    background-color: #000000;
 }
 
 /*.widnow:focus{*/
