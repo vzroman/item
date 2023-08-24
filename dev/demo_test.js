@@ -86,7 +86,7 @@ class MyWidget extends item.view.Item{
                 // events:{ value:"prop1" },
                 value:true,
                 textOn: "LONGT TEXT",
-                textOff:"NOT LONG TEXT"
+                textOff:"NOT"
             }
         }
     };
