@@ -1,0 +1,251 @@
+
+
+.window {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.06);
+
+    /*border-color: rgba(0, 0, 0, 0.08);*/
+    /*color: #424242;*/
+    /*background-color: #ffffff;*/
+    /*opacity: 1;*/
+
+    /*border-radius: 0px;*/
+    /*padding: 0;*/
+    /*border-width: 0px;*/
+    /*border-style: solid;*/
+    /*z-index: 1000;*/
+    /*overflow: scroll;*/
+}
+
+.widnow.focused{
+    box-shadow: 1px 1px 7px 1px rgba(0, 0, 0, 0.3);
+}
+
+.titlebar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 1em;
+    height: 2.4em;
+
+    background-color: #f3f3f4;
+    color: #324552;
+
+    /*border-top-left-radius: 0px;*/
+    /*border-top-right-radius: 0px;*/
+    /*padding-block: 12px;*/
+    /*padding-inline: 16px;*/
+    /*border-width: 0 0 1px;*/
+    /*border-style: solid;*/
+    /*white-space: nowrap;*/
+
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*flex-flow: row nowrap;*/
+    /*flex-shrink: 0;*/
+    /*align-items: center;*/
+
+    /*border-color: inherit;*/
+    /*color: #424242;*/
+    /*background-color: #fafafa;*/
+}
+
+.title_icon{
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.title_text{
+    flex-grow: 1;
+    text-overflow: ellipsis;
+}
+
+.title_actions{
+    /*align-self: flex-start;*/
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+/*.titlebar>.title_actions>div>button>div[name='icon']{*/
+/*    width: 16px;*/
+/*    height: 16px;*/
+/*}*/
+.titlebar>.title_actions>div>button{
+    border: none;
+    background-color: transparent;
+}
+.titlebar>.title_actions>div>button:hover{
+    background-color: #e6e6e8;
+}
+
+.content{
+    flex-grow: 1;
+    background-color: #ffffff;
+    overflow: auto;
+
+    /*padding-block: 16px;*/
+    /*padding-inline: 16px;*/
+    /*border-width: 0;*/
+    /*border-color: inherit;*/
+    /*color: inherit;*/
+    /*background: none;*/
+    /*outline: 0;*/
+    /*overflow: auto;*/
+    /*position: relative;*/
+    /*flex: 1 1 auto;*/
+}
+
+.resize_handle {
+    position: absolute;
+    background: transparent;
+    z-index: 200;
+}
+
+/*.resize_handle::before {*/
+/*    content: "";*/
+/*    border: 0 solid;*/
+/*    border-color: inherit;*/
+/*}*/
+
+.resize_n {
+    left: 0;
+    top: 0;
+    right: 0;
+    height: 6px;
+    cursor: n-resize;
+}
+
+.resize_e {
+    top:0;
+    bottom: 0;
+    right: 0;
+    width: 6px;
+    cursor: e-resize;
+}
+
+.resize_s {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    cursor: s-resize;
+}
+
+.resize_w {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 6px;
+    cursor: w-resize;
+}
+
+.resize_se {
+    cursor: se-resize;
+    bottom: 0;
+    right: 0;
+    width: 6px;
+    height: 6px;
+}
+
+.resize_sw {
+    cursor: sw-resize;
+    bottom: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+}
+
+.resize_ne {
+    cursor: ne-resize;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 6px;
+}
+
+.resize_nw {
+    cursor: nw-resize;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+}
+
+/*.widnow:focus{*/
+/*    box-shadow: 1px 1px 7px 1px rgba(0, 0, 0, 0.3);*/
+/*}*/
+
+/*.item_grid_button {*/
+/*    border-color: transparent;*/
+/*    !* color: inherit; *!*/
+/*    background: none;*/
+/*    box-shadow: none;*/
+/*}*/
+
+/*.item_grid_button > div[name='icon'] {*/
+/*    !* TODO. find other way of overriding inline style priority *!*/
+/*    width: 16px !important;*/
+/*    height: 16px !important;*/
+/*}*/
+
+
+/*.window_titlebar__title_wrapper {*/
+/*    flex: 1;*/
+/*    display: flex;*/
+/*    flex-flow: row nowrap;*/
+/*    padding-block: 0.5em;*/
+/*    padding-inline: 0;*/
+/*    margin-block: -0.5em;*/
+/*    margin-inline: 0;*/
+/*    align-items: center;*/
+/*    gap: 5px*/
+/*}*/
+
+/*.window_titlebar__icon{*/
+/*    display: none;*/
+/*    width: 20px;*/
+/*    height: 20px;*/
+/*    background-size: contain;*/
+/*    background-repeat: no-repeat;*/
+/*}*/
+
+/*.window_titlebar__title {*/
+/*    font-size: 16px;*/
+/*    line-height: 1.25;*/
+/*    text-overflow: ellipsis;*/
+/*    overflow: hidden;*/
+/*    cursor: default;*/
+/*}*/
+
+/*.window_titlebar__actions {*/
+/*    margin-block: -5em;*/
+/*    margin-inline: 0;*/
+/*    margin-inline-end: -4px;*/
+/*    line-height: 1;*/
+/*    display: flex;*/
+/*    flex-flow: row nowrap;*/
+/*    flex-shrink: 0;*/
+/*    align-items: center;*/
+/*    vertical-align: top;*/
+/*}*/
+
+/*.window_content {*/
+/*    padding-block: 16px;*/
+/*    padding-inline: 16px;*/
+/*    border-width: 0;*/
+/*    border-color: inherit;*/
+/*    color: inherit;*/
+/*    background: none;*/
+/*    outline: 0;*/
+/*    overflow: auto;*/
+/*    position: relative;*/
+/*    flex: 1 1 auto;*/
+/*}*/
+

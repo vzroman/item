@@ -1,6 +1,7 @@
 
 import {item} from "../dist/item.js";
 import {Ecomet} from "./ecomet.js";
+//import restore from "../src/img/restore.svg";
 
 export function run( $container ){
 
@@ -48,13 +49,21 @@ export function run( $container ){
             }
         ]
 
-        const widget = new item.view.layout.TabStrip({
+        new item.view.layout.Window({
             $container,
-            tabs,
-            events: {
-                onChange: v => console.log("bindedd", v)
-            },
-            horizontal: true
+            actions: ["close", "minimize", "maximize"],
+            // width: "500px",
+            // height: "300px",
+            resizable: true,
+            draggable: true,
+            icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
+            //modal: true,
+            content: {
+                view: MyWidget,
+                options: {
+                    color:"black"
+                }
+            }
         });
 
 

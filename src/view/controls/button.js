@@ -25,7 +25,7 @@
 
 import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
-import mainCss from "../../css/main.css";
+import styles from "./button.css";
 
 // The control is the point where external widgets to be attached
 export class Control extends Parent{
@@ -36,8 +36,8 @@ export class Control extends Parent{
         icon:{type:types.primitives.String},
         white_space:{type:types.primitives.String, default:"nowrap"}
     };
-    static markup = `<button class="${ mainCss.horizontal }" style="width:100%;height:100%;align-items: center;cursor: pointer">
-        <div name="icon" style="display: none; width: 20px; height: 20px; background-size: contain; background-repeat: no-repeat;"></div>
+    static markup = `<button class="${ styles.button } item_button">
+        <div name="icon" class="${ styles.icon }"></div>
         <div name="text"></div>
     </button>`;
 
