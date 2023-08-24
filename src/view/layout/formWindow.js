@@ -21,8 +21,7 @@ export class FormWindow extends Window{
             view: {
                 view: Form,
                 options:{
-                    view: this._options.view.view,
-                    options: this._options.view.options,
+                    view: this._options.view,
                     events: {
                         error:(...args)=>this._trigger("error", args),
                         commit:(...args)=>{

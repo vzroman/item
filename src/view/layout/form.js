@@ -23,7 +23,7 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {View as Parent} from "../item.js";
+import {View as ItemView, View as Parent} from "../item.js";
 import {types} from "../../types/index.js";
 import {controls} from "../controls/index.js";
 import {text as i18n} from "../../i18n/i18n.js";
@@ -35,7 +35,10 @@ import styles from "./form.css";
 export class Form extends Parent{
 
     static options = {
-        view:{type: types.primitives.Class, options:{class:Parent}, required:true },
+        view:{type:types.complex.Item, options:{schema:{
+            view:{type: types.primitives.Class, options:{class:Parent}, required:true },
+            options:{type: types.primitives.Set }
+        }}, required:true},
         options:{type: types.primitives.Set },
         commit:{type: types.primitives.Fun, default:data => data.commit() },
         rollback:{type: types.primitives.Fun, default:data => data.rollback() }
@@ -64,12 +67,12 @@ export class Form extends Parent{
     widgets(){
         return {
             view: {
-                view: this._options.view,
+                view: this._options.view.view,
                 options: deepMerge({
                     links:{
                         focus:"committable"
                     }
-                }, this._options.options)
+                }, this._options.view.options)
             },
             save: {
                 view: controls.Button,
