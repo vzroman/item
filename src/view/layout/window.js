@@ -28,7 +28,7 @@ export class Window extends ItemView {
 
         modal:{type: types.primitives.Bool},
         draggable:{type: types.primitives.Bool, default:true},
-        resizable:{type: types.primitives.Bool},
+        resizable:{type: types.primitives.Bool, default:true},
 
         position:{type:types.complex.Item, options:{schema:{
             top:{type: types.primitives.Float, required:true },
