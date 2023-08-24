@@ -332,8 +332,8 @@ export class View extends ItemView {
         const initX = e.clientX;
         const initY = e.clientY;
         const initPosition = this._options.position;
-        const initWidth = this._options.width;
-        const initHeight = this._options.height;
+        const initWidth = this._options.width || this.$markup.width();
+        const initHeight = this._options.height || this.$markup.height();
 
         if ($(e.target).hasClass(style.resize_n) ){
             return (e)=>{

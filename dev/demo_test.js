@@ -66,26 +66,26 @@ export function run( $container ){
             }
         });
 
-        // new item.view.layout.Window({
-        //     actions: ["close",  "maximize"],
-        //     title:"My window2",
-        //     position:{
-        //         top:50,
-        //         left:50
-        //     },
-        //     // width: "500px",
-        //     // height: "300px",
-        //     resizable: true,
-        //     draggable: true,
-        //     icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
-        //     //modal: true,
-        //     content: {
-        //         view: MyWidget,
-        //         options: {
-        //             color:"green"
-        //         }
-        //     }
-        // });
+        new item.view.layout.Window({
+            actions: ["close",  "maximize"],
+            title:"My window2",
+            position:{
+                top:50,
+                left:50
+            },
+            // width: "500px",
+            // height: "300px",
+            resizable: true,
+            draggable: true,
+            icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
+            //modal: true,
+            content: {
+                view: MyWidget,
+                options: {
+                    color:"green"
+                }
+            }
+        });
 
 
         // data.set({prop1:"green"})
