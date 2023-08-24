@@ -8,7 +8,8 @@
 }
 
 .view{
-
+    flex-grow: 1;
+    overflow: auto;
 }
 
 .button_block{

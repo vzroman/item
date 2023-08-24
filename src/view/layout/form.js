@@ -57,7 +57,7 @@ export class Form extends Parent{
     };
 
     static markup = `<div class="${ styles.form }">
-        <div name="view" style="flex-grow: 1"></div>
+        <div name="view"></div>
         <div class="${ styles.button_block }">
             <div name="save"></div>
             <div name="cancel"></div>
