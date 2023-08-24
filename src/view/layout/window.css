@@ -1,0 +1,146 @@
+
+
+.window {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.06);
+}
+
+.window.focused{
+    box-shadow: 1px 1px 7px 1px rgba(0, 0, 0, 0.3);
+}
+
+.titlebar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 1em;
+    height: 2.4em;
+
+    padding: 0 6px;
+
+    background-color: #f3f3f4;
+    color: #324552;
+
+    cursor: grab;
+    user-select: none;
+}
+
+.title_icon{
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.title_text{
+    flex-grow: 1;
+    text-overflow: ellipsis;
+    font-size: 16px;
+}
+
+.title_actions{
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.titlebar>.title_actions>div>button{
+    border: none;
+    background-color: transparent;
+}
+.titlebar>.title_actions>div>button:hover{
+    background-color: #e6e6e8;
+}
+
+.content{
+    flex-grow: 1;
+    background-color: #ffffff;
+    overflow: auto;
+}
+
+.resize_handle {
+    position: absolute;
+    background: transparent;
+    z-index: 200;
+}
+
+.resize_n {
+    left: 0;
+    top: 0;
+    right: 0;
+    height: 6px;
+    cursor: n-resize;
+}
+
+.resize_e {
+    top:0;
+    bottom: 0;
+    right: 0;
+    width: 6px;
+    cursor: e-resize;
+}
+
+.resize_s {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    cursor: s-resize;
+}
+
+.resize_w {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 6px;
+    cursor: w-resize;
+}
+
+.resize_se {
+    cursor: se-resize;
+    bottom: 0;
+    right: 0;
+    width: 6px;
+    height: 6px;
+}
+
+.resize_sw {
+    cursor: sw-resize;
+    bottom: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+}
+
+.resize_ne {
+    cursor: ne-resize;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 6px;
+}
+
+.resize_nw {
+    cursor: nw-resize;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+}
+
+.overlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10003;
+    opacity: 0.5;
+    background-color: #000000;
+}
+
+

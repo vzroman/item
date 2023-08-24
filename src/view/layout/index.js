@@ -25,9 +25,11 @@
 import {View as Form} from "./form.js";
 import {View as FormField} from "./formField.js";
 import {View as TabStrip} from "./tabstrip.js";
+import {View as Window} from "./window.js";
 
 export const layout = {
     Form,
     FormField,
-    TabStrip
+    TabStrip,
+    Window
 };
