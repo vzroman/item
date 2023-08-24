@@ -72,13 +72,20 @@ export class Window extends ItemView {
         super(options);
 
         this._onDestroy = [];
+        this._resizeObserver = undefined;
 
         //---------position------------------------------
         if (!this._options.position){
-            this.set({position:{
-                top: Math.max(0, (($(window).height() - $(this.$markup).outerHeight()) / 2) + $(window).scrollTop()),
-                left: Math.max(0, (($(window).width() - $(this.$markup).outerWidth()) / 2) + $(window).scrollLeft())
-            }});
+            const setCenter=()=>{
+                this.set({position:{
+                    top: Math.max(0, (($(window).height() - $(this.$markup).outerHeight()) / 2) + $(window).scrollTop()),
+                    left: Math.max(0, (($(window).width() - $(this.$markup).outerWidth()) / 2) + $(window).scrollLeft())
+                }});
+            }
+            setCenter();
+            this._resizeObserver = new ResizeObserver(setCenter);
+            this._resizeObserver.observe(this.$markup[0]);
+
         }
         this.bind("position",position=> {
 
@@ -190,6 +197,9 @@ export class Window extends ItemView {
 
             if ((!this._options.draggable) || this._options.isMaximized) return;
 
+            this._resizeObserver?.disconnect();
+            this._resizeObserver=undefined;
+
             dragPoint = {
                 x: e.clientX,
                 y: e.clientY
@@ -258,6 +268,9 @@ export class Window extends ItemView {
         $resizers.on("mousedown", e =>{
 
             if ((!this._options.resizable) || this._options.isMaximized || this._options.isMinimized) return;
+
+            this._resizeObserver?.disconnect();
+            this._resizeObserver=undefined;
 
             resizer = this._initResizer( e );
 
@@ -414,6 +427,10 @@ export class Window extends ItemView {
             this.$overlay.remove();
             this.$overlay = undefined;
         }
+
+        this._resizeObserver?.disconnect();
+        this._resizeObserver=undefined;
+
         if (this._onDestroy){
             for (const d of this._onDestroy){
                 d();
