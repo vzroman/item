@@ -9,7 +9,7 @@ import {text} from "../../i18n/i18n.js";
 import style from "./formField.css";
 
 
-export class View extends Parent{
+export class FormField extends Parent{
 
     static options = {
         name:{type: types.primitives.String },
@@ -54,4 +54,4 @@ export class View extends Parent{
     }
 
 }
-View.extend();
+FormField.extend();

@@ -5,7 +5,7 @@ import {View as Flex} from "../collections/flex.js"
 import {Control as Parent} from "../controls/control.js";
 import style from "./tabstrip.css";
 
-export class View extends ItemView {
+export class TabStrip extends ItemView {
 
     static events = {onChange: true}
 
@@ -100,7 +100,7 @@ export class View extends ItemView {
         }
     }
 }
-View.extend();
+TabStrip.extend();
 
 class Control extends Parent{
 
