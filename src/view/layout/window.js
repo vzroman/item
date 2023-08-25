@@ -242,6 +242,7 @@ export class Window extends ItemView {
                     bottom:0,
                     right:0
                 });
+                $view.css({width:"100%",height:"100%"});
             }else{
                 this.$markup.css({
                     top:this._options.position.top,
@@ -249,6 +250,8 @@ export class Window extends ItemView {
                     bottom:"unset",
                     right:"unset"
                 });
+                $view.width( this._options.width );
+                $view.height( this._options.height );
             }
         });
 
