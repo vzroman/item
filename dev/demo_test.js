@@ -115,8 +115,8 @@ class MyWidget extends item.view.Item{
                 // links:{ value:"prop1" },
                 // events:{ value:"prop1" },
                 value:true,
-                textOn: "true",
-                textOff:"false"
+                textOn: "LONGT TEXT",
+                textOff:"NOT"
             }
         }
     };
