@@ -25,6 +25,7 @@
 
 import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
+import styles from "./textInput.css"
 
 // The control is the point where external widgets to be attached
 export class Control extends Parent{
@@ -34,7 +35,7 @@ export class Control extends Parent{
         length:{type: types.primitives.Integer}
     };
 
-    static markup = `<input type="text" style="width: 100%"/>`;
+    static markup = `<input type="text" class="${ styles.input }"/>`;
 
     constructor( options ){
         super( options );
