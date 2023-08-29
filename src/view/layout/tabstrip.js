@@ -5,7 +5,7 @@ import {View as Flex} from "../collections/flex.js"
 import {Control as Parent} from "../controls/control.js";
 import style from "./tabstrip.css";
 
-export class View extends ItemView {
+export class TabStrip extends ItemView {
 
     static events = {onChange: true}
 
@@ -42,7 +42,8 @@ export class View extends ItemView {
         const { view, options } = this._options.tabs[id] || this._options.tabs[0];
         this._tab = new view({
             $container: this.$tabContainer,
-            ...options,
+            data:this._options.data,
+            ...options
         })
     }
 
@@ -99,7 +100,7 @@ export class View extends ItemView {
         }
     }
 }
-View.extend();
+TabStrip.extend();
 
 class Control extends Parent{
 

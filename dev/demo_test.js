@@ -1,6 +1,7 @@
 
 import {item} from "../dist/item.js";
 import {Ecomet} from "./ecomet.js";
+//import restore from "../src/img/restore.svg";
 
 export function run( $container ){
 
@@ -43,25 +44,47 @@ export function run( $container ){
                 text: "Tab 1",
                 view: MyWidget,
                 options: {
-                    color:"green"
+                    color:"white"
                 }
-            },
-            {
-                text: "Tab 2",
-                view: MyWidget,
-                options: {
-                    color:"black"
-                }
-            },
+            }
         ]
 
-        const widget = new item.view.layout.TabStrip({
-            $container,
-            tabs,
-            events: {
-                onChange: v => console.log("bindedd", v)
+        new item.view.layout.Window({
+            actions: ["close", "minimize", "maximize"],
+            title:"My window",
+            width: 500,
+            height: 300,
+            resizable: false,
+            draggable: true,
+            icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
+            modal: false,
+            view: {
+                view: MyWidget,
+                options: {
+                    color:"white"
+                }
+            }
+        });
+
+        new item.view.layout.FormWindow({
+            actions: ["close",  "maximize"],
+            title:"My window2",
+            position:{
+                top:50,
+                left:50
             },
-            horizontal: true
+            // width: "500px",
+            // height: "300px",
+            resizable: true,
+            draggable: true,
+            icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
+            //modal: true,
+            view: {
+                view: MyWidget,
+                options: {
+                    color:"green"
+                }
+            }
         });
 
 
@@ -83,22 +106,17 @@ class MyWidget extends item.view.Item{
 
     static markup = `<div style="width: 100%; height: 100%">
         <div name="text"></div>
-        <div name="number"></div>
     </div>`;
 
     static widgets = {
         text:{
-            view:item.view.controls.TextInput,
+            view:item.view.controls.Toggle,
             options:{
-                links:{ value:"prop1" },
-                events:{ value:"prop1" }
-            }
-        },
-        number:{
-            view:item.view.controls.NumberInput,
-            options:{
-                links:{ value:"prop2" },
-                events:{ value:"prop2" }
+                // links:{ value:"prop1" },
+                // events:{ value:"prop1" },
+                value:true,
+                textOn: "LONGT TEXT",
+                textOff:"NOT"
             }
         }
     };

@@ -22,12 +22,16 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {View as Form} from "./form.js";
-import {View as FormField} from "./formField.js";
-import {View as TabStrip} from "./tabstrip.js";
+import {Form} from "./form.js";
+import {FormField} from "./formField.js";
+import {TabStrip} from "./tabstrip.js";
+import {Window} from "./window.js";
+import {FormWindow} from "./formWindow.js";
 
 export const layout = {
     Form,
     FormField,
-    TabStrip
+    TabStrip,
+    Window,
+    FormWindow
 };

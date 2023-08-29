@@ -1,0 +1,103 @@
+.toggle {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    color: rgba(0, 0, 0, 0.88);
+    font-size: 14px;
+    line-height: 22px;
+    list-style: none;
+    font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji';
+    position: relative;
+    display: inline-block;
+    min-width: 44px;
+    height: 22px;
+    vertical-align: middle;
+    background: rgba(0, 0, 0, 0.25);
+    border: 0;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.toggle .toggle-handle {
+    position: absolute;
+    top: 2px;
+    inset-inline-start: 2px;
+    width: 18px;
+    height: 18px;
+    transition: all 0.2s ease-in-out;
+}
+
+.toggle .toggle-inner {
+    display: block;
+    overflow: hidden;
+    border-radius: 100px;
+    height: 100%;
+    padding-inline-start: 24px;
+    padding-inline-end: 9px;
+    transition: padding-inline-start 0.2s ease-in-out,padding-inline-end 0.2s ease-in-out;
+}
+
+.toggle .toggle-inner .toggle-inner-checked {
+    margin-inline-start: calc(-100% + 22px - 48px);
+    margin-inline-end: calc(100% - 22px + 48px);
+}
+
+.toggle .toggle-inner .toggle-inner-checked, .toggle .toggle-inner .toggle-inner-unchecked {
+    display: block;
+    color: #fff;
+    font-size: 12px;
+    transition: margin-inline-start 0.2s ease-in-out,margin-inline-end 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.toggle .toggle-inner .toggle-inner-unchecked {
+    margin-top: -22px;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+}
+
+.toggle .toggle-inner .toggle-inner-checked, .toggle .toggle-inner .toggle-inner-unchecked {
+    display: block;
+    color: #fff;
+    font-size: 12px;
+    transition: margin-inline-start 0.2s ease-in-out,margin-inline-end 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.toggle .toggle-handle::before {
+    position: absolute;
+    top: 0;
+    inset-inline-end: 0;
+    bottom: 0;
+    inset-inline-start: 0;
+    background-color: #fff;
+    border-radius: 9px;
+    box-shadow: 0 2px 4px 0 rgba(0, 35, 11, 0.2);
+    transition: all 0.2s ease-in-out;
+    content: "";
+}
+
+.toggle.toggle-checked .toggle-handle {
+    inset-inline-start: calc(100% - 20px);
+}
+
+.toggle.toggle-checked .toggle-inner {
+    padding-inline-start: 9px;
+    padding-inline-end: 24px;
+}
+
+.toggle.toggle-checked .toggle-inner .toggle-inner-checked {
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+}
+
+.toggle.toggle-checked .toggle-inner .toggle-inner-unchecked {
+    margin-inline-start: calc(100% - 22px + 48px);
+    margin-inline-end: calc(-100% + 22px - 48px);
+}
+
+.toggle.toggle-checked {
+    background: #1677ff;
+}

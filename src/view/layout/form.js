@@ -23,17 +23,22 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {View as Parent} from "../item.js";
+import {View as ItemView, View as Parent} from "../item.js";
 import {types} from "../../types/index.js";
 import {controls} from "../controls/index.js";
 import {text as i18n} from "../../i18n/i18n.js";
-import mainCss from "../../css/main.css";
 import {deepMerge} from "../../utilities/data.js";
 
-export class View extends Parent{
+import styles from "./form.css";
+
+
+export class Form extends Parent{
 
     static options = {
-        view:{type: types.primitives.Class, options:{class:Parent}, required:true },
+        view:{type:types.complex.Item, options:{schema:{
+            view:{type: types.primitives.Class, options:{class:Parent}, required:true },
+            options:{type: types.primitives.Set }
+        }}, required:true},
         options:{type: types.primitives.Set },
         commit:{type: types.primitives.Fun, default:data => data.commit() },
         rollback:{type: types.primitives.Fun, default:data => data.rollback() }
@@ -51,9 +56,9 @@ export class View extends Parent{
         cancel:true
     };
 
-    static markup = `<div class="${ mainCss.vertical }" style="height: 100%">
-        <div name="view" style="flex-grow: 1"></div>
-        <div class="${ mainCss.horizontal }" style="justify-content: flex-end; margin-top: 1em">
+    static markup = `<div class="${ styles.form }">
+        <div name="view" class="${styles.view}"></div>
+        <div class="${ styles.button_block }">
             <div name="save"></div>
             <div name="cancel"></div>
         </div>
@@ -62,12 +67,12 @@ export class View extends Parent{
     widgets(){
         return {
             view: {
-                view: this._options.view,
+                view: this._options.view.view,
                 options: deepMerge({
                     links:{
                         focus:"committable"
                     }
-                }, this._options.options)
+                }, this._options.view.options)
             },
             save: {
                 view: controls.Button,
@@ -109,4 +114,4 @@ export class View extends Parent{
     }
 
 }
-View.extend();
+Form.extend();

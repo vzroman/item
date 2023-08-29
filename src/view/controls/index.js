@@ -31,6 +31,7 @@ import {Control as Dropdown} from "./dropdown.js";
 import {Control as ItemList} from "./itemList.js";
 import {SelectList} from "./selectList.js";
 import { MultiSelect } from "./multiSelect.js";
+import {Toggle} from "./toggle.js";
 
 export const controls = {
     Control,
@@ -41,5 +42,6 @@ export const controls = {
     Dropdown,
     SelectList,
     MultiSelect,
-    ItemList
+    ItemList,
+    Toggle
 };
