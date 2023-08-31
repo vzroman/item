@@ -218,6 +218,7 @@ export class Pager extends ItemView{
                 }
             },
             pageSize: {view: controls.Dropdown, options: {
+                hideClear:true,
                 items:  this.get("pageSizeValues"),
                 links: { value: "parent@pageSize" },
                 events: { value: "parent@pageSize" }
