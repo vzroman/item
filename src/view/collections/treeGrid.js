@@ -176,6 +176,7 @@ export class TreeGrid extends ItemView{
 
     search( value ) {
         const controller = this._options.search( value, this._options.contextPath );
+        if (!controller) return;
         this._grid?.destroy();
         const _options = deepCopy(this._gridOptions);
         _options.columns[0] = {
