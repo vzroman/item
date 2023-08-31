@@ -26,6 +26,7 @@
 import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
 import {Controller} from "../../controllers/collection.js";
+import styles from "./dropdown.css"
 //import $ from "jquery";
 
 export class Control extends Parent{
@@ -40,9 +41,9 @@ export class Control extends Parent{
         hideClear:{type: types.primitives.Bool, default: false}
     };
 
-    static markup = `<div style="position: relative;">
-        <select style="height:100%; width:100%;"></select>
-        <span style="position:absolute; top: 0; right: 20px; cursor: pointer;">x</span>
+    static markup = `<div class="${ styles.dropdown }">
+        <select></select>
+        <span class="${ styles.clear }">x</span>
     </div>`;
 
     constructor( options ){
