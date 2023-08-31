@@ -25,6 +25,7 @@
 
 import {Control as Parent} from "./textInput.js";
 import {types} from "../../types/index.js";
+import styles from "./numberInput.css";
 
 // The control is the point where external widgets to be attached
 export class Control extends Parent{
@@ -47,7 +48,7 @@ export class Control extends Parent{
             ? ` oninput="this.value=this.value.replace(/[^0-9]/g,'');"`
             : ``;
 
-        return `<input type="number" ${ isInteger } />`
+        return `<input type="number" class="${ styles.input }" ${ isInteger } />`
     }
 
     constructor( options ){
