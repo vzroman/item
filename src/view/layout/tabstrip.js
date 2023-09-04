@@ -13,11 +13,13 @@ export class TabStrip extends ItemView {
         tabs:{ type:types.complex.Collection, options:{schema:{
             text:{type: types.primitives.String },
             icon:{type: types.primitives.String },
+            disabled: {type: types.primitives.Bool, default: false},
             view:{type: types.primitives.Class, options:{ class: ItemView }, required:true },
             options:{type: types.primitives.Set }
         }}},
         active:{type:types.primitives.Integer, default: 0},
-        horizontal:{type: types.primitives.Bool, default:true }
+        horizontal:{type: types.primitives.Bool, default:true },
+        disabledTabs:{type: types.primitives.Array, default:[]}
     };
 
     markup() {
@@ -52,6 +54,7 @@ export class TabStrip extends ItemView {
             id:"id",
             schema:{
                 text:{type: types.primitives.String },
+                disabled: {type: types.primitives.Bool, default: false},
                 icon:{type: types.primitives.String },
                 id: {type: types.primitives.Integer },
                 isActive:{type: types.primitives.Bool }
@@ -60,7 +63,8 @@ export class TabStrip extends ItemView {
                 return {
                     id:i,
                     text:tab.text,
-                    icon:tab.icon
+                    icon:tab.icon,
+                    disabled: tab.disabled
                 }
              } )
         });
@@ -68,6 +72,12 @@ export class TabStrip extends ItemView {
         this.bind("active", active=>{
             for (const id of Object.keys(_menuController.get())) {
                 _menuController.set({[id]:{isActive: Number(id) ===active}})
+            }
+        });
+
+        this.bind("disabledTabs", tabs=>{
+            for (const id of Object.keys(_menuController.get())) {
+                _menuController.set({[id]:{ disabled:tabs.includes( Number(id) ) }});
             }
         });
 
@@ -80,14 +90,15 @@ export class TabStrip extends ItemView {
                     item:{
                         view: Control,
                         options:{
-                            links: {text: "data@text", icon: "data@icon", classes: {
-                                source:"data@isActive",
-                                handler:(isActive)=> { 
+                            links: {
+                                text: "data@text",  
+                                icon: "data@icon", 
+                                classes: { source:"data@isActive", handler:(isActive)=> { 
                                     if (isActive){
                                         return [style.active]
                                     }else{ return [] }
-                                }
-                            }},
+                                }}
+                            },
                             events:{ click:{ handler: (_, tab) => {
                                 const active = tab.get("data").get("id");
                                 this.set({active});
@@ -108,7 +119,8 @@ class Control extends Parent{
         text:{type:types.primitives.String},
         title:{type:types.primitives.String},
         icon:{type:types.primitives.String},
-        white_space:{type:types.primitives.String, default:"nowrap"}
+        white_space:{type:types.primitives.String, default:"nowrap"},
+        disabled: {type: types.primitives.Bool, default: false}
     };
 
     markup(){
@@ -143,6 +155,13 @@ class Control extends Parent{
 
         this.bind("title", value => this.$markup.attr("title", value));
         this.bind("white_space", value => this.$text.css("white-space",value))
+        this.bind("disabled", value => {
+            if (value) {
+                this.$markup.css({ "pointer-events": "none" });
+            } else {
+                this.$markup.css({ "pointer-events": "unset"});
+            }
+        });
     }
 
     enable( value ){
