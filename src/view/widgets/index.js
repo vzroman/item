@@ -23,8 +23,10 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Pager} from "./pager";
+import {ColorPicker} from "./colorPicker";
 
 
 export const widgets = {
-    Pager
+    Pager,
+    ColorPicker
 };

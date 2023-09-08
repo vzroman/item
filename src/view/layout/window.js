@@ -10,6 +10,7 @@ import restore from "../../img/restore.svg";
 
 
 export class Window extends ItemView {
+    static events = { onClose: true };
 
     static options = {
 
@@ -335,7 +336,10 @@ export class Window extends ItemView {
                 view: controls.Button,
                 options:{
                     events:{
-                        click:() => this.destroy()
+                        click:() => {
+                            this._trigger("onClose");
+                            this.destroy();
+                        }
                     },
                     icon: `url("${ close }")`
                 }

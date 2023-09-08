@@ -59,33 +59,36 @@ export function run( $container ){
             icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
             modal: false,
             view: {
-                view: MyWidget,
+                view: item.view.widgets.ColorPicker,
                 options: {
-                    color:"white"
+                    events: { onChange: (v) => {
+                        console.log(v)
+                    } },
+                    value: "#fff"
                 }
             }
         });
 
-        new item.view.layout.FormWindow({
-            actions: ["close",  "maximize"],
-            title:"My window2",
-            position:{
-                top:50,
-                left:50
-            },
-            // width: "500px",
-            // height: "300px",
-            resizable: true,
-            draggable: true,
-            icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
-            //modal: true,
-            view: {
-                view: MyWidget,
-                options: {
-                    color:"green"
-                }
-            }
-        });
+        // new item.view.layout.FormWindow({
+        //     actions: ["close",  "maximize"],
+        //     title:"My window2",
+        //     position:{
+        //         top:50,
+        //         left:50
+        //     },
+        //     // width: "500px",
+        //     // height: "300px",
+        //     resizable: true,
+        //     draggable: true,
+        //     icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
+        //     //modal: true,
+        //     view: {
+        //         view: MyWidget,
+        //         options: {
+        //             color:"green"
+        //         }
+        //     }
+        // });
 
 
         // data.set({prop1:"green"})

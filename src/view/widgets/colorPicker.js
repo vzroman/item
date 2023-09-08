@@ -5,6 +5,7 @@ import {layout} from "../layout";
 import style from "../widgets/colorPicker.css";
 
 export class ColorPicker extends ItemView {
+    static events = { onChange: true };
 
     static options = {
         value:{type:types.primitives.String, default: "#000"},
@@ -25,6 +26,7 @@ export class ColorPicker extends ItemView {
         this.bind("value", value => {
             $colorValue.text(value);
             $colorPreview.css({"background-color": value});
+            this._trigger("onChange", [value]);
         });
     }
 
@@ -33,6 +35,7 @@ export class ColorPicker extends ItemView {
         _this.$markup.attr("disabled", true);
         
         const dialog = new layout.Window({
+            events: {onClose: () => { _this.$markup.attr("disabled", false); }},
             view:{
                 view: ColorForm,
                 options: {
