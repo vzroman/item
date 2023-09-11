@@ -3,7 +3,7 @@ import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
 import { controls } from "./index.js";
 import {View as Flex} from "../collections/flex.js";
-import {View as Item, View as ItemView} from "../item.js";
+import {View as ItemView} from "../item.js";
 import { controllers } from "../../controllers";
 import UpIcon from "../../../src/img/arrow_up.png";
 import DownIcon from "../../../src/img/arrow_down.png";
@@ -40,7 +40,7 @@ export class ItemList extends Parent{
 
     widgets(){
         this.itemcontroller = new controllers.Collection({
-            index:"index",  // TODO ???
+            id:"index",
             schema:{
                 index:{ type: types.primitives.Integer },
                 value:{type: types.primitives.Any},
@@ -58,15 +58,13 @@ export class ItemList extends Parent{
             data:[]
         });
 
-        // TODO. css?
-        this.$markup.find(".flex-collection").css({"gap": "8px"});
-
         return {
             items: {
                 view: Flex,
                 options: {
                     data: this.itemcontroller,
                     direction:"vertical",
+                    css: { "gap": "8px" },
                     item: {
                         view: ListItem,
                         options: {
@@ -156,10 +154,7 @@ class ListItem extends ItemView{
                 view: controls.Button,
                 options: {
                     icon: `url("${UpIcon}")`,
-                    links:{
-                        enable: "data@isUp",
-                        css: { source: "data@isUp", handler: v => ({opacity: v ? 1 : 0.5})} //TODO. Better to do it in Button
-                    },
+                    links:{ enable: "data@isUp" },
                     events: {
                         click: { handler: () => this._trigger("onReorder", [this._options.index, this._options.index-1]) }
                     }
@@ -169,10 +164,7 @@ class ListItem extends ItemView{
                 view: controls.Button,
                 options: {
                     icon: `url("${DownIcon}")`,
-                    links:{
-                        enable: "data@isDown",
-                        css: {source: "data@isDown", handler: v => ({opacity: v ? 1 : 0.5})}
-                    },
+                    links:{ enable: "data@isDown" },
                     events: {
                         click: { handler: () => this._trigger("onReorder", [this._options.index, this._options.index+1]) }
                     }
@@ -182,10 +174,7 @@ class ListItem extends ItemView{
                 view: controls.Button,
                 options: {
                     icon: `url("${DeleteIcon}")`,
-                    links:{
-                        enable: "data@isDelete",
-                        css: { source: "data@isDelete", handler: v => ({opacity: v ? 1 : 0.5})} //TODO. Better to do it in Button
-                    },
+                    links:{ enable: "data@isDelete" },
                     events: {
                         click: { handler: () => this._trigger("onDelete", [this._options.index]) }
                     }
