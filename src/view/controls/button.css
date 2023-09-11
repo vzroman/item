@@ -20,6 +20,7 @@
 }
 .button[disabled]{
     color: #9b9b9b;
+    opacity: 0.5;
 }
 
 .button>.icon{
