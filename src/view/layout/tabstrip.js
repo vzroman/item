@@ -47,6 +47,11 @@ export class TabStrip extends ItemView {
         })
     }
 
+    linkWidgets( context ){
+        super.linkWidgets( context );
+        this._tab?.link( context );
+    }
+
     widgets() {
         const _menuController = new controllers.Collection({
             id:"id",
