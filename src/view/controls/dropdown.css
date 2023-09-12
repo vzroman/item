@@ -1,0 +1,30 @@
+.dropdown{
+    position: relative;
+
+    border-radius: 3px;
+    padding: 2px 2px 2px 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #CFD7DC;
+    outline: 0;
+    line-height: 1.42857;
+    vertical-align: middle;
+    -webkit-appearance: none;
+}
+
+.dropdown>select{
+    height:100%;
+    width:100%;
+    border: none;
+    background-color: transparent;
+    font-family: Arial,verdana,sans-serif;
+    color: rgb(81, 89, 103);
+    font-size: 14px;
+}
+
+.dropdown>.clear{
+    position:absolute;
+    top: 0;
+    right: 20px;
+    cursor: pointer;
+}

@@ -40,12 +40,12 @@ export class Window extends ItemView {
         }}, required:true},
 
         isFocused:{type: types.primitives.Bool, default:true},
-        z_index:{type: types.primitives.Integer, default:10002},
+        z_index:{type: types.primitives.Integer, default:11002},
         isMinimized:{type: types.primitives.Bool, default:false},
         isMaximized:{type: types.primitives.Bool, default:false}
     };
 
-    static markup = `<div class="${style.window}" style="z-index: 10002">
+    static markup = `<div class="${style.window}" style="z-index: 11002">
             <div class="${style.titlebar}">
                 <div class="${ style.title_icon }"></div>
                 <div class="${ style.title_text }"></div>
