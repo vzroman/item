@@ -97,7 +97,8 @@ export class TabStrip extends ItemView {
                                     if (isActive){
                                         return [style.active]
                                     }else{ return [] }
-                                }}
+                                }},
+                                disabled: "data@disabled"
                             },
                             events:{ click:{ handler: (_, tab) => {
                                 const active = tab.get("data").get("id");
