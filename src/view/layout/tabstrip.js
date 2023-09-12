@@ -129,6 +129,11 @@ class Control extends Parent{
         disabled: {type: types.primitives.Bool, default: false}
     };
 
+    static #disabledStyle = {
+        color: "#9b9b9b", 
+        opacity: "0.5"
+    };
+
     markup(){
         const $markup = $(`<div class="${ style.tab_nav }" style="align-items: center;cursor: pointer">
             <div name="icon" style="display: none; width: 20px; height: 20px; background-size: contain; background-repeat: no-repeat;"></div>
@@ -143,6 +148,7 @@ class Control extends Parent{
 
     constructor( options ){
         super( options );
+        const prevMarkupStyle = this.$markup.css(["color", "opacity"]);
 
         this.bind("text", value => this.$text.text( value ));
 
@@ -163,9 +169,9 @@ class Control extends Parent{
         this.bind("white_space", value => this.$text.css("white-space",value))
         this.bind("disabled", value => {
             if (value) {
-                this.$markup.css({ "pointer-events": "none" });
+                this.$markup.css({ "pointer-events": "none", ...this.constructor.#disabledStyle });
             } else {
-                this.$markup.css({ "pointer-events": "unset"});
+                this.$markup.css({ "pointer-events": "unset", ...prevMarkupStyle});
             }
         });
     }
