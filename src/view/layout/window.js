@@ -250,8 +250,10 @@ export class Window extends ItemView {
                     bottom:"unset",
                     right:"unset"
                 });
-                $view.width( this._options.width );
-                $view.height( this._options.height );
+                $view.css({
+                    width: this._options.width ? `${this._options.width}px`: "",
+                    height: this._options.height ? `${this._options.height}px`: "",
+                });
             }
         });
 
