@@ -15,6 +15,6 @@ $(function () {
 
 
 
-    item_list_test( $container );
+    demo_test( $container );
 
 });
