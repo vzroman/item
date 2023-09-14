@@ -54,7 +54,8 @@ export class ColorPicker extends Control {
             title: "Color select",
             events:{
                 destroy:()=> controller.destroy()
-            }
+            },
+            minWidth: 350
         });
     }
 
@@ -69,18 +70,16 @@ class ColorForm extends Control {
     };
 
     static markup = `<div style="display: flex; gap: 10px; padding: 10px">
-        <div>
-            <div name="transparent" style="margin-bottom: 10px; display: flex; align-items: center; gap: 5px">
-                <label>Transparent</label>
-            </div>
-            <div name="colorpalette">
-                <table name="color-table" class="${style.table}"><tbody name="color-tbody"></tbody></table>
-            </div>
+        <div name="colorpalette">
+            <table name="color-table" class="${style.table}"><tbody name="color-tbody"></tbody></table>
         </div>
         <div>
-            <div style="min-width: 130px;">
+            <div style="min-width: 130px; margin-bottom: 10px;">
                 <input type="color" value="#00000" id="selected-color" name="selected-color" />
                 <label for="selected-color" name="selected-color-label">#00000</label>
+            </div>
+            <div name="transparent" style="display: flex; align-items: center; gap: 5px">
+                <label>Transparent</label>
             </div>
         </div>
     </div>`;
