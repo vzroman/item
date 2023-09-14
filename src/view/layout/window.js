@@ -103,9 +103,9 @@ export class Window extends ItemView {
         this.bind("width", width =>{
             if (typeof width !== "number") return;
             if (typeof this._options.maxWidth === "number" && width > this._options.maxWidth){
-                width = this._options.maxWidth;
+                return this.set({width:this._options.maxWidth});
             }else if(typeof this._options.minWidth === "number" && width < this._options.minWidth){
-                width = this._options.minWidth;
+                return this.set({width:this._options.minWidth});
             }
             $view.width( width );
         });
@@ -113,11 +113,43 @@ export class Window extends ItemView {
         this.bind("height", height =>{
             if (typeof height !== "number") return;
             if (typeof this._options.maxHeight === "number" && height > this._options.maxHeight){
-                height = this._options.maxHeight;
+                return this.set({height:this._options.maxHeight});
             }else if(typeof this._options.minHeight === "number" && height < this._options.minHeight){
-                height = this._options.minHeight;
+                return this.set({height:this._options.minHeight});
             }
             $view.height( height );
+        });
+
+        this.bind("minWidth", minWidth => {
+            if (typeof minWidth !== "number") return;
+            this.$markup.css({"min-width": minWidth});
+            if (typeof this._options.width === "number" && this._options.width < minWidth){
+                this.set({width:minWidth});
+            }
+        });
+
+        this.bind("maxWidth", maxWidth => {
+            if (typeof maxWidth !== "number") return;
+            this.$markup.css({"max-width": maxWidth});
+            if (typeof this._options.width === "number" && this._options.width > maxWidth){
+                this.set({width:maxWidth});
+            }
+        });
+
+        this.bind("minHeight", minHeight => {
+            if (typeof minHeight !== "number") return;
+            this.$markup.css({"min-height": minHeight});
+            if (typeof this._options.height === "number" && this._options.height < minHeight){
+                this.set({height:minHeight});
+            }
+        });
+
+        this.bind("maxHeight", maxHeight => {
+            if (typeof maxHeight !== "number") return;
+            this.$markup.css({"max-height": maxHeight});
+            if (typeof this._options.height === "number" && this._options.height > maxHeight){
+                this.set({height:maxHeight});
+            }
         });
 
         //---------title------------------------------

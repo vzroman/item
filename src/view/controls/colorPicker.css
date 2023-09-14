@@ -1,0 +1,50 @@
+.colorBtn {
+    border-radius: 3px;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    border-width: 1px;
+    border-style: solid;
+    font-size: 14px;
+    line-height: 1.42857;
+    font-family: inherit;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    user-select: none;
+    cursor: pointer;
+    outline: none;
+    position: relative;
+    background: #fff;
+    border-color: #fff;
+    min-width: 120px;
+}
+
+.colorBtn:hover {
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #515967;
+    background-color: #f3f3f4;
+}
+
+.colorValue {
+    float: left;
+    padding-right: 4px;
+}
+
+.colorPreview {
+    border: 1px solid black;
+    float: right;
+    width: 20px;
+    height: 20px;
+}
+
+.table {
+    border-collapse: collapse;
+}
+
+.td:hover {
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.3), inset 0 0 0 1px white;
+}
