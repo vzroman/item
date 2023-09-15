@@ -9,6 +9,8 @@ import UpIcon from "../../../src/img/arrow_up.png";
 import DownIcon from "../../../src/img/arrow_down.png";
 import DeleteIcon from "../../img/delete.png";
 
+import styles from "./itemList.css";
+
 
 export class ItemList extends Control{
     static options = {
@@ -19,7 +21,7 @@ export class ItemList extends Control{
         value: {type: types.primitives.Array, default: []}
     }
 
-    static markup = `<div name="items"></div>`;
+    static markup = `<div name="items" class="${ styles.itemList } item_item_list"></div>`;
 
     updateValue( value ) {
         const set = Object.keys(this.itemcontroller.get()).reduce((acc,_,i) => {
@@ -124,9 +126,9 @@ class ListItem extends ItemView{
         onReorder: true
     }
 
-    static markup = `<div style="display: flex;">
-        <div name="content" style="flex-grow: 1"></div>
-        <div style="margin-left: 12px;display: flex;align-items: center; gap: 6px;">
+    static markup = `<div class="${styles.item} item">
+        <div name="content" class="${ styles.content } content"></div>
+        <div class="${ styles.buttons_block } buttons_block">
             <div name="up"></div>
             <div name="down"></div>
             <div name="delete"</div>
