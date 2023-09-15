@@ -2,6 +2,10 @@
 
 }
 
+.itemList .flex-collection{
+    gap: 8px;
+}
+
 .item{
     display: flex;
 }

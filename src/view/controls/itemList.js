@@ -66,7 +66,6 @@ export class ItemList extends Control{
                 options: {
                     data: this.itemcontroller,
                     direction:"vertical",
-                    css: { "gap": "8px" },
                     item: {
                         view: ListItem,
                         options: {
