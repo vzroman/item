@@ -66,7 +66,7 @@ export class ItemList extends Control{
                 options: {
                     data: this.itemcontroller,
                     direction:"vertical",
-                    classes:["flex_collection"],
+                    classes:[styles.flex_collection],
                     item: {
                         view: ListItem,
                         options: {
