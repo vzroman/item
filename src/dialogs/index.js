@@ -23,7 +23,9 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {error} from "./error.js";
+import {yes_no} from "./yes_no";
 
 export const dialogs = {
-    error
+    error,
+    yes_no
 };

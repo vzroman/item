@@ -371,6 +371,9 @@ export class Window extends ItemView {
                     events:{
                         click:() => this.destroy()
                     },
+                    links:{
+                        visible: { source: "parent", event:"actions", handler: actions => actions.includes("close") }
+                    },
                     icon: `url("${ close }")`
                 }
             },
