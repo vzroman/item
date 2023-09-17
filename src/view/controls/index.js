@@ -32,7 +32,7 @@ import {ItemList} from "./itemList.js";
 import {SelectList} from "./selectList.js";
 import { MultiSelect } from "./multiSelect.js";
 import {Toggle} from "./toggle.js";
-import {ColorPicker} from "./colorPicker";
+import {ColorPicker} from "./colorPicker.js";
 
 export const controls = {
     Control,

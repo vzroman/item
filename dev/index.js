@@ -5,6 +5,7 @@ import {run as demo_test} from "./demo_test.js"
 import {run as demo_collection} from "./demo_collection.js"
 import {run as multiselect_test} from "./multiselect_test.js"
 import {run as item_list_test} from "./item_list_test.js"
+import {run as popups_test} from "./popups_test.js"
 
 
 $(function () {
@@ -15,6 +16,6 @@ $(function () {
 
 
 
-    demo_test( $container );
+    popups_test( $container );
 
 });

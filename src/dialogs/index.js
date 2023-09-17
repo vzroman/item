@@ -22,20 +22,8 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {types} from "./types/index.js";
-import {view} from "./view/index.js";
-import {util} from "./utilities/index.js";
-import * as i18n from "./i18n/i18n.js";
-import {controllers} from "./controllers/index.js";
-import {dialogs} from "./dialogs/index.js";
-import {Item} from "./core/item.js";
+import {error} from "./error.js";
 
-export const item = {
-    types,
-    view,
-    util,
-    i18n,
-    controllers,
-    dialogs,
-    Item
+export const dialogs = {
+    error
 };
