@@ -24,8 +24,10 @@
 //------------------------------------------------------------------------------------
 import {error} from "./error.js";
 import {yes_no} from "./yes_no";
+import {notify} from "./notify";
 
 export const dialogs = {
     error,
-    yes_no
+    yes_no,
+    notify
 };
