@@ -37,6 +37,11 @@ export class TabStrip extends ItemView {
         this.bind("active", tab => this.changeView(tab));
     }
 
+    destroy() {
+        this._tab?.destroy();
+        super.destroy();
+    }
+
     changeView(id){
         this._tab?.destroy();
         this.$tabContainer.empty();
