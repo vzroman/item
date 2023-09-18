@@ -4,6 +4,7 @@
     flex-direction: row;
     height: 100%;
     width:100%;
+    flex-grow: 1;
     align-items: center;
     cursor: pointer;
 

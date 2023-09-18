@@ -1,0 +1,22 @@
+.itemList{
+
+}
+
+.itemList .flex_collection{
+    gap: 8px;
+}
+
+.item{
+    display: flex;
+}
+
+.content{
+    flex-grow: 1
+}
+
+.buttons_block{
+    margin-left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
