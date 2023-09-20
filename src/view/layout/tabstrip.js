@@ -54,9 +54,9 @@ export class TabStrip extends ItemView {
     }
 
     linkWidgets( context ){
-        this._linkContext = context;
-        super.linkWidgets( context );
-        this._tab?.link( context );
+        this._linkContext = {...this._linkContext,...context};
+        super.linkWidgets( this._linkContext );
+        this._tab?.link( this._linkContext );
     }
 
     widgets() {
