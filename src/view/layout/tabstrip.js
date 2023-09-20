@@ -44,12 +44,16 @@ export class TabStrip extends ItemView {
         const { view, options } = this._options.tabs[id] || this._options.tabs[0];
         this._tab = new view({
             $container: this.$tabContainer,
-            data:this._options.data,
             ...options
-        })
+        });
+
+        if (this._linkContext){
+           this._tab.link( this._linkContext );
+        }
     }
 
     linkWidgets( context ){
+        this._linkContext = context;
         super.linkWidgets( context );
         this._tab?.link( context );
     }
