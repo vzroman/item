@@ -64,6 +64,25 @@ export class MultiSelect extends Control{
         const _id = this._options.itemValue || "value";
         const _text = this._options.itemText || _id;
 
+        const selectedController = new controllers.Collection({
+            id:"id",
+            schema:{
+                id:{type: types.primitives.Any} ,
+                text:{type: types.primitives.String}
+            },
+            data: []
+        });
+
+        const updateSelectedController=()=>{
+            
+            selectedController.set( Object.fromEntries( [..._items.keys()].map(id => [id, null]) ) );
+            
+            const value = this.get("value") || [];
+            for (const v of value){
+                selectedController.set({[v]:{id:v, text:_items.get(v)}} );
+            }
+        }
+
         const updateItems = (items)=>{
             if (typeof items[0] !== "object"){
                 // The data is a simple list of values, transform it to the list of items
@@ -76,7 +95,10 @@ export class MultiSelect extends Control{
 
             const value = this.get("value").filter(v => _items.has(v));
             this.set({value});
+            updateSelectedController();
         }
+
+        this.bind("value", updateSelectedController);
 
         this.bind("items", items=>{
             if (items instanceof controllers.Collection){
@@ -85,25 +107,6 @@ export class MultiSelect extends Control{
                 updateItems( items )
             }
         });
-
-        const selectedController = new controllers.Collection({
-            id:"id",
-            schema:{
-                id:{type: types.primitives.Any} ,
-                text:{type: types.primitives.String}
-            },
-            data: []
-        });
-
-        this.bind("value",(value=[], prevValue=[])=>{
-            for (const id of prevValue){
-                if (!value.includes(id)) selectedController.set({[id]:null})
-            }
-            for (const id of value){
-                selectedController.set({[id]:{id,text: _items.get(id)}});
-            }
-        });
-
 
         this._widgets.selected.link({data:selectedController});
     }
