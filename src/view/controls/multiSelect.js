@@ -23,26 +23,27 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Control as Parent} from "./control.js";
+import {Control} from "./control.js";
 import {types} from "../../types/index.js";
 import { SelectList } from "./selectList.js";
 import {View as Flex} from "../collections/flex.js";
 import {View as ItemView} from "../item.js";
-import mainCss from "../../css/main.css";
 import { controllers } from "../../controllers";
 import { controls } from "./index.js";
 import { Label } from "../primitives/label.js";
 
-export class MultiSelect extends Parent{
-    static markup = `<div class="${ mainCss.multiselect }">
-        <div class="${mainCss.toggle_wrapper}" style="display: flex;flex-direction: row;align-items: stretch">
-            <div name="selected" style="flex-grow: 1; display:flex; flex-direction:row; overflow-x:scroll;"></div>
-            <div name="toggle" style="text-align:center;"></div>
-        </div>
-        <div style="position: absolute; top: 100%; width:100%;">
+import dropdown from "../../img/dropdown.svg"
+import close from "../../img/close.svg"
+
+import styles from "./multiSelect.css";
+
+export class MultiSelect extends Control{
+    static markup = `<div class="${ styles.multiselect }">
+        <div class="${styles.selected_items}">
+            <div name="selected"></div>
             <div name="items"></div>
         </div>
-        
+        <div name="toggle"></div>
     </div>`;
 
     static options = {
@@ -57,55 +58,63 @@ export class MultiSelect extends Parent{
 
     constructor( options ){
         super( options );
-        const map = new Map();
-        this._selectedController = new controllers.Collection({
+
+        const _items = new Map();
+
+        const _id = this._options.itemValue || "value";
+        const _text = this._options.itemText || _id;
+
+        const updateItems = (items)=>{
+            if (typeof items[0] !== "object"){
+                // The data is a simple list of values, transform it to the list of items
+                items = items.map( value => { return {value} });
+            }
+            _items.clear();
+            for (const item of items){
+                _items.set( item[_id], item[_text] )
+            }
+
+            const value = this.get("value").filter(v => _items.has(v));
+            this.set({value});
+        }
+
+        this.bind("items", items=>{
+            if (items instanceof controllers.Collection){
+                items.onReady().then(()=> updateItems( Object.values( items.get() ) ) )
+            }else{
+                updateItems( items )
+            }
+        });
+
+        const selectedController = new controllers.Collection({
             id:"id",
-            schema:{ 
+            schema:{
                 id:{type: types.primitives.Any} ,
                 text:{type: types.primitives.String}
             },
             data: []
         });
 
-        this.bind("items", items => {
-            map.clear();
-            items.forEach(item => {
-                item = typeof item === "object" 
-                    ? {...item}
-                    : {id: item};
-    
-                const id = this._options.itemValue 
-                    ? item[this._options.itemValue]
-                    : item.id;
-                
-                const text = this._options.itemText 
-                    ? item[this._options.itemText]
-                    : item.id;
-                    
-                map.set( id, {id, text} );
-            });
-            const value = this.get("value").filter(v => map.has(v));
-            this.set({value});
-        })
-
         this.bind("value",(value=[], prevValue=[])=>{
             for (const id of prevValue){
-                if (!value.includes(id)) this._selectedController.set({[id]:null})
+                if (!value.includes(id)) selectedController.set({[id]:null})
             }
             for (const id of value){
-                this._selectedController.set({[id]:map.get(id)});
+                selectedController.set({[id]:{id,text: _items.get(id)}});
             }
         });
 
-        this._widgets.selected.link({"data":this._selectedController});
+
+        this._widgets.selected.link({data:selectedController});
     }
 
     widgets() {
+
         return {
             selected:{
                 view:Flex,
                 options:{
-                    data: this._selectedController,
+                    data: undefined,
                     direction:"horizontal",
                     item:{
                         view:SelectButton,
@@ -126,7 +135,7 @@ export class MultiSelect extends Parent{
             toggle:{
                 view: controls.Button,
                 options:{
-                    text: "V",
+                    icon:`url("${ dropdown }")`,
                     events:{
                         click:{handler:() => this._widgets.items.set({visible: !this._widgets.items.get("visible")})}
                     }
@@ -167,7 +176,7 @@ class SelectButton extends ItemView{
         text:{type: types.primitives.String}
     }
 
-    static markup = `<div class="${mainCss.selectButton}">
+    static markup = `<div class="${styles.selectButton}">
         <div name="text"></div>
         <div name="close"></div>
     </div>`;
@@ -183,6 +192,7 @@ class SelectButton extends ItemView{
             close:{
                 view: controls.Button,
                 options:{
+                    icon:`url("${ close }")`,
                     events:{ click:{ handler:()=>{
                         this._trigger("onDelete", [this._options.data.get("id")]);
                     }}}

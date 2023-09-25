@@ -16,6 +16,6 @@ $(function () {
 
 
 
-    popups_test( $container );
+    multiselect_test( $container );
 
 });
