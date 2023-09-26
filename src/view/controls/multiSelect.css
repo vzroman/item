@@ -1,0 +1,77 @@
+.multiselect {
+    width: calc(100% - 4px);   /* padding + border */
+    height: calc(100% - 4px);   /* padding + border */
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    border-radius: 3px;
+    padding: 1px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #CFD7DC;
+}
+
+.selected_items{
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    position: relative;
+    flex-grow: 1;
+}
+
+.selected_items>[name="selected"]{
+    overflow-x:scroll;
+    gap: 2px;
+}
+.selected_items>[name="selected"]>div{
+    gap: 2px;
+}
+.selected_items>[name="items"]{
+    position: absolute;
+    top: 100%;
+    width:100%;
+    overflow: scroll;
+    max-height: 15vh;
+}
+
+.multiselect>div[name="toggle"]>button{
+    border: none;
+    background: transparent;
+}
+
+.selectButton{
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: #f3f3f4;
+    padding-left: 5px;
+    padding-right: 5px;
+    gap: 3px;
+}
+
+.selectButton>div[name="text"]{
+    display:flex;
+    align-items: center;
+}
+
+.selectButton div[name="close"] button{
+    padding-block: 0;
+    padding-inline: 0;
+    border: none;
+    background: transparent;
+}
+
+.selectButton div[name="close"] button>div[name="icon"]{
+    width: 15px;
+    height: 15px;
+}
+
+.selectButton div[name="close"] button:hover{
+    background-color: #b6bdca;
+}
+
+.selectButton:hover{
+    background-color: #b6bdca;
+    color: #263248;
+}
