@@ -21,7 +21,8 @@
 }
 
 .selected_items>[name="selected"]{
-    overflow-x:scroll;
+    flex-grow: 1;
+    overflow-x:auto;
     gap: 2px;
 }
 .selected_items>[name="selected"]>div{
@@ -31,7 +32,7 @@
     position: absolute;
     top: 100%;
     width:100%;
-    overflow: scroll;
+    overflow: auto;
     max-height: 15vh;
 }
 
