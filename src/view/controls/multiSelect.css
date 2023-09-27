@@ -34,6 +34,7 @@
     width:100%;
     overflow: auto;
     max-height: 15vh;
+    z-index: 9999;
 }
 
 .multiselect>div[name="toggle"]>button{
