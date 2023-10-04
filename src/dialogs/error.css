@@ -1,3 +1,7 @@
+.error_window{
+    max-height: 100vh;
+}
+
 .error{
     padding: 10px;
     min-width: 300px;

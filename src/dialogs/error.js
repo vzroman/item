@@ -8,9 +8,10 @@ export function error( error ){
             title:item.i18n.text("ERROR")+"!",
             icon:`url("${ icon }")`,
             actions:["close"],
+            classes:[styles.error_window],
             view:{
-                view:item.view.primitives.Label,
-                options:{ text:error, classes:[styles.error]}
+                view:item.view.primitives.Html,
+                options:{ html:error, classes:[styles.error]}
             },
             events:{ destroy:resolve }
         });
