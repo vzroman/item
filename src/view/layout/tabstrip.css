@@ -17,11 +17,13 @@
 }
 
 .tab_container.vertical>[name="menu"] .tab_nav{
+    flex-direction: column;
     writing-mode: vertical-lr;
     width:1.2em;
 }
 
 .tab_container.horizontal>[name="menu"] .tab_nav{
+    flex-direction: row;
     height:1.2em;
 }
 
@@ -32,6 +34,9 @@
 }
 
 .tab_nav {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
     float: left;
     padding: 6px 12px;
     background: #eeeeee;
@@ -43,6 +48,14 @@
 
 .tab_nav:hover{
     color: #1274AC;
+}
+
+.tab_nav>[name="icon"]{
+    display: none;
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 .active {

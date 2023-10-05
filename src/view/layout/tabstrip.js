@@ -98,7 +98,7 @@ export class TabStrip extends ItemView {
                     data: _menuController,
                     direction: this._options.horizontal ? "horizontal" : "vertical",
                     item:{
-                        view: Control,
+                        view: Tab,
                         options:{
                             links: {
                                 text: "data@text",  
@@ -124,7 +124,7 @@ export class TabStrip extends ItemView {
 }
 TabStrip.extend();
 
-class Control extends Parent{
+class Tab extends Parent{
 
     static options = {
         text:{type:types.primitives.String},
@@ -140,8 +140,8 @@ class Control extends Parent{
     };
 
     markup(){
-        const $markup = $(`<div class="${ style.tab_nav }" style="align-items: center;cursor: pointer">
-            <div name="icon" style="display: none; width: 20px; height: 20px; background-size: contain; background-repeat: no-repeat;"></div>
+        const $markup = $(`<div class="${ style.tab_nav }">
+            <div name="icon"></div>
             <div name="text"></div>
         </div>`);
 
@@ -190,5 +190,5 @@ class Control extends Parent{
     }
 }
 
-Control.extend();
+Tab.extend();
 
