@@ -18,8 +18,11 @@
 
 .tab_container.vertical>[name="menu"] .tab_nav{
     flex-direction: column;
-    writing-mode: vertical-lr;
     width:1.2em;
+}
+
+.tab_container.vertical>[name="menu"] .tab_nav>[name="text"]{
+    writing-mode: vertical-lr;
 }
 
 .tab_container.horizontal>[name="menu"] .tab_nav{
