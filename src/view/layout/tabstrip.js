@@ -141,7 +141,7 @@ class Tab extends Parent{
 
     markup(){
         const $markup = $(`<div class="${ style.tab_nav }">
-            <div name="icon"></div>
+            <div name="icon" style="display: none"></div>
             <div name="text"></div>
         </div>`);
 
