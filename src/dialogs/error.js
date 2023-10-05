@@ -3,7 +3,8 @@ import icon from "./error.svg"
 import styles from "./error.css"
 
 export function error( error ){
-    const $error = $(error).appendTo($(`<div class="${ styles.error }"></div>`));
+    const $error = $(`<div class="${ styles.error }"></div>`);
+    $error.html(error);
     return new Promise(resolve =>{
         new item.view.layout.Window({
             title:item.i18n.text("ERROR")+"!",
