@@ -1,15 +1,12 @@
 .dropdown{
     position: relative;
-    width: calc(100% - 14px);   /* padding + border */
-    height: calc(100% - 6px);   /* padding + border */
-    flex-grow: 1;
+    width: calc(100% - 2px);   /*border */
+    height: calc(100% - 2px);   /*border */
     border-radius: 3px;
-    padding: 2px 2px 2px 10px;
     border-width: 1px;
     border-style: solid;
     border-color: #CFD7DC;
     outline: 0;
-    vertical-align: middle;
     -webkit-appearance: none;
 }
 
@@ -21,6 +18,7 @@
     font-family: Arial,verdana,sans-serif;
     color: rgb(81, 89, 103);
     font-size: 14px;
+    padding: 2px 2px 2px 10px;
 }
 
 .dropdown>.clear{
