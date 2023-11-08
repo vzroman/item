@@ -6,6 +6,7 @@ import {run as demo_collection} from "./demo_collection.js"
 import {run as multiselect_test} from "./multiselect_test.js"
 import {run as item_list_test} from "./item_list_test.js"
 import {run as popups_test} from "./popups_test.js"
+import {run as splitter_test} from "./splitter_test.js"
 
 
 $(function () {
@@ -16,6 +17,6 @@ $(function () {
 
 
 
-    multiselect_test( $container );
+        splitter_test( $container );
 
 });
