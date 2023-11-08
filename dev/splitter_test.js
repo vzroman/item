@@ -41,10 +41,12 @@ export function run( $container ){
                 <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p>
                 <div name="dynamic" style="background-color:red; height:100px; width:100px;"></div>
             </div>
-            <div style="width: 100%; height: 100%"><div name="s2" style="width:inherit; height: inherit">
-                <div> <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p></div>
-                <div> <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p></div>
-            </div></div>
+            <div style="width: 100%; height: 100%">
+                <div name="s2" style="width:inherit; height: inherit">
+                    <div> <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p></div>
+                    <div> <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p></div>
+                </div>
+            </div>
         </div>`).appendTo($container);
 
         const s = new item.view.layout.Splitter({
