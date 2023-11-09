@@ -32,7 +32,7 @@ export function run( $container ){
 
 
         const $markup = $(`<div style="height: 500px; width: 1300px; border: 1px solid black">
-            <div>
+            <div style="max-width: 500px">
                 <img src="https://th.bing.com/th/id/R.77c9cea07f42aab16acd14b29439db4f?rik=E%2bbDbAVv7Bxk%2fg&pid=ImgRaw&r=0" />
             </div>
             <div style="height:120px">
@@ -43,7 +43,7 @@ export function run( $container ){
                 <div name="s2" style="width:inherit; height: inherit">
                     <div> <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p></div>
                     <div name="s2-1" style="width: 100%; height: 100%"> 
-                        <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p>
+                        <div style="max-width: 300px"><img src="https://w0.peakpx.com/wallpaper/639/317/HD-wallpaper-anime-anime-girls-digital-art-artwork-portrait-display-vertical-2d-morikura-en-brunette-brown-eyes-school-uniform.jpg" /></div>
                         <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p>
                     </div>
                 </div>

@@ -60,7 +60,7 @@
 .e-splitter-horizontal, .e-splitter-vertical {
     border-width: 1px;
     display: flex;
-    overflow: hidden;
+    overflow: auto;
     position: relative;
     touch-action: none;
     width: 100%;
