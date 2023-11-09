@@ -10,6 +10,8 @@ export class Splitter extends ItemView {
         width: {type: types.primitives.String, default: "100%"},
     };
 
+    static events = {onResize: true};
+
     constructor(options) {
         const $container = options.$container;
 
@@ -94,6 +96,8 @@ export class Splitter extends ItemView {
 
         $items.forEach(i => $(i).appendTo(innerContainer));
 
+        const _this = this;
+
         $handles.forEach(function(item, idx) {
             const leftSide = item.prev();
             const rightSide = item.next();
@@ -121,9 +125,14 @@ export class Splitter extends ItemView {
                 if (isVertical) {
                     containerValue = innerContainer.height();
                 }
+
+                item.addClass(style.resizing);
               
                 document.addEventListener("mousemove", mouseMoveHandler);
-                document.addEventListener("mouseup", mouseUpHandler);
+                document.addEventListener("mouseup", () => {
+                    mouseUpHandler();
+                    _this._trigger("onResize", [true]);
+                });
             }
 
             function mouseMoveHandler(e) {
@@ -163,6 +172,7 @@ export class Splitter extends ItemView {
             }
 
             function mouseUpHandler() {
+                item.removeClass(style.resizing);
                 document.removeEventListener("mousemove", mouseMoveHandler);
                 document.removeEventListener("mouseup", mouseUpHandler);
             }
@@ -170,3 +180,5 @@ export class Splitter extends ItemView {
 
     }
 }
+
+Splitter.extend();

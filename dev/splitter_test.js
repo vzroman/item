@@ -31,12 +31,10 @@ export function run( $container ){
     function doTest(){
 
 
-        const $markup = $(`<div style="height: 500px; width: 1000px; border: 1px solid black">
-            <div><ul>
-            <li>a</li>
-            <li>b</li>
-            <li>c</li>
-            </ul></div>
+        const $markup = $(`<div style="height: 500px; width: 1300px; border: 1px solid black">
+            <div>
+                <img src="https://th.bing.com/th/id/R.77c9cea07f42aab16acd14b29439db4f?rik=E%2bbDbAVv7Bxk%2fg&pid=ImgRaw&r=0" />
+            </div>
             <div style="height:120px">
                 <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p>
                 <div name="dynamic" style="background-color:red; height:100px; width:100px;"></div>
@@ -44,19 +42,27 @@ export function run( $container ){
             <div style="width: 100%; height: 100%">
                 <div name="s2" style="width:inherit; height: inherit">
                     <div> <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p></div>
-                    <div> <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p></div>
+                    <div name="s2-1" style="width: 100%; height: 100%"> 
+                        <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p>
+                        <p>Lorem isadasdadasdasda asdasd  adasda a dssd ssd ada</p>
+                    </div>
                 </div>
             </div>
         </div>`).appendTo($container);
 
         const s = new item.view.layout.Splitter({
             $container: $markup,
-            orientation: "horizontal"
+            orientation: "horizontal",
         });
 
         const s2 = new item.view.layout.Splitter({
             $container: $markup.find('[name="s2"]'),
             orientation: "vertical"
+        });
+
+        const s21 = new item.view.layout.Splitter({
+            $container: $markup.find('[name="s2-1"]'),
+            orientation: "horizontal"
         });
 
         
