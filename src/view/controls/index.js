@@ -33,6 +33,7 @@ import {SelectList} from "./selectList.js";
 import { MultiSelect } from "./multiSelect.js";
 import {Toggle} from "./toggle.js";
 import {ColorPicker} from "./colorPicker.js";
+import {Control as Panel} from './panel/panel.js'
 
 export const controls = {
     Control,
@@ -45,5 +46,6 @@ export const controls = {
     MultiSelect,
     ItemList,
     Toggle,
-    ColorPicker
+    ColorPicker,
+    Panel
 };

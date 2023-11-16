@@ -23,52 +23,68 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-import {Control as Parent} from "./control.js";
-import {types} from "../../types/index.js";
-import styles from "./button.css";
+import {Control as Parent} from "../control.js";
+import {types} from "../../../types/index.js"
+import styles from "./panel.css";
+import { primitives } from "../../primitives/index.js";
 
 // The control is the point where external widgets to be attached
 export class Control extends Parent{
 
     static options = {
-        text:{type:types.primitives.String},
-        title:{type:types.primitives.String},
-        icon:{type:types.primitives.String},
-        white_space:{type:types.primitives.String, default:"nowrap"}
+        title: {type: types.primitives.String, default: ""}
     };
-    static markup = `<button class="${ styles.button } item_button">
-        <div name="icon" class="${ styles.icon }"></div>
-        <div name="text"></div>
-    </button>`;
 
-    constructor( options ){
-        super( options );
+    #isOpen = false;
+    
+    markup(){
+        const $markup = $(`<div>
+        <div class="${styles.panel_wrapper}" style="position:relative">
+            <div name="panel_title"></div>
+            <div name="panel_button"></div>
+        </div>
+        <div name="panel_content" style="display:none"></div>
+    </div>`);
 
-        this.bind("text", value => this.$markup.find('[name="text"]').text( value ));
+    const $content = $markup.find('[name="panel_content"]');
+    this._options.$container.children().each(function() {
+        $(this).appendTo($content);
+    });
 
-        this.bind("icon", value => {
-            let css = value
-                ?{
-                    "background-image":value,
-                    "display":"block"
+    return $markup;
+    }
+
+    
+    widgets(){
+        const content = this.$markup.find('[name="panel_content"]')
+        const button = this.$markup.find('[name="panel_button"]')
+        const wrapper = this.$markup.find(`[class="${styles.panel_wrapper}"]`)
+
+        return {
+            panel_title: {
+                view: primitives.Label,
+                options: {
+                    links: { text: "parent@title" },
+                    events: { click: () => {
+                        const isOpen = !this.#isOpen;
+                        this.expandPanel(isOpen,content, button, wrapper)
+                        this.#isOpen = isOpen
+                    } }
                 }
-                :{
-                    "background-image":"",
-                    "display":"none"
-                };
-            this.$markup.find('[name="icon"]').css( css );
-        });
-
-        this.bind("title", value => this.$markup.attr("title", value));
-        this.bind("white_space", value => this.$markup.find('[name="text"]').css("white-space",value))
+            }
+        }
     }
 
-    enable( value ){
-        this.$markup.prop('disabled', !value);
-    }
-
-    focus(){
-        this.$markup.focus();
+    expandPanel(isOpen, content, button, wrapper){
+        if(isOpen){
+            content.slideDown().css({padding:"0.5em"});
+            button.addClass(`${styles.rotated}`)
+            wrapper.css({color:"#0c63e4", background:"#e7f1ff"})
+        }else{
+            content.slideUp().css({padding: "0"})
+            button.removeClass(`${styles.rotated}`)
+            wrapper.css({color:"#696969", background:"#f5f6f7", border:""})
+        }
     }
 }
 Control.extend();
