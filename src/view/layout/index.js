@@ -27,11 +27,13 @@ import {FormField} from "./formField.js";
 import {TabStrip} from "./tabstrip.js";
 import {Window} from "./window.js";
 import {FormWindow} from "./formWindow.js";
+import {Panel} from './panel/panel.js';
 
 export const layout = {
     Form,
     FormField,
     TabStrip,
     Window,
-    FormWindow
+    FormWindow,
+    Panel
 };
