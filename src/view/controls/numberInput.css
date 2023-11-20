@@ -9,5 +9,6 @@
     border-color: #CFD7DC;
     outline: 0;
     vertical-align: middle;
+    color: inherit;
     -webkit-appearance: none;
 }
