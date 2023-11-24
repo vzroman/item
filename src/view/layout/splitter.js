@@ -15,10 +15,10 @@ export class Splitter extends ItemView {
         super(options);
 
         // TODO. This should be done in markup method
-
+        // TODO. It's better to call them $panes
         const $elements = $container.children();
 
-        //TODO. The option can be dynamic
+        //TODO. It's better to make boolean 'is_vertical' default=false
         const isVertical = this._options.orientation === "vertical";
 
         //TODO. Do we really need this check?
@@ -30,7 +30,6 @@ export class Splitter extends ItemView {
         //TODO. It's better not to use - in class name to be able to work with standard js keys style.e_splitter
         const innerContainer = $(`<div class="${style["e-splitter"]}" style="height: ${this._options.height}; width: ${this._options.width};"></div>`);
 
-        //TODO. This is a d
         if (isVertical) {
             innerContainer.addClass(style["e-splitter-vertical"]);
         } else {
@@ -43,12 +42,12 @@ export class Splitter extends ItemView {
 
         const $items = [];
 
+        // TODO. What for?
         let orderN = 0;
 
-
-        // TODO. We already have orientation property. It's better to make boolean 'is_vertical' default=false
         const orientation = this._options.orientation;
 
+        // TODO. Do we really need this function? What does it do?
         function getInitialFlexBasis(value, paneLength) {
             let initialFlexBasis = (value - (8 * paneLength - 1)) / paneLength;
             initialFlexBasis = ((initialFlexBasis / value) + ((8 / paneLength) / value)) * 100;
@@ -82,18 +81,23 @@ export class Splitter extends ItemView {
             orderN += 1;
 
             $items.push(paneShell);
-            
+
+            // TODO. Next should be done with in if (index + 1 !== $elements.length)
+            // TODO. What for do we need attributes
+            //                 tabindex="0"
+            //                 role="separator"
+            //                 aria-orientation="${orientation}"
             const $handle = $(`<div 
                 class="${style.splitbar} ${isVertical ? style.vertical : style.horizontal}" 
                 style="order: ${orderN}" 
                 tabindex="0" 
-                role="separator" 
+                role="separator"    
                 aria-orientation="${orientation}">
                 <div class="${isVertical ? style.handle_v : style.handle_h}"></div>
             </div>`);
 
             if (index + 1 !== $elements.length) { 
-                $handle.insertAfter($element); 
+                $handle.insertAfter($element);  // TODO. No sense in it
                 $handles.push($handle);
                 $items.push($handle);
             } 
@@ -119,12 +123,15 @@ export class Splitter extends ItemView {
 
                 coords = {
                     e,
+                    prev:{ width, height },
+                    next:{width, height}
                     firstWidth,
                     secondWidth,
                     firstHeight,
                     secondHeight
                 };
 
+                // TODO. May be better to use ? operator here?
                 containerValue = innerContainer.width();
 
                 if (isVertical) {
@@ -142,16 +149,20 @@ export class Splitter extends ItemView {
 
             function mouseMoveHandler(e) {
                 const delta = {
-                    x: e.clientX - coords.e.clientX,
-                    y: e.clientY - coords.e.clientY
+                    width: e.clientX - coords.e.clientX,
+                    height: e.clientY - coords.e.clientY
                 };
 
                 const styles = {};
 
-                if (isVertical) {
-                    delta.x = Math.min(Math.max(delta.y, -coords.firstHeight), coords.secondHeight);
+                const dimension = isVertical ? 'height' : 'width';
 
-                    styles.left = {"flex-basis": ((coords.firstHeight + delta.x )* 100) / containerValue + "%"};
+                if (isVertical) {
+
+
+                    delta.x = Math.min(Math.max(delta[dimension], -coords.prev[dimension]), coords.next[dimension]);
+
+                    styles.left = {"flex-basis": ((coords.next[dimension] + delta.x )* 100) / containerValue + "%"};
 
                     if (idx !== $handles.length - 1) {
                         styles.right = {
