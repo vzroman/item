@@ -1,31 +1,8 @@
-import {Ecomet} from "./ecomet.js";
 import {item} from "../dist/item.js";
 
 export function run( $container ){
 
-    const connection = new Ecomet();
-
-    function connect(){
-        console.debug("connecting...");
-        connection.connect("127.0.0.1", 8000, "http:", ()=>{
-            console.debug("connected, logging in...");
-            connection.login("system", "111111", ()=>{
-
-                console.debug("logged as system");
-
-                doTest();
-
-            },console.error);
-        }, err=>{
-            console.error( "connect error", err );
-            setTimeout(connect, 1000);
-        }, ()=>{
-            console.error( "connection closes" );
-            setTimeout(connect, 1000);
-        });
-    }
-
-    connect();
+    
 
 
     function doTest(){
@@ -52,17 +29,15 @@ export function run( $container ){
 
         const s = new item.view.layout.Splitter({
             $container: $markup,
-            orientation: "horizontal",
         });
 
         const s2 = new item.view.layout.Splitter({
             $container: $markup.find('[name="s2"]'),
-            orientation: "vertical"
+            isVertical: true
         });
 
         const s21 = new item.view.layout.Splitter({
             $container: $markup.find('[name="s2-1"]'),
-            orientation: "horizontal"
         });
 
         
@@ -73,4 +48,6 @@ export function run( $container ){
 
 
     }
+
+    doTest();
 }

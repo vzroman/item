@@ -4,7 +4,7 @@ import style from "./splitter.css";
 
 export class Splitter extends ItemView {
     static options = {
-        orientation: {type: types.primitives.String, default: "horizontal"}
+        isVertical: {type: types.primitives.Bool, default: false}
     };
 
     static events = {onResize: true};
@@ -15,25 +15,24 @@ export class Splitter extends ItemView {
         super(options);
 
         // TODO. This should be done in markup method
-        // TODO. It's better to call them $panes
-        const $elements = $container.children();
 
-        //TODO. It's better to make boolean 'is_vertical' default=false
-        const isVertical = this._options.orientation === "vertical";
+        const $panes = $container.children();
+
+        const isVertical = this._options.isVertical;
 
         //TODO. Do we really need this check?
-        if ($elements.length < 2) {
-            throw new Error("Container must contain at least two elements.");
-        }
+        // if ($panes.length < 2) {
+        //     throw new Error("Container must contain at least two elements.");
+        // }
 
         $container.empty();
-        //TODO. It's better not to use - in class name to be able to work with standard js keys style.e_splitter
-        const innerContainer = $(`<div class="${style["e-splitter"]}" style="height: ${this._options.height}; width: ${this._options.width};"></div>`);
+
+        const innerContainer = $(`<div class="${style.splitter}" style="height: 100%; width: 100%;"></div>`);
 
         if (isVertical) {
-            innerContainer.addClass(style["e-splitter-vertical"]);
+            innerContainer.addClass(style.splitter_vertical);
         } else {
-            innerContainer.addClass(style["e-splitter-horizontal"]);
+            innerContainer.addClass(style.splitter_horizontal);
         }
 
         innerContainer.appendTo($container);
@@ -47,57 +46,41 @@ export class Splitter extends ItemView {
 
         const orientation = this._options.orientation;
 
-        // TODO. Do we really need this function? What does it do?
-        function getInitialFlexBasis(value, paneLength) {
-            let initialFlexBasis = (value - (8 * paneLength - 1)) / paneLength;
-            initialFlexBasis = ((initialFlexBasis / value) + ((8 / paneLength) / value)) * 100;
-            return {initialFlexBasis, value};
-        }
-        
-        const paneLength = $elements.length;
+        let containerValue;
 
-        let {initialFlexBasis, value: containerValue} = getInitialFlexBasis(isVertical ? innerContainer.height() : innerContainer.width(), paneLength);
-
-        $elements.each(function(index, $element) {
+        $panes.each(function(index, $pane) {
            
-            $element = $($element);
+            $pane = $($pane);
 
             if (orderN > 0) { orderN += 1; }
             
-            const paneShell = $(`<div class="${style["e-pane"]} ${style["e-pane-horizontal"]}"></div>`);
+            const paneShell = $(`<div class="${style.pane} ${style.pane_horizontal}"></div>`);
 
-            // TODO. Why do we need order?
+            // TODO. Why do we need order? 
+            // It does not work properly if order is not specified
             const paneStyle = {"order": orderN + ""};
 
-            if (index + 1 !== $elements.length) {
-                // paneStyle['flex-basis'] = `${initialFlexBasis}%`;
-                paneShell.addClass(style["e-static-pane"]);
+            if (index + 1 !== $panes.length) {
+                paneShell.addClass(style.static_pane);
             }
 
             paneShell.css(paneStyle);
 
-            $element.appendTo(paneShell);
+            $pane.appendTo(paneShell);
 
             orderN += 1;
 
             $items.push(paneShell);
 
-            // TODO. Next should be done with in if (index + 1 !== $elements.length)
-            // TODO. What for do we need attributes
-            //                 tabindex="0"
-            //                 role="separator"
-            //                 aria-orientation="${orientation}"
             const $handle = $(`<div 
                 class="${style.splitbar} ${isVertical ? style.vertical : style.horizontal}" 
                 style="order: ${orderN}" 
-                tabindex="0" 
                 role="separator"    
                 aria-orientation="${orientation}">
                 <div class="${isVertical ? style.handle_v : style.handle_h}"></div>
             </div>`);
 
-            if (index + 1 !== $elements.length) { 
-                $handle.insertAfter($element);  // TODO. No sense in it
+            if (index + 1 !== $panes.length) { 
                 $handles.push($handle);
                 $items.push($handle);
             } 
@@ -123,19 +106,14 @@ export class Splitter extends ItemView {
 
                 coords = {
                     e,
-                    prev:{ width, height },
-                    next:{width, height}
-                    firstWidth,
-                    secondWidth,
-                    firstHeight,
-                    secondHeight
+                    prev:{width: firstWidth, height: firstHeight},
+                    next:{width: secondWidth, height: secondHeight}
                 };
 
-                // TODO. May be better to use ? operator here?
-                containerValue = innerContainer.width();
+                containerValue = innerContainer?.width();
 
                 if (isVertical) {
-                    containerValue = innerContainer.height();
+                    containerValue = innerContainer?.height();
                 }
 
                 item.addClass(style.resizing);
@@ -143,7 +121,7 @@ export class Splitter extends ItemView {
                 document.addEventListener("mousemove", mouseMoveHandler);
                 document.addEventListener("mouseup", () => {
                     mouseUpHandler();
-                    _this._trigger("onResize", [true]);
+                    _this._trigger("onResize");
                 });
             }
 
@@ -157,34 +135,18 @@ export class Splitter extends ItemView {
 
                 const dimension = isVertical ? 'height' : 'width';
 
-                if (isVertical) {
+                const paneDimensionDelta = Math.min(Math.max(delta[dimension], -coords.prev[dimension]), coords.next[dimension]);
 
+                styles.prev = {"flex-basis": ((coords.prev[dimension] + paneDimensionDelta) * 100) / containerValue + "%"};
 
-                    delta.x = Math.min(Math.max(delta[dimension], -coords.prev[dimension]), coords.next[dimension]);
-
-                    styles.left = {"flex-basis": ((coords.next[dimension] + delta.x )* 100) / containerValue + "%"};
-
-                    if (idx !== $handles.length - 1) {
-                        styles.right = {
-                            "flex-basis": ((coords.secondHeight - delta.x) * 100) / containerValue + "%"
-                        };
-                    }
-
-                } else {
-                    delta.x = Math.min(Math.max(delta.x, -coords.firstWidth), coords.secondWidth);
-
-                    styles.left = {"flex-basis": ((coords.firstWidth + delta.x )* 100) / containerValue + "%"};
-
-                    if (idx !== $handles.length - 1) {
-                        styles.right = {
-                            "flex-basis": ((coords.secondWidth - delta.x) * 100) / containerValue + "%"
-                        };
-                    }
+                if (idx !== $handles.length - 1) {
+                    styles.next = {
+                        "flex-basis": ((coords.next[dimension] - paneDimensionDelta) * 100) / containerValue + "%"
+                    };
                 }
 
-                leftSide.css(styles.left);
-                rightSide.css(styles?.right || {});
-                              
+                leftSide.css(styles.prev);
+                styles.next && rightSide.css(styles.next);            
             }
 
             function mouseUpHandler() {
