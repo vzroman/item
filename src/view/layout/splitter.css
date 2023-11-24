@@ -1,0 +1,113 @@
+.splitbar {
+    color: #324552;
+    background-color: #ebebeb;
+    min-height: 100%;
+    border-style: solid;
+    outline: 0;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.horizontal {
+    width: 8px;
+    min-width: 8px;
+    border-width: 0;
+    background-repeat: repeat-y;
+    flex-direction: column;
+    cursor: col-resize;
+}
+
+.vertical {
+    height: 8px;
+    min-height: 8px;
+    border-width: 0;
+    background-repeat: repeat-x;
+    flex-direction: row;
+    width: 100%;
+    cursor: row-resize;
+}
+
+.handle_h{
+    height: 20px;
+    background-color: currentColor;
+    position: static;
+    width: 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    z-index: 200;
+}
+
+.handle_v {
+    width: 20px;
+    height: 6px;
+    position: static;
+    z-index: 200;
+    background-color: currentColor;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.handle_h::before, .handle_v::before {
+    content: "";
+    border: 0 solid;
+    border-color: inherit;
+    vertical-align: baseline;
+}
+
+.e-splitter-horizontal, .e-splitter-vertical {
+    border-width: 1px;
+    display: flex;
+    overflow: auto;
+    position: relative;
+    touch-action: none;
+    width: 100%;
+}
+
+.e-splitter.e-splitter-horizontal {
+    flex-direction: row;
+}
+
+.e-splitter.e-splitter-vertical {
+    flex-direction: column;
+}
+
+.e-splitter .e-split-bar.e-split-bar-horizontal.e-resizable-split-bar {
+    cursor: col-resize;
+}
+
+.e-split-bar-horizontal {
+    background: #e0e0e0;
+    border-left: none;
+    border-right: none;
+    -ms-flex-align: center;
+    align-items: center;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    -ms-flex-pack: center;
+    justify-content: center;
+    min-width: 1px;
+    z-index: 15;
+}
+
+/* pane */
+.e-splitter.e-splitter-horizontal .e-pane.e-pane-horizontal, .e-splitter.e-splitter-vertical .e-pane.e-pane-horizontal {
+    overflow: auto;
+}
+
+.e-splitter.e-splitter-horizontal .e-pane.e-static-pane, .e-splitter.e-splitter-vertical .e-pane.e-static-pane {
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.e-pane.e-pane-horizontal {
+    flex: 1 1 auto;
+}
+
+.resizing:hover{
+    background-color: rgb(9, 105, 218);
+}
