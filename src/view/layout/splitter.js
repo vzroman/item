@@ -91,18 +91,18 @@ export class Splitter extends ItemView {
         const _this = this;
 
         $handles.forEach(function(item, idx) {
-            const leftSide = item.prev();
-            const rightSide = item.next();
+            const prevPane = item.prev();
+            const nextPane = item.next();
 
             let coords;
 
             item.on("mousedown", mouseDownHandler);
 
             function mouseDownHandler(e) {
-                // leftSide.width() doesnt return correct width i.e 48px instead of 0px
+                // prevPane.width() doesnt return correct width i.e 48px instead of 0px
 
-                const {width: firstWidth, height: firstHeight} = leftSide[0].getBoundingClientRect();
-                const {width: secondWidth, height: secondHeight} = rightSide[0].getBoundingClientRect();
+                const {width: firstWidth, height: firstHeight} = prevPane[0].getBoundingClientRect();
+                const {width: secondWidth, height: secondHeight} = nextPane[0].getBoundingClientRect();
 
                 coords = {
                     e,
@@ -145,8 +145,8 @@ export class Splitter extends ItemView {
                     };
                 }
 
-                leftSide.css(styles.prev);
-                styles.next && rightSide.css(styles.next);            
+                prevPane.css(styles.prev);
+                styles.next && nextPane.css(styles.next);            
             }
 
             function mouseUpHandler() {
