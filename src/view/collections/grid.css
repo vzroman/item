@@ -91,6 +91,10 @@ table>td {
     position: relative;
     padding: 0;
 }
+.resizer_header:last-of-type span{
+    width: 5px;
+    right: 0;
+}
 .resizer {
     position: absolute;
     top: 0;
