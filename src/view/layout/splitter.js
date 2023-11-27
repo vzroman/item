@@ -4,7 +4,8 @@ import style from "./splitter.css";
 
 export class Splitter extends ItemView {
     static options = {
-        isVertical: {type: types.primitives.Bool, default: false}
+        isVertical: {type: types.primitives.Bool, default: false},
+        initSize:[30, 50, 20]
     };
 
     static events = {

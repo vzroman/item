@@ -77,6 +77,8 @@
 .pane{
     overflow: auto;
     flex: 0 0 auto;
+    /*min-width: 50px;*/
+    /*min-height: 50px;*/
 }
 
 .pane:last-of-type{
