@@ -5,7 +5,7 @@ import style from "./splitter.css";
 export class Splitter extends ItemView {
     static options = {
         isVertical: {type: types.primitives.Bool, default: false},
-        initSize:[30, 50, 20]
+        initSize: {type: types.primitives.Array, default: []}
     };
 
     static events = {
@@ -28,6 +28,8 @@ export class Splitter extends ItemView {
 
         }
 
+        const initSize = this._options.initSize;
+
         for (let i=0; i < (count - 1); i++){
 
             const $handle = $(`<div 
@@ -39,6 +41,11 @@ export class Splitter extends ItemView {
 
             const $prev = $($panes[i]).parent();
             const $next = $($panes[i+1])?.parent();
+
+            if (typeof initSize[i] === "number" && typeof initSize[i+1] === "number") {
+                $prev.css({"flex-basis": initSize[i] + "%"});
+                $next.css({"flex-basis": initSize[i+1] + "%"});
+            }
 
             $handle.insertAfter( $prev );
             this._initHandle($handle, $prev, $next);

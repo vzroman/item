@@ -30,15 +30,18 @@ export function run( $container ){
         const s = new item.view.layout.Splitter({
             $container: $markup,
             //isVertical: true
+            initSize: [10, 40, 50]
         });
 
         const s2 = new item.view.layout.Splitter({
             $container: $markup.find('[name="s2"]'),
-            isVertical: true
+            isVertical: true,
+            initSize: [40, 60]
         });
 
         const s21 = new item.view.layout.Splitter({
             $container: $markup.find('[name="s2-1"]'),
+            initSize: [50, 50]
         });
 
         
