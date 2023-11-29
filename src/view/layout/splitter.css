@@ -1,0 +1,86 @@
+.splitter{
+    height: 100%;
+    width: 100%;
+    flex-grow: 1;
+    flex-shrink: 0;
+
+    border-width: 1px;
+    display: flex;
+    overflow: auto;
+    position: relative;
+    touch-action: none;
+
+    flex-direction: row;
+}
+
+.splitter.vertical{
+    flex-direction: column;
+}
+
+.splitbar {
+    color: #324552;
+    background-color: #ebebeb;
+    border-style: solid;
+    border-width: 0;
+    border-left: none;
+    border-right: none;
+    outline: 0;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    z-index: 15;
+
+    height: 100%;
+    flex-direction: column;
+    width: 8px;
+    min-width: 8px;
+    background-repeat: repeat-y;
+    cursor: col-resize;
+}
+
+.splitter.vertical>.splitbar{
+    width: 100%;
+    height: 8px;
+    min-height: 8px;
+    background-repeat: repeat-x;
+    flex-direction: row;
+    cursor: row-resize;
+}
+
+.handle{
+    height: 20px;
+    width: 6px;
+
+    background-color: currentColor;
+    position: static;
+    z-index: 200;
+    border-radius: 4px;
+}
+
+.handle::before{
+    content: "";
+    border: 0 solid;
+    border-color: inherit;
+    vertical-align: baseline;
+}
+
+.splitter.vertical>.splitbar>.handle{
+    width: 20px;
+    height: 6px;
+}
+
+
+.pane{
+    overflow: auto;
+    flex: 0 0 auto;
+}
+
+.pane:last-of-type{
+    flex: 1 1 auto;
+}
+
+.resizing:hover{
+    background-color: rgb(9, 105, 218);
+}
