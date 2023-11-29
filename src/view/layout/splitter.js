@@ -42,7 +42,7 @@ export class Splitter extends ItemView {
             const $prev = $($panes[i]).parent();
             const $next = $($panes[i+1])?.parent();
 
-            if (typeof initSize[i] === "number" && typeof initSize[i+1] === "number") {
+            if (!isNaN(initSize[i]) && !isNaN(initSize[i+1])) {
                 $prev.css({"flex-basis": initSize[i] + "%"});
                 $next.css({"flex-basis": initSize[i+1] + "%"});
             }
@@ -73,13 +73,9 @@ export class Splitter extends ItemView {
 
             const paneDimensionDelta = Math.min(Math.max(delta[dimension], -coords.prev[dimension]), coords.next[dimension]);
 
-            console.log("prev", $handle, $prevPane , {"flex-basis": ((coords.prev[dimension] + paneDimensionDelta) * 100) / totalSize + "%"})
             $prevPane.css({"flex-basis": ((coords.prev[dimension] + paneDimensionDelta) * 100) / totalSize + "%"});
 
             if ($nextPane) {
-                console.log("next", {
-                    "flex-basis": ((coords.next[dimension] - paneDimensionDelta) * 100) / totalSize + "%"
-                })
                 $nextPane.css({
                     "flex-basis": ((coords.next[dimension] - paneDimensionDelta) * 100) / totalSize + "%"
                 });
