@@ -12,3 +12,7 @@
     color:inherit;
     -webkit-appearance: none;
 }
+
+.invalid{
+    color: red
+}
