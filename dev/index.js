@@ -8,6 +8,7 @@ import {run as item_list_test} from "./item_list_test.js"
 import {run as popups_test} from "./popups_test.js"
 import {run as panel_test} from "./panel_test.js"
 import {run as splitter_test} from "./splitter_test.js"
+import {run as validate_input} from "./validate_input.js"
 
 
 $(function () {
@@ -18,6 +19,6 @@ $(function () {
 
 
 
-        splitter_test( $container );
+        validate_input( $container );
 
 });

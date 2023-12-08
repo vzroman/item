@@ -32,15 +32,32 @@ export class Control extends Parent{
 
     static options = {
         value:{type: types.primitives.String},
-        length:{type: types.primitives.Integer}
+        length:{type: types.primitives.Integer},
+        validate:{type: types.primitives.String}
     };
 
-    static markup = `<input type="text" class="${ styles.input }"/>`;
+    static events = {
+        onInvalidInput:true
+    };
+
+    static markup = `<input type="text" class="item_text_input ${ styles.input }"/>`;
 
     constructor( options ){
         super( options );
 
-        const onChange = ()=> this.set({ value:this.$markup.val() });
+        const onChange = ()=> {
+            const val = this.$markup.val()
+            if(this.#validateValue(val)){
+                this.$markup.removeClass(styles.invalid);
+                this.$markup.removeClass("invalid");
+                this.set({ value:val});
+            }else{
+                this.$markup.addClass(styles.invalid);
+                this.$markup.addClass("invalid");
+                this._trigger("onInvalidInput", val);
+            } 
+        };
+
         this.$markup.on("change", onChange).on("keypress", event=>{
             if (event.which === 13){
                 event.preventDefault();
@@ -59,6 +76,11 @@ export class Control extends Parent{
 
     focus(){
         this.$markup.focus();
+    }
+
+    #validateValue(value){
+        if(!this._options.validate) return true
+        return new RegExp(this._options.validate).test(value)
     }
 }
 Control.extend();
