@@ -5,7 +5,7 @@ export function run( $container ){
 
     const a = new item.view.controls.TextInput({
         $container,
-        validate_text:"^[a-zA-Z0-9]+$",
+        validate:"^[a-zA-Z0-9]+$",
         events:{
             value:(val)=>{
                 console.log(val);
