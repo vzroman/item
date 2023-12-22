@@ -80,7 +80,7 @@ export class Control extends Parent{
     }
 
     validateValue(value){
-        if(!this._options.validate.pattern) return value
+        if(!this._options.validate) return value
         if(new RegExp(this._options.validate.pattern).test(value)){
             return value
         }
