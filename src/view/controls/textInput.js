@@ -33,7 +33,6 @@ export class Control extends Parent{
     static options = {
         value:{type: types.primitives.String},
         length:{type: types.primitives.Integer},
-        validate:{type: types.primitives.String}
     };
 
     static events = {
@@ -47,10 +46,12 @@ export class Control extends Parent{
 
         const onChange = ()=> {
             const val = this.$markup.val()
-            if(this.#validateValue(val)){
+            const _value = this.validateValue(val)
+            if(_value){
                 this.$markup.removeClass(styles.invalid);
                 this.$markup.removeClass("invalid");
-                this.set({ value:val});
+                this.set({ value:_value});
+                this.$markup.val(_value)
             }else{
                 this.$markup.addClass(styles.invalid);
                 this.$markup.addClass("invalid");
@@ -78,9 +79,13 @@ export class Control extends Parent{
         this.$markup.focus();
     }
 
-    #validateValue(value){
-        if(!this._options.validate) return true
-        return new RegExp(this._options.validate).test(value)
+    validateValue(value){
+        if(!this._options.validate.pattern) return value
+        if(new RegExp(this._options.validate.pattern).test(value)){
+            return value
+        }
+
+        return undefined
     }
 }
 Control.extend();
