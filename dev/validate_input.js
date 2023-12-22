@@ -3,30 +3,27 @@ import {item} from "../dist/item.js";
 
 export function run( $container ){
 
-    const a = new item.view.controls.TextInput({
-        $container,
-        validate:{
-            pattern: "^[a-zA-Z0-9]+$"
-        },
-        events:{
-            value:(val)=>{
-                console.log(val);
-            }
-        }
-    })
-
-    // const b = new item.view.controls.NumberInput({
+    // const a = new item.view.controls.TextInput({
     //     $container,
     //     validate:{
-    //         min: 12
+    //         pattern: "^[a-zA-Z0-9]+$"
     //     },
-    //     step:1,
     //     events:{
     //         value:(val)=>{
     //             console.log(val);
     //         }
     //     }
     // })
+
+    const b = new item.view.controls.NumberInput({
+        $container,
+        step:1,
+        events:{
+            value:(val)=>{
+                console.log(val);
+            }
+        }
+    })
 
     // const c = new item.view.controls.NumberInput({
     //     $container,
