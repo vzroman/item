@@ -76,17 +76,5 @@ export class Control extends Parent{
 
     }
 
-    validateValue(value){
-        
-        if(!this._options.validate) return value
-        
-        const {min, max} = this._options.validate
-        if(max && value > max){
-            value = max
-        } else if(min && value < min){
-            value = min
-        }
-        return value
-    }
 }
 Control.extend();

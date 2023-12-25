@@ -43,26 +43,34 @@ export class Control extends View{
 
         this._validator = this._options.validate
             ? new this.constructor.options.value.type( this._options.validate )
-            : undefined;
+            : undefined; 
 
         // We do it asynchronously because descendants should be
         // able to init their widget
         setTimeout(()=>{
             if (!this._controller) return;
             this.bind("value",(value, prev) => {
+                let isValid; 
+
                 if ( this._validator ){
                     const _value = this._validator.coerce( value );
-
+                    isValid =  
+                        (_value !== undefined)
+                        // control initialization
+                        || (value === undefined && prev===undefined) ;
                     if (deepEqual(value, _value)){
                         this.updateValue( value, prev );
                     }else{
-                        this.setValue( _value !== undefined ? value : null );
+                        this.setValue( _value !== undefined ? _value : null );
                     }
                 }else{
+                    isValid = true;
                     this.updateValue( value, prev );
                 }
+
+                this.setValid(isValid, value);
             });
-        });
+        }); 
     }
 
     // The same method for getting or setting value.
@@ -85,6 +93,10 @@ export class Control extends View{
     }
 
     updateValue( value, prev ){
+        // Override it to update the value of the external widget
+    }
+
+    setValid(isValid){
         // Override it to update the value of the external widget
     }
 

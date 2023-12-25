@@ -15,15 +15,15 @@ export function run( $container ){
     //     }
     // })
 
-    const b = new item.view.controls.NumberInput({
-        $container,
-        step:1,
-        events:{
-            value:(val)=>{
-                console.log(val);
-            }
-        }
-    })
+    // const b = new item.view.controls.NumberInput({
+    //     $container,
+    //     step:1,
+    //     events:{
+    //         value:(val)=>{
+    //             console.log(val);
+    //         }
+    //     }
+    // })
 
     // const c = new item.view.controls.NumberInput({
     //     $container,
@@ -51,4 +51,17 @@ export function run( $container ){
     //         }
     //     }
     // })
+
+    const e = new item.view.controls.NumberInput({
+        $container,
+        validate:{
+            min: 12
+        },
+        step:1,
+        events:{
+            value:(val)=>{
+                console.log(val);
+            }
+        }
+    })
 }

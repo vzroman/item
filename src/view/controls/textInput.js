@@ -45,18 +45,7 @@ export class Control extends Parent{
         super( options );
 
         const onChange = ()=> {
-            const val = this.$markup.val()
-            const _value = this.validateValue(val)
-            if(_value){
-                this.$markup.removeClass(styles.invalid);
-                this.$markup.removeClass("invalid");
-                this.set({ value:_value});
-                this.$markup.val(_value)
-            }else{
-                this.$markup.addClass(styles.invalid);
-                this.$markup.addClass("invalid");
-                this._trigger("onInvalidInput", val);
-            } 
+            this.set({value:this.$markup.val()})
         };
 
         this.$markup.on("change", onChange).on("keypress", event=>{
@@ -79,13 +68,18 @@ export class Control extends Parent{
         this.$markup.focus();
     }
 
-    validateValue(value){
-        if(!this._options.validate) return value
-        if(new RegExp(this._options.validate.pattern).test(value)){
-            return value
+    setValid(isValid, value){
+        const val = this.$markup.val()
+        if(isValid){
+            this.$markup.removeClass(styles.invalid);
+            this.$markup.removeClass("invalid");
+            // this.set({value:val})
+        }else{
+            this.$markup.addClass(styles.invalid);
+            this.$markup.addClass("invalid");
+            this.$markup.val(value);
+            this._trigger("onInvalidInput", val);
         }
-
-        return undefined
     }
 }
 Control.extend();
