@@ -124,17 +124,20 @@ export class Controller extends Linkable{
         // Add new changes
         this._merge( changes );
 
-        this._isValid = this._validate();
+        setTimeout(()=>{
+            // We need to wrap the staff into setTimeout to give the schema links time to settle down
+            this._isValid = this._validate();
 
-        if (!this._isRefresh){
+            if (!this._isRefresh){
 
-            this._trigger("committable", this.isCommittable());
+                this._trigger("committable", this.isCommittable());
 
-            if (this._options.autoCommit && this.isCommittable()){
-                // The data is ready to be committed and the controller is autoCommit
-                this.commit();
+                if (this._options.autoCommit && this.isCommittable()){
+                    // The data is ready to be committed and the controller is autoCommit
+                    this.commit();
+                }
             }
-        }
+        });
     }
 
     _merge( changes ){
