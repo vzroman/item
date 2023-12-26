@@ -126,6 +126,7 @@ export class Controller extends Linkable{
 
         setTimeout(()=>{
             // We need to wrap the staff into setTimeout to give the schema links time to settle down
+            if(this._schema === undefined) return
             this._isValid = this._validate();
 
             if (!this._isRefresh){
