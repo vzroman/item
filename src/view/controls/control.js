@@ -25,7 +25,7 @@
 
 import {View} from "../item.js";
 import {types} from "../../types/index.js";
-import {deepEqual} from "../../utilities/data.js";
+import {deepCopy, deepEqual} from "../../utilities/data.js";
 
 
 // The control is the point where external widgets to be attached
@@ -45,32 +45,28 @@ export class Control extends View{
             ? new this.constructor.options.value.type( this._options.validate )
             : undefined;
 
+        // Validate the value
+        if ( this._validator ){
+            this._controller.bind("beforeChange",(changes) => {
+                if (!changes?.hasOwnProperty("value")) return;
+
+                // No validation if it's a value reset
+                if (changes.value === null) return;
+
+                const value = deepCopy(changes.value);
+
+                changes.value = this._validator.coerce( changes.value );
+                this.setValid(changes.value!==undefined, value);
+            });
+        }
         // We do it asynchronously because descendants should be
         // able to init their widget
         setTimeout(()=>{
             if (!this._controller) return;
             this.bind("value",(value, prev) => {
-                let isValid; 
-
-                if ( this._validator ){
-                    const _value = this._validator.coerce( value );
-                    isValid =  
-                        (_value !== undefined)
-                        // control initialization
-                        || (value === undefined && prev===undefined) ;
-                    if (deepEqual(value, _value)){
-                        this.updateValue( value, prev );
-                    }else{
-                        this.setValue( _value !== undefined ? _value : null );
-                    }
-                }else{
-                    isValid = true;
-                    this.updateValue( value, prev );
-                }
-
-                this.setValid(isValid, value);
+                this.updateValue( value, prev );
             });
-        }); 
+        });
     }
 
     // The same method for getting or setting value.
