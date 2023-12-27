@@ -124,12 +124,14 @@ export class Controller extends Linkable{
         // Add new changes
         this._merge( changes );
 
+        const isRefresh = this._isRefresh;
+
         setTimeout(()=>{
             // We need to wrap the staff into setTimeout to give the schema links time to settle down
             if(this._schema === undefined) return
             this._isValid = this._validate();
 
-            if (!this._isRefresh){
+            if (!isRefresh){
 
                 this._trigger("committable", this.isCommittable());
 
