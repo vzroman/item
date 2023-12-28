@@ -22,6 +22,7 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
+const __triggerQueue = [];
 export class Eventful{
 
     bind(event, callback){
@@ -53,20 +54,32 @@ export class Eventful{
     }
 
     _trigger(type, params) {
-        const callbacks=this.__events?this.__events.callbacks[type]:undefined;
+        __triggerQueue.push([type, params]);
+        if (__triggerQueue.length === 1) this.#trigger();
+    }
 
-        if (callbacks){
-            if (!Array.isArray(params)){
-                params = [params];
-            }
+    #trigger() {
+        for (;;){
+            const task = __triggerQueue.shift();
+            if (!task) break;
 
-            Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
-                try{
-                    callbacks[id]?.apply(this, [...params,this]);
-                }catch(e){
-                    console.error("invalid event callback",e);
+            let [type, params] = task;
+
+            const callbacks=this.__events?this.__events.callbacks[type]:undefined;
+
+            if (callbacks){
+                if (!Array.isArray(params)){
+                    params = [params];
                 }
-            })
+
+                Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
+                    try{
+                        callbacks[id]?.apply(this, [...params,this]);
+                    }catch(e){
+                        console.error("invalid event callback",e);
+                    }
+                })
+            }
         }
     }
 
