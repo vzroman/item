@@ -45,7 +45,9 @@ export class Control extends Parent{
         super( options );
 
         const onChange = ()=> {
-            this.set({value:this.$markup.val()})
+            const value = this.$markup.val();
+            this.$markup.val( this.value() );
+            this.set({value})
         };
 
         this.$markup.on("change", onChange).on("keypress", event=>{
