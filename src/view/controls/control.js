@@ -64,7 +64,7 @@ export class Control extends View{
         setTimeout(()=>{
             if (!this._controller) return;
             this.bind("value",(value, prev) => {
-                this.updateValue( value, prev );
+                this.updateValue( this.value(), prev );
             });
         });
     }
