@@ -32,15 +32,24 @@ export class Control extends Parent{
 
     static options = {
         value:{type: types.primitives.String},
-        length:{type: types.primitives.Integer}
+        length:{type: types.primitives.Integer},
     };
 
-    static markup = `<input type="text" class="${ styles.input }"/>`;
+    static events = {
+        onInvalidInput:true
+    };
+
+    static markup = `<input type="text" class="item_text_input ${ styles.input }"/>`;
 
     constructor( options ){
         super( options );
 
-        const onChange = ()=> this.set({ value:this.$markup.val() });
+        const onChange = ()=> {
+            const value = this.$markup.val();
+            this.$markup.val( this.value() );
+            this.set({value})
+        };
+
         this.$markup.on("change", onChange).on("keypress", event=>{
             if (event.which === 13){
                 event.preventDefault();
@@ -59,6 +68,17 @@ export class Control extends Parent{
 
     focus(){
         this.$markup.focus();
+    }
+
+    setValid(isValid, value){
+        if(isValid){
+            this.$markup.removeClass(styles.invalid);
+            this.$markup.removeClass("invalid");
+        }else{
+            this.$markup.addClass(styles.invalid);
+            this.$markup.addClass("invalid");
+            this.$markup.val(value);
+        }
     }
 }
 Control.extend();

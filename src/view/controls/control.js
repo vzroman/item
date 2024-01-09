@@ -25,7 +25,7 @@
 
 import {View} from "../item.js";
 import {types} from "../../types/index.js";
-import {deepEqual} from "../../utilities/data.js";
+import {deepCopy, deepEqual} from "../../utilities/data.js";
 
 
 // The control is the point where external widgets to be attached
@@ -45,22 +45,26 @@ export class Control extends View{
             ? new this.constructor.options.value.type( this._options.validate )
             : undefined;
 
+        // Validate the value
+        if ( this._validator ){
+            this._controller.bind("beforeChange",(changes) => {
+                if (!changes?.hasOwnProperty("value")) return;
+
+                // No validation if it's a value reset
+                if (changes.value === null) return;
+
+                const value = deepCopy(changes.value);
+
+                changes.value = this._validator.coerce( changes.value );
+                this.setValid(changes.value!==undefined, value);
+            });
+        }
         // We do it asynchronously because descendants should be
         // able to init their widget
         setTimeout(()=>{
             if (!this._controller) return;
             this.bind("value",(value, prev) => {
-                if ( this._validator ){
-                    const _value = this._validator.coerce( value );
-
-                    if (deepEqual(value, _value)){
-                        this.updateValue( value, prev );
-                    }else{
-                        this.setValue( _value !== undefined ? value : null );
-                    }
-                }else{
-                    this.updateValue( value, prev );
-                }
+                this.updateValue( this.value(), prev );
             });
         });
     }
@@ -85,6 +89,10 @@ export class Control extends View{
     }
 
     updateValue( value, prev ){
+        // Override it to update the value of the external widget
+    }
+
+    setValid(isValid){
         // Override it to update the value of the external widget
     }
 

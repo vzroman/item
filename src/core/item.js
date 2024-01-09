@@ -109,12 +109,12 @@ export class Item extends Linkable{
     // Events API
     //-------------------------------------------------------------------
     bind(event, callback){
-        if (this.constructor.events[event]){
-            // Subscriptions to own events overlap subscriptions controller events
-            return [event, super.bind(event, callback)];
-        } else{
+        if (event === "change" || event === "beforeChange" || !this.constructor.events[event]){
             // Subscriptions to property changes
             return [event, this._controller.bind(event, callback)];
+        }else{
+            // Subscriptions to own events overlap subscriptions controller events
+            return [event, super.bind(event, callback)];
         }
     }
 
