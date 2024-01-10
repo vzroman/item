@@ -135,7 +135,7 @@ class ListItem extends ItemView{
     </div>`;
 
     widgets(){
-        const { view, options } = this._options.item;
+        const { view, options={} } = this._options.item;
         if (typeof options.links === "object"){
             options.links.value = "parent@value";
         } else {
