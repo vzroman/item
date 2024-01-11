@@ -8,7 +8,6 @@ import { controllers } from "../../controllers";
 import UpIcon from "../../../src/img/arrow_up.png";
 import DownIcon from "../../../src/img/arrow_down.png";
 import DeleteIcon from "../../img/delete.png";
-
 import styles from "./itemList.css";
 
 
@@ -136,20 +135,20 @@ class ListItem extends ItemView{
     </div>`;
 
     widgets(){
-        const { view, options } = this._options.item;
+        const { view, options={} } = this._options.item;
+        if (typeof options.links === "object"){
+            options.links.value = "parent@value";
+        } else {
+            options.links = { value: "parent@value" };
+        }
+        if (typeof options.events === "object"){
+            options.events.value = "parent@value";
+        } else {
+            options.events = { value: "parent@value" };
+        }
+
         return {
-            content: {
-                view,
-                options: {
-                    ...options,
-                    links: {
-                        value: "parent@value"
-                    },
-                    events: {
-                        value: "parent@value"
-                    }
-                }
-            },
+            content: { view, options },
             up: {
                 view: controls.Button,
                 options: {
