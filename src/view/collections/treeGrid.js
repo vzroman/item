@@ -150,6 +150,7 @@ export class TreeGrid extends ItemView{
                         onClose:()=>{
                             this._widgets.breadcrumbs.set({"visible": true});
                             this._widgets.search_bar.set({"visible": false});
+                            this._widgets.search_icon.set({"visible": true});
                             if (!(this._grid.get("columns")[0].view instanceof TreeCell)) {
                                 this._contextPath( this._options.contextPath );
                             }
@@ -166,6 +167,7 @@ export class TreeGrid extends ItemView{
                         click:() => {
                             this._widgets.breadcrumbs.set({"visible": false});
                             this._widgets.search_bar.set({"visible": true});
+                            this._widgets.search_icon.set({"visible": false});
                         }
                     }
                 }
