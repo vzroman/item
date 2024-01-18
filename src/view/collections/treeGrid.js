@@ -231,6 +231,7 @@ export class TreeGrid extends ItemView{
 
                         this._widgets.breadcrumbs.set({"visible": true});
                         this._widgets.search_bar.set({"visible": false});
+                        this._widgets.search_icon.set({"visible": true});
                         
                         const path = [];
                         while (item) {
