@@ -255,7 +255,9 @@ export class Linkable extends Eventful{
                 }
             }
 
-            source = pathEval(source, context);
+            source = source instanceof Linkable
+                ? source
+                : pathEval(source, context);
 
             if ( source ){
                 // The context contains the source controller, the link runs

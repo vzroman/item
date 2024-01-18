@@ -32,14 +32,22 @@ export class SelectList extends Dropdown{
 
     static options = {
         value:{type: types.primitives.Array},
+        multiselect:{type: types.primitives.Bool, default:true}
     }
 
     constructor( options ){
         super( options );
 
-        this.$markup.on("click", () => {
+
+        this.$markup.on("click", (event) => {
+            if (!this._options.multiselect && event.target?.checked){
+                this.$markup.find('input:checked').each(function() {
+                    if (this === event.target) return;
+                    $(this).attr("checked", false);
+                });
+            }
             this.setValue( this._getValues() );
-        })
+        });
 
         this.$markup.off("change");
     }
