@@ -50,6 +50,11 @@ export class Controller extends Linkable{
 
         // Initialize the schema
         this._schema = new Schema( this._options.schema );
+        this._schema.bind("update",()=>{ 
+            this._isValid = this._validate();
+            //this._trigger("committable", this.isCommittable());
+            this._trigger("committable", this.isCommittable());
+        });
 
         this._data = undefined;
         this._changes = undefined;
