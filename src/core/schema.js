@@ -117,6 +117,10 @@ export class Schema extends Linkable{
         attributes:undefined
     };
 
+    static events = {
+        update:true
+    };
+
     constructor( Attributes ){
         super({attributes:Attributes});
 
@@ -125,6 +129,10 @@ export class Schema extends Linkable{
 
         this._attributes = Object.entries( this._options.attributes ).reduce((acc,[a, options])=>{
             acc[a] = new Attribute( options );
+            acc[a].bind("change",()=>{
+                this._trigger("update");
+            });
+            
             return acc;
         },{});
 
