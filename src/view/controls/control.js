@@ -63,8 +63,15 @@ export class Control extends View{
         // able to init their widget
         setTimeout(()=>{
             if (!this._controller) return;
-            this.bind("value",(value, prev) => {
-                this.updateValue( this.value(), prev );
+
+            this.updateValue( this.value(), undefined );
+            this.bind("beforeChange",(changes) => {
+                if (changes.hasOwnProperty("value")){
+                    const prev = this.value();
+                    setTimeout(()=> {
+                        if (this._controller) this.updateValue( this.value(), prev )
+                    });
+                }
             });
         });
     }
