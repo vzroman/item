@@ -68,6 +68,7 @@ export class Eventful{
     }
 
     destroy(){
+        if (this.isDestroyed()) return;
         this._trigger("destroy");
         this._destroy();
     }
