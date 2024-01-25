@@ -25,6 +25,14 @@
 const __triggerQueue = [];
 export class Eventful{
 
+    constructor() {
+        this.__events={
+            id:0,
+            callbacks:{},
+            index:{}
+        };
+    }
+
     bind(event, callback){
         if (typeof callback!=="function") { throw new Error("invalid callback") }
 
@@ -60,6 +68,15 @@ export class Eventful{
     }
 
     destroy(){
+        this._trigger("destroy");
+        this._destroy();
+    }
+
+    isDestroyed(){
+        return !this.__events;
+    }
+
+    _destroy(){
         this.__events = undefined;
     }
 }

@@ -320,10 +320,10 @@ export class TreeGrid extends ItemView{
         row.fold();
     }
 
-    destroy() {
+    _destroy() {
         this._breadCrumbsController?.destroy();
         this._grid?.destroy();
-        super.destroy();
+        super._destroy();
     }
 
 }

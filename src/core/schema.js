@@ -55,7 +55,7 @@ export class Attribute extends Linkable{
     _initType(){
 
         if ( primitives.Any !== this._options.type && !primitives.Any.isPrototypeOf(this._options.type) )
-            throw new Error("invalid type: " + this._options.type);
+            throw new Error("invalid type: " + this._options.type);!this.__even
 
         if (this._type){
             this._type.destroy();
@@ -96,10 +96,10 @@ export class Attribute extends Linkable{
         return result;
     }
 
-    destroy(){
+    _destroy(){
         this._type.destroy();
         this._type = undefined;
-        super.destroy();
+        super._destroy();
     }
 
     _updateDefault(){
@@ -222,10 +222,10 @@ export class Schema extends Linkable{
         return result;
     }
 
-    destroy(){
+    _destroy(){
         Object.values( this._attributes ).forEach( a=> a.destroy() );
         this._attributes = undefined;
-        super.destroy();
+        super._destroy();
     }
 }
 Schema.extend();

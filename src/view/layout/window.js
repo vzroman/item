@@ -462,7 +462,7 @@ export class Window extends ItemView {
         }
     }
 
-    destroy() {
+    _destroy() {
         if (this.$overlay){
             this.$overlay.remove();
             this.$overlay = undefined;
@@ -477,7 +477,7 @@ export class Window extends ItemView {
             }
             this._onDestroy = undefined;
         }
-        super.destroy();
+        super._destroy();
     }
 
 }

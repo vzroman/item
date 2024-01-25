@@ -313,12 +313,12 @@ export class Controller extends Linkable{
     //-------------------------------------------------------------------
     // Clean UP
     //-------------------------------------------------------------------
-    destroy(){
+    _destroy(){
         this._schema?.destroy();
         this._schema = undefined;
         this._data = undefined;
         this._changes = undefined;
-        super.destroy();
+        super._destroy();
     }
 }
 Controller.extend();

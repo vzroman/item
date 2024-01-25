@@ -189,9 +189,9 @@ export class Control extends Parent{
         this._itemsController = undefined;
     }
 
-    destroy(){
+    _destroy(){
         this._destroyItemsController();
-        super.destroy();
+        super._destroy();
     }
 }
 Control.extend();

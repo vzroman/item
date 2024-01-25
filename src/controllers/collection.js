@@ -243,12 +243,12 @@ export class Controller extends Item{
         return this._count;
     }
 
-    destroy(){
+    _destroy(){
         if (this._view){
             this._view.destroy();
             this._view = undefined;
         }
-        super.destroy();
+        super._destroy();
     }
 
     refresh( data ){

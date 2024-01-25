@@ -320,9 +320,7 @@ export class Linkable extends Eventful{
         }
     }
 
-    destroy(){
-
-        this._trigger("destroy");
+    _destroy(){
 
         if (this._linked){
             for (const link of Object.values(this._linked.properties)){
@@ -335,7 +333,7 @@ export class Linkable extends Eventful{
         }
 
         this._options = undefined;
-        super.destroy();
+        super._destroy();
     }
 }
 

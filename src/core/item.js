@@ -126,10 +126,10 @@ export class Item extends Linkable{
         }
     }
 
-    destroy(){
+    _destroy(){
         this._controller?.destroy();
         this._controller = undefined;
-        super.destroy();
+        super._destroy();
     }
 }
 Item.extend();

@@ -243,7 +243,7 @@ export class View extends Item{
     }
 
 
-    destroy(){
+    _destroy(){
         if (this._widgets){
             Object.values(this._widgets).forEach(widget =>{
                 widget.destroy();
@@ -251,7 +251,7 @@ export class View extends Item{
             this._widgets = undefined;
         }
         this.$markup.remove();
-        super.destroy();
+        super._destroy();
     }
 }
 View.extend();

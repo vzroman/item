@@ -163,7 +163,7 @@ export class View extends Item{
         return item;
     }
 
-    destroy(){
+    _destroy(){
         if (this._items){
             Object.values(this._items).forEach(item =>{
                 item[0].destroy();
@@ -177,7 +177,7 @@ export class View extends Item{
 
         this._collection = undefined;
 
-        super.destroy();
+        super._destroy();
     }
 }
 View.extend();

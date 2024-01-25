@@ -146,7 +146,7 @@ export class Row extends Item{
         this._options.children?.refresh();
     }
 
-    destroy() {
+    _destroy() {
         this.$markup.trigger("item-grid-row-select",[this, false]);
 
         this.#unbind?.forEach( u => u());
@@ -162,7 +162,7 @@ export class Row extends Item{
 
         this._options.children?.destroy();
 
-        super.destroy();
+        super._destroy();
     }
 
     #placeAfter( previousRow ){
@@ -241,9 +241,9 @@ class RowsCollection extends Collection{
         row.set({previousRow});
     }
 
-    destroy() {
+    _destroy() {
         this._options.data?.destroy();
-        super.destroy();
+        super._destroy();
     }
 
 

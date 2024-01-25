@@ -95,10 +95,10 @@ export class Form extends Parent{
         }
     }
 
-    destroy(){
+    _destroy(){
         if (this._onError) this._onError();
         this._onError = undefined;
-        super.destroy();
+        super._destroy();
     }
 
     _commit(){

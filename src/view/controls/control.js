@@ -115,12 +115,12 @@ export class Control extends View{
         }
     }
 
-    destroy(){
+    _destroy(){
         if (this._widget && typeof this._widget.destroy === "function"){
             this._widget.destroy();
             this._widget = undefined;
         }
-        super.destroy();
+        super._destroy();
     }
 }
 Control.extend();

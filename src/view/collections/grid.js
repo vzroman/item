@@ -280,10 +280,10 @@ export class Grid extends Collection{
     }
 
 
-    destroy() {
+    _destroy() {
         this.heightObserver?.disconnect();
         this._selection?.destroy();
-        super.destroy();
+        super._destroy();
     }
 }
 Grid.extend();
