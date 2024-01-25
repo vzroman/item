@@ -54,36 +54,39 @@ export class Eventful{
     }
 
     _trigger(type, params) {
-        __triggerQueue.push([type, params]);
-        if (__triggerQueue.length === 1) this.#trigger();
-    }
-
-    #trigger() {
-        for (;;){
-            const task = __triggerQueue.shift();
-            if (!task) break;
-
-            let [type, params] = task;
-
-            const callbacks=this.__events?this.__events.callbacks[type]:undefined;
-
-            if (callbacks){
-                if (!Array.isArray(params)){
-                    params = [params];
-                }
-
-                Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
-                    try{
-                        callbacks[id]?.apply(this, [...params,this]);
-                    }catch(e){
-                        console.error("invalid event callback",e);
-                    }
-                })
-            }
-        }
+        if (!this.__events?.callbacks[type]) return;
+        __triggerQueue.push([this, type, params]);
+        if (__triggerQueue.length === 1) trigger();
     }
 
     destroy(){
         this.__events = undefined;
+    }
+}
+
+
+function trigger() {
+    for (;;){
+        const task = __triggerQueue.shift();
+        if (!task) break;
+
+        let [_this, type, params] = task;
+
+        const callbacks= _this.__events?.callbacks[type];
+
+        if (callbacks){
+            if (!Array.isArray(params)){
+                params = [params];
+            }
+
+            Object.keys(callbacks).map(k=> +k).sort().forEach(id=>{
+                try{
+                    callbacks[id]?.apply(_this, [...params,_this]);
+                }catch(e){
+                    console.error("invalid event callback",e);
+                }
+            })
+        }
+        __triggerQueue.shift();
     }
 }

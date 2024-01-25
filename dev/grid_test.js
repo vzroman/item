@@ -35,13 +35,7 @@ export function run( $container ){
             schema:{
                 ".name":{ type:item.types.primitives.String },
                 ".pattern":{type:item.types.primitives.String}
-            },
-            data:["and",[
-                [".folder",'=',"some folder"],
-                ["or",[
-
-                ]]
-            ]]
+            }
         });
 
         const grid = new item.view.collections.Grid({
@@ -58,13 +52,8 @@ export function run( $container ){
             // getIcon:{type:types.primitives.Any},
             // getSubitems:{type:types.primitives.Any}
         });
-        const filter = ["and",[
-            [".folder",'=',"some folder"],
-            ["or",[
 
-            ]]
-        ]]
-        controller.init([".folder","=","$oid('/root/PROJECT/LOCALIZATION')"]);
+        controller.init([".folder","=","$oid('/root/PROJECT')"]);
 
     }
 }

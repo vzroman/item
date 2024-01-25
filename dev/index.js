@@ -19,6 +19,6 @@ $(function () {
 
 
 
-        validate_input( $container );
+    grid_test( $container );
 
 });
