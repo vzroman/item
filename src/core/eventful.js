@@ -34,13 +34,8 @@ export class Eventful{
     }
 
     bind(event, callback){
+        if (this.isDestroyed()) throw new Error("the object is destroyed");
         if (typeof callback!=="function") { throw new Error("invalid callback") }
-
-        this.__events=this.__events||{
-            id:0,
-            callbacks:{},
-            index:{}
-        };
 
         // Unique id for the handler. The is an increment
         // it makes possible to run callbacks in the same order
@@ -54,6 +49,7 @@ export class Eventful{
     }
 
     unbind(id){
+        if (this.isDestroyed()) return;
         const type=this.__events?this.__events.index[id]:undefined;
         if (type){
             delete this.__events.index[id];
