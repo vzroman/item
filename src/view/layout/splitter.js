@@ -24,7 +24,7 @@ export class Splitter extends ItemView {
         const count = $panes.length;
         for (let i=0; i < count; i++){
 
-            const $pane = $(`<div class="${style.pane}"></div>`).appendTo( $markup );
+            const $pane = $(`<div class="${style.pane} pane"></div>`).appendTo( $markup );
             $($panes[i]).appendTo( $pane );
             if (typeof initSize[i] === "number" && initSize[i] !== null){
                 $pane.css({"flex-basis": initSize[i] + "%"});
@@ -37,7 +37,7 @@ export class Splitter extends ItemView {
                 class="${style.splitbar}" 
                 role="separator"    
                 aria-orientation="${orientation}">
-                <div class="${style.handle}"></div>
+                <div class="${style.handle} handle"></div>
              </div>`);
 
             const $prev = $($panes[i]).parent();
