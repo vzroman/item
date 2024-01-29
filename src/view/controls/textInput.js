@@ -33,6 +33,7 @@ export class Control extends Parent{
     static options = {
         value:{type: types.primitives.String},
         length:{type: types.primitives.Integer},
+        placeholder:{type: types.primitives.String},
     };
 
     static events = {
@@ -54,6 +55,14 @@ export class Control extends Parent{
             if (event.which === 13){
                 event.preventDefault();
                 onChange();
+            }
+        });
+
+        this.bind("placeholder",value => {
+            if (value){
+                this.$markup.prop("placeholder", value);
+            }else{
+                this.$markup.removeAttr("placeholder");
             }
         });
     }

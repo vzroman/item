@@ -3,17 +3,18 @@ import {item} from "../dist/item.js";
 
 export function run( $container ){
 
-    // const a = new item.view.controls.TextInput({
-    //     $container,
-    //     validate:{
-    //         pattern: "^[a-zA-Z0-9]+$"
-    //     },
-    //     events:{
-    //         value:(val)=>{
-    //             console.log(val);
-    //         }
-    //     }
-    // })
+    const a = new item.view.controls.TextInput({
+        $container,
+        validate:{
+            pattern: "^[a-zA-Z0-9]+$"
+        },
+        // placeholder:"192.128.1.1",
+        events:{
+            value:(val)=>{
+                console.log(val);
+            }
+        }
+    })
 
     // const b = new item.view.controls.NumberInput({
     //     $container,
@@ -52,16 +53,16 @@ export function run( $container ){
     //     }
     // })
 
-    const e = new item.view.controls.NumberInput({
-        $container,
-        validate:{
-            min: 12
-        },
-        step:1,
-        events:{
-            value:(val)=>{
-                console.log(val);
-            }
-        }
-    })
+    // const e = new item.view.controls.NumberInput({
+    //     $container,
+    //     validate:{
+    //         min: 12
+    //     },
+    //     step:1,
+    //     events:{
+    //         value:(val)=>{
+    //             console.log(val);
+    //         }
+    //     }
+    // })
 }
