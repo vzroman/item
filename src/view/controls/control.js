@@ -57,6 +57,7 @@ export class Control extends View{
 
                 changes.value = this._validator.coerce( changes.value );
                 this.setValid(changes.value!==undefined, value);
+                if (changes.value===undefined) delete changes.value;
             });
         }
         // We do it asynchronously because descendants should be
