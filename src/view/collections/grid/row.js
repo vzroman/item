@@ -68,8 +68,8 @@ export class Row extends Item{
         this.bind("previousRow", row=>{
 
             if ( row ){
-                row.set({nextRow:this});
                 const nextRow = row.get("nextRow");
+                row.set({nextRow:this});
                 if (nextRow && !nextRow.isDestroyed()) {
                     nextRow.set({previousRow: this});
                 }
@@ -185,21 +185,23 @@ export class Row extends Item{
     }
 
     #reorder(){
-        if (this._options.nextRow){
-            this.$markup.insertBefore(this._options.nextRow.$markup);
-        }else if(this._options.previousRow){
-            const $previousRow = this._options.previousRow.$markup;
-            const $nextRows = $previousRow.nextAll('tr');
-            let $previous = $previousRow;
-            for (let i=0; i<$nextRows.length; i++){
-                const $row = $($nextRows[i]);
-                if (this.constructor.getItem( $row ).get("level") > this._options.level){
-                    $previous = $row
-                }else{
-                    break
+        if(this._options.previousRow){
+            if (this._options.previousRow.get("isUnfolded")){
+                const $previousRow = this._options.previousRow.$markup;
+                const $nextRows = $previousRow.nextAll('tr');
+                let $previous = $previousRow;
+                for (let i=0; i<$nextRows.length; i++){
+                    const $row = $($nextRows[i]);
+                    if (this.constructor.getItem( $row ).get("level") > this._options.level){
+                        $previous = $row
+                    }else{
+                        break
+                    }
                 }
+                this.$markup.insertAfter( $previous );
+            }else{
+                this.$markup.insertAfter( this._options.previousRow.$markup );
             }
-            this.$markup.insertAfter( $previous );
         }else if(this._options.parentRow){
             this.$markup.insertAfter( this._options.parentRow.$markup );
         }else{
