@@ -185,6 +185,7 @@ export class Row extends Item{
     }
 
     #reorder(){
+        if (this.isDestroyed()) return;
         if(this._options.previousRow && !this._options.previousRow.isDestroyed()){
             if (this._options.previousRow.get("isUnfolded")){
                 const $previousRow = this._options.previousRow.$markup;
