@@ -195,6 +195,9 @@ export class Controller extends Linkable{
             const changes = super.set( this._schema.coerce( Data ) );
             this._data = util.patch(this._data, changes);
             this._changes = undefined;
+            if (Data instanceof Linkable){
+                this.link({data:Data});
+            }
             this._onReady();
         }finally {
             this._isRefresh = false;
