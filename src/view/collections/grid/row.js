@@ -66,16 +66,7 @@ export class Row extends Item{
         }
 
         this.bind("previousRow", row=>{
-
-            if ( row ){
-                const nextRow = row.get("nextRow");
-                row.set({nextRow:this});
-                if (nextRow && !nextRow.isDestroyed()) {
-                    nextRow.set({previousRow: this});
-                }
-            }
-
-
+            
             setTimeout(()=>{
 
                 if (this.isDestroyed()) return;
@@ -168,12 +159,6 @@ export class Row extends Item{
         this.#unbind?.forEach( u => u());
         this.#unbind = undefined;
 
-        if (this._options.nextRow && !this._options.nextRow.isDestroyed()){
-            let previousRow = this._options.previousRow;
-            if (previousRow && previousRow.isDestroyed()) previousRow = undefined;
-            this._options.nextRow.set({previousRow});
-        }
-
         if (this.#children){
             this.#children.destroy();
             this.#children = undefined;
@@ -185,8 +170,7 @@ export class Row extends Item{
     }
 
     #reorder(){
-        if (this.isDestroyed()) return;
-        if(this._options.previousRow && !this._options.previousRow.isDestroyed()){
+        if(this._options.previousRow){
             if (this._options.previousRow.get("isUnfolded")){
                 const $previousRow = this._options.previousRow.$markup;
                 const $nextRows = $previousRow.nextAll('tr');
