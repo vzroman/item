@@ -160,7 +160,7 @@ export class Control extends Parent{
 
         const currentValue = this.getValue();
         this._itemsController.view().forEach(([id, item])=>{
-            const value = itemValueFun( item );
+            const value = ''+itemValueFun( item );
             const text = itemTextFun( item );
             const selected = value === currentValue ? "selected" : "";
 
