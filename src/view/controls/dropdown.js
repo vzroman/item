@@ -139,7 +139,10 @@ export class Control extends Parent{
             return this._initItemsController([]);
         }
 
-        this._itemsController.onReady().then(()=>this._updateItems());
+        this._itemsController.onReady().then(()=>{
+            if (this.isDestroyed()) return;
+            this._updateItems();
+        });
 
         this._subscription = this._itemsController.bind("change",()=> this._updateItems() );
 
