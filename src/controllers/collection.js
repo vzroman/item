@@ -287,7 +287,7 @@ export class Controller extends Item{
 
         // Coerce items
         for (const k in Data){
-            Data[k] = this._schema.coerce( Data[k] );
+            Data[k] = Data[k] ? this._schema.coerce( Data[k] ) : Data[k];
         }
 
         return Data;
