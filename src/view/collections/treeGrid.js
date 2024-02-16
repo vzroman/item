@@ -147,14 +147,7 @@ export class TreeGrid extends ItemView{
                         onSearch:(val)=>{
                             this.search(val);
                         },
-                        onClose:()=>{
-                            this._widgets.breadcrumbs.set({"visible": true});
-                            this._widgets.search_bar.set({"visible": false});
-                            this._widgets.search_icon.set({"visible": true});
-                            if (!(this._grid.get("columns")[0].view instanceof TreeCell)) {
-                                this._contextPath( this._options.contextPath );
-                            }
-                        }
+                        onClose:()=>this.resetSearch()
                     }
                 }
             },
@@ -248,6 +241,15 @@ export class TreeGrid extends ItemView{
                 destroy:()=> controller.destroy()
             }
         });
+    }
+
+    resetSearch(){
+        this._widgets.breadcrumbs.set({"visible": true});
+        this._widgets.search_bar.set({"visible": false});
+        this._widgets.search_icon.set({"visible": true});
+        if (!(this._grid.get("columns")[0].view instanceof TreeCell)) {
+            this._contextPath( this._options.contextPath );
+        }
     }
 
     getSelected(){
