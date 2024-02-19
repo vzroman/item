@@ -35,7 +35,7 @@ export class Control extends Parent{
         value:{type: types.primitives.String},
         size:{type: types.primitives.Integer},
         items:{type: types.primitives.Any},
-        itemValue:{type: types.primitives.String},
+        itemValue:{type: types.primitives.Any},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
         hideClear:{type: types.primitives.Bool, default: false}
