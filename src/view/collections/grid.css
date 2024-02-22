@@ -45,6 +45,7 @@
     width: 100%;
     border-left: 1px solid #ccc;
     border-spacing: 0px;
+    flex-grow: 1;
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
