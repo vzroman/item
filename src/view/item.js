@@ -262,24 +262,22 @@ export class View extends Item{
 
             // Check if the controller is lock linkable
             if (!(controller instanceof Controller)) continue;
-            if (!controller.constructor.events.requestStart) continue;
-            if (!controller.constructor.events.requestEnd) continue;
+            if (!controller.constructor.options.request) continue;
 
             // lock the item on request start
-            const requestStartId =  controller.bind("requestStart", ()=>{
-                if (!this.isDestroyed() && !this.#unlock) this.#unlock = this.lock();
+            const requestId =  controller.bind("$.request", request=>{
+                if (this.isDestroyed()) return; // Already destroyed
+                if (this.#unlock) return;   // Already locked
+                if (request){
+                    // Lock the item view on request
+                    this.#unlock = this.lock();
+                }else{
+                    if (typeof this.#unlock === "function") this.#unlock();
+                    this.#unlock = undefined;
+                }
             });
 
-            // unlock the item on request end
-            const requestEndId =  controller.bind("requestEnd", ()=>{
-                if (!this.isDestroyed() && typeof this.#unlock === "function") this.#unlock();
-                this.#unlock = undefined;
-            });
-
-            this.bind("destroy",()=>{
-                context.data.unbind( requestStartId );
-                context.data.unbind( requestEndId );
-            });
+            this.bind("destroy",()=>controller.unbind( requestId ));
          }
     }
 
