@@ -54,7 +54,8 @@ export class Controller extends Collection{
         connection:undefined,
         timeout: 60000,
         subscribe:false,
-        serverPaging: false
+        serverPaging: false,
+        request:undefined
     };
 
     constructor( options ){
@@ -92,9 +93,22 @@ export class Controller extends Collection{
 
     updatePage() {
         if (this._options.serverPaging && this._filter) {
-            this.refresh();
+
+            // Check if the query is already active
+            if (this._options.request){
+                return this._options.request.finally(()=>{
+                    if (this.isDestroyed()) return;
+                    this.updatePage();
+                });
+            }
+
+            // Check if the page is already loaded
+            if (this.__queryPage.page === this._options.page && this.__queryPage.pageSize === this._options.pageSize){
+                return;
+            }
+            return this.refresh();
         } else {
-            super._updateView();
+            return super._updateView();
         }
     }
 
@@ -144,54 +158,63 @@ export class Controller extends Collection{
 
     query( filter ){
 
-        return new Promise((resolve, reject)=>{
+        return this.queueRequest(()=>{
 
-            const fields = [this._options.id, ...this._schema.filter({virtual:false})]
-                .map(name => ItemController.toSafeFieldName( name ))
-                .join(",");
+            this.__queryPage = {
+                page: this._options.page,
+                pageSize:this._options.pageSize
+            };
 
-            const {
-                serverPaging,
-                page,
-                pageSize,
-                connection,
-                timeout
-            } = this._options;
+            return new Promise((resolve, reject)=>{
 
-            const pagination = serverPaging && page !== undefined && pageSize !== undefined
-                ? `PAGE ${page}:${pageSize}`
-                : "";
+                const fields = [this._options.id, ...this._schema.filter({virtual:false})]
+                    .map(name => ItemController.toSafeFieldName( name ))
+                    .join(",");
 
-            const DBs = Array.isArray( this._options.DBs)
-                ? this._options.DBs.join(",")
-                : typeof this._options.DBs === "string"
-                    ? this._options.DBs
-                    : "*";
+                const {
+                    serverPaging,
+                    page,
+                    pageSize,
+                    connection,
+                    timeout
+                } = this._options;
 
-            const orderBy = !this._options.orderBy || this._options.orderBy === ".oid"
-                ? ""
-                : "order by " + this._options.orderBy;
+                const pagination = serverPaging && page !== undefined && pageSize !== undefined
+                    ? `PAGE ${page}:${pageSize}`
+                    : "";
 
-            connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
-                if (pagination !== ""){
-                    this._totalCount = result.count;
-                    result = result.result;
-                }else{
-                    this._totalCount = result.length - 1;
-                }
+                const DBs = Array.isArray( this._options.DBs)
+                    ? this._options.DBs.join(",")
+                    : typeof this._options.DBs === "string"
+                        ? this._options.DBs
+                        : "*";
 
-                let [header,...items] = result;
-                header = header.map( f => ItemController.fromSafeFieldName(f) );
+                const orderBy = !this._options.orderBy || this._options.orderBy === ".oid"
+                    ? ""
+                    : "order by " + this._options.orderBy;
 
-                result = items.map( fields =>{
-                    const item = {};
-                    for (let i = 0; i < header.length; i++){
-                        item[header[i]] = fields[i]
+                connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
+                    if (pagination !== ""){
+                        this._totalCount = result.count;
+                        result = result.result;
+                    }else{
+                        this._totalCount = result.length - 1;
                     }
-                    return item;
-                })
-                resolve( result );
-            }, reject, timeout );
+
+                    let [header,...items] = result;
+                    header = header.map( f => ItemController.fromSafeFieldName(f) );
+
+                    result = items.map( fields =>{
+                        const item = {};
+                        for (let i = 0; i < header.length; i++){
+                            item[header[i]] = fields[i]
+                        }
+                        return item;
+                    })
+                    resolve( result );
+                }, reject, timeout );
+            });
+
         });
     }
 
@@ -204,36 +227,63 @@ export class Controller extends Collection{
     }
 
     commit( idList ){
-        if ( idList ){
-            return super.commit( idList );
+        if ( idList ) {
+            return super.commit(idList);
         }else{
-            return this._promise("commit",(resolve, reject)=>{
+            return this.queueRequest(()=>{
 
-                const onReject = error => {
-                    this._trigger("reject", error);
-                    return reject( error );
-                }
+                return this._promise("commit",(resolve, reject)=>{
 
-                if ( !this.isCommittable() ) return onReject("not ready");
+                    const onReject = error => {
+                        this._trigger("reject", error);
+                        return reject( error );
+                    }
 
-                const DBs = Array.isArray( this._options.DBs)
-                    ? this._options.DBs.join(",")
-                    : typeof this._options.DBs === "string"
-                        ? this._options.DBs
-                        : "*";
+                    if ( !this.isCommittable() ) return onReject("not ready");
 
-                this.constructor.transaction(DBs, this._changes,  this._options.connection(), this._options.timeout)
-                    .then(()=>{
+                    const DBs = Array.isArray( this._options.DBs)
+                        ? this._options.DBs.join(",")
+                        : typeof this._options.DBs === "string"
+                            ? this._options.DBs
+                            : "*";
 
-                        // The changes settled to the database
-                        super.commit().then(resolve, reject);
+                    this.constructor.transaction(DBs, this._changes,  this._options.connection(), this._options.timeout)
+                        .then(()=>{
 
-                        // Refresh the data after successful commit
-                        this.refresh();
+                            // The changes settled to the database
+                            super.commit().then(resolve, reject);
 
-                    }, onReject);
+                            // Refresh the data after successful commit
+                            this.refresh();
+
+                        }, onReject);
+                })
+
             });
         }
+    }
+
+    queueRequest( requestFunction ){
+
+        if (this.isDestroyed()) return;
+
+        // The request is already active, queue the next
+        const activeRequest = this._options.request;
+        if (activeRequest){
+            return activeRequest.finally(()=>{
+                this.queueRequest( requestFunction );
+            })
+        }
+
+        const request = requestFunction();
+        this.option("request", request);
+        request.finally(()=>{
+            if (this.isDestroyed()) return;
+            this.option("request", null);
+        });
+
+        return request;
+
     }
 
 

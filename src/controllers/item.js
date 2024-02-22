@@ -23,7 +23,6 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Linkable} from "../core/linkable.js";
-import {Eventful} from "../core/eventful.js";
 import * as util from "../utilities/data.js";
 import {Schema} from "../core/schema.js";
 
@@ -166,7 +165,7 @@ export class Controller extends Linkable{
     //------------------------------------------------------------------
     bind(event, callback){
 
-        if ( this._data || this.constructor.events[event] ){
+        if ( this._data || (typeof event === "string" && event.startsWith("$.")) || this.constructor.events[event] ){
             return [ super.bind( event, callback ) ]
         }
 
