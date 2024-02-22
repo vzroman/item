@@ -165,7 +165,7 @@ export class Controller extends Linkable{
     //------------------------------------------------------------------
     bind(event, callback){
 
-        if ( this._data || this.constructor.events[event] ){
+        if ( this._data || event.startsWith("$.") || this.constructor.events[event] ){
             return [ super.bind( event, callback ) ]
         }
 
