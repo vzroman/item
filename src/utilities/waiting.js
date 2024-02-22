@@ -14,7 +14,10 @@ export function waiting( $container ){
     });
     resizeObserver.observe($element["0"]);
 
+    document.addEventListener('scroll', onResize, true);
+
     return function () {
+        document.removeEventListener('scroll', onResize, true);
         resizeObserver.disconnect();
         $lock.remove();
     }
