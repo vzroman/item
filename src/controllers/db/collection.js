@@ -276,9 +276,11 @@ export class Controller extends Collection{
         }
 
         const request = requestFunction();
+        console.log("set request");
         this.option("request", request);
         request.finally(()=>{
             if (this.isDestroyed()) return;
+            console.log("reset request");
             this.option("request", null);
         });
 
