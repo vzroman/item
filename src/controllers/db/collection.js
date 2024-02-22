@@ -55,7 +55,7 @@ export class Controller extends Collection{
         timeout: 60000,
         subscribe:false,
         serverPaging: false,
-        request:true
+        request:undefined
     };
 
     constructor( options ){
