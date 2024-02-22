@@ -26,6 +26,7 @@
 import {Item} from "../core/item.js";
 import {types} from "../types/index.js";
 import {deepMerge} from "../utilities/data.js";
+import {Controller} from "../controllers/item.js";
 //import $ from "jquery";
 
 
@@ -61,6 +62,9 @@ export class View extends Item{
     static getItem( $item ){
         return $item.data("@item");
     }
+
+    #lockControllers;
+    #unlock;
 
     constructor( options ){
         super( options );
@@ -198,6 +202,8 @@ export class View extends Item{
         // Init own links and events to the external data
         super.link( context );
 
+        this.#bindLock( context );
+
         this.linkWidgets( context );
     }
 
@@ -242,8 +248,48 @@ export class View extends Item{
         }
     }
 
+    #bindLock( context ){
+
+        // check if the view item is lockable
+        if (typeof this.lock !== "function") return;
+
+        this.#lockControllers = this.#lockControllers ?? {};
+
+        for (const [key, controller] of Object.entries(context)){
+
+            // the controller is already linked
+            if (this.#lockControllers[key]) continue;
+
+            // Check if the controller is lock linkable
+            if (!(controller instanceof Controller)) continue;
+            if (!controller.constructor.events.requestStart) continue;
+            if (!controller.constructor.events.requestEnd) continue;
+
+            // lock the item on request start
+            const requestStartId =  controller.bind("requestStart", ()=>{
+                if (!this.isDestroyed() && !this.#unlock) this.#unlock = this.lock();
+            });
+
+            // unlock the item on request end
+            const requestEndId =  controller.bind("requestEnd", ()=>{
+                if (!this.isDestroyed() && typeof this.#unlock === "function") this.#unlock();
+                this.#unlock = undefined;
+            });
+
+            this.bind("destroy",()=>{
+                context.data.unbind( requestStartId );
+                context.data.unbind( requestEndId );
+            });
+         }
+    }
+
 
     _destroy(){
+
+        this.#lockControllers = undefined;
+        if (typeof this.#unlock === "function") this.#unlock();
+        this.#unlock = undefined;
+
         if (this._widgets){
             Object.values(this._widgets).forEach(widget =>{
                 widget.destroy();

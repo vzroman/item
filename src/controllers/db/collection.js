@@ -57,6 +57,11 @@ export class Controller extends Collection{
         serverPaging: false
     };
 
+    static events ={
+        requestStart:true,
+        requestEnd:true
+    };
+
     constructor( options ){
 
         options.id = ".oid";
@@ -143,7 +148,7 @@ export class Controller extends Collection{
     }
 
     query( filter ){
-
+        this._trigger("requestStart");
         return new Promise((resolve, reject)=>{
 
             const fields = [this._options.id, ...this._schema.filter({virtual:false})]
@@ -192,7 +197,7 @@ export class Controller extends Collection{
                 })
                 resolve( result );
             }, reject, timeout );
-        });
+        }).finally(()=>this._trigger("requestEnd"));
     }
 
     getCount() {
@@ -222,6 +227,7 @@ export class Controller extends Collection{
                         ? this._options.DBs
                         : "*";
 
+                this._trigger("requestStart");
                 this.constructor.transaction(DBs, this._changes,  this._options.connection(), this._options.timeout)
                     .then(()=>{
 
@@ -231,7 +237,7 @@ export class Controller extends Collection{
                         // Refresh the data after successful commit
                         this.refresh();
 
-                    }, onReject);
+                    }, onReject).finally(()=>this._trigger("requestEnd"));
             });
         }
     }

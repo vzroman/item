@@ -33,6 +33,7 @@ import {Pager} from "../widgets/pager";
 import {Selection} from "../../utilities/selection";
 import {types} from "../../types";
 import style from "./grid.css";
+import {waiting} from "../../utilities/waiting.js";
 
 export class Grid extends Collection{
 
@@ -279,6 +280,9 @@ export class Grid extends Collection{
         });
     }
 
+    lock(){
+        return waiting( this.$table );
+    }
 
     _destroy() {
         this.heightObserver?.disconnect();
