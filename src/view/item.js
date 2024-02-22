@@ -269,8 +269,8 @@ export class View extends Item{
             const requestId =  controller.bind("$.request", request=>{
                 console.log("$.request", request);
                 if (this.isDestroyed()) return; // Already destroyed
-                if (this.#unlock) return;   // Already locked
                 if (request){
+                    if (this.#unlock) return;   // Already locked
                     // Lock the item view on request
                     this.#unlock = this.lock();
                 }else{
