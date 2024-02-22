@@ -80,8 +80,8 @@ export class Window extends ItemView {
         if (!this._options.position){
             const setCenter=()=>{
                 this.set({position:{
-                    top: Math.max(0, (($(window).height() - $(this.$markup).outerHeight()) / 2) + $(window).scrollTop()),
-                    left: Math.max(0, (($(window).width() - $(this.$markup).outerWidth()) / 2) + $(window).scrollLeft())
+                    top: Math.max(0, (($window.height() - $(this.$markup).outerHeight()) / 2) + $window.scrollTop()),
+                    left: Math.max(0, (($window.width() - $(this.$markup).outerWidth()) / 2) + $window.scrollLeft())
                 }});
             }
             setCenter();
@@ -225,8 +225,8 @@ export class Window extends ItemView {
             let top = position.y + shiftY;
             let left = position.x + shiftX;
 
-            top = Math.min(Math.max(top, 0), $(window).height() - this.$markup.innerHeight());
-            left = Math.min(Math.max(left, 0), $(window).width() - this.$markup.innerWidth());
+            top = Math.min(Math.max(top, 0), $window.height() - this.$markup.innerHeight());
+            left = Math.min(Math.max(left, 0), $window.width() - this.$markup.innerWidth());
 
             this.set({position:{ top, left }});
         };
