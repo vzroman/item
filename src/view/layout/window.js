@@ -74,6 +74,8 @@ export class Window extends ItemView {
         this._onDestroy = [];
         this._resizeObserver = undefined;
 
+        const $window = $(window);
+
         //---------position------------------------------
         if (!this._options.position){
             const setCenter=()=>{
@@ -220,10 +222,13 @@ export class Window extends ItemView {
             const shiftX = e.clientX - dragPoint.x;
             const shiftY = e.clientY - dragPoint.y;
 
-            this.set({position:{
-                top: position.y + shiftY,
-                left: position.x + shiftX
-             }});
+            let top = position.y + shiftY;
+            let left = position.x + shiftX;
+
+            top = Math.min(Math.max(top, 0), $(window).height() - this.$markup.innerHeight());
+            left = Math.min(Math.max(left, 0), $(window).width() - this.$markup.innerWidth());
+
+            this.set({position:{ top, left }});
         };
         $titlebar.on("mousedown", e =>{
 
