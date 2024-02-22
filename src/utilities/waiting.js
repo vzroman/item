@@ -4,9 +4,9 @@ export function waiting( $container ){
     const $element = $container ?? $body;
     const $lock=$('<div class="overlay"><div class="wait-img"></div></div>').appendTo($body);
     const onResize = ()=>{
-        const {top, left} = $container.offset();
-        const width = $container.outerWidth();
-        const height = $container.outerHeight();
+        const {top, left} = $element.offset();
+        const width = $element.outerWidth();
+        const height = $element.outerHeight();
         $lock.css({top, left, width:`${width}px`, height:`${height}px`});
     }
     const resizeObserver = new ResizeObserver(() => {
