@@ -200,14 +200,17 @@ export class Grid extends Collection{
     markup(){
 
         const $markup = $(`<div class="${ style.grid } item_grid_container">
-            <table class="${ style.table } item_grid_table">
-                <thead name="header"></thead>
-                <tbody name="tbody"></tbody>
-                <tfoot name="footer"></tfoot>
-            </table>
+            <div class="${ style.table_container }">
+                <table class="${ style.table } item_grid_table">
+                    <thead name="header"></thead>
+                    <tbody name="tbody"></tbody>
+                    <tfoot name="footer"></tfoot>
+                </table>
+            </div>
             <div name="pager" class="item_grid_pager"></div>
         </div>`);
 
+        this.$table_container = $markup.find(`.${ style.table_container }`);
         this.$table = $markup.find('table');
         this.$thead = $markup.find('thead');
         this.$tbody = $markup.find('tbody');
@@ -281,7 +284,7 @@ export class Grid extends Collection{
     }
 
     lock(){
-        return waiting( this.$table );
+        return waiting( this.$table_container );
     }
 
     _destroy() {
