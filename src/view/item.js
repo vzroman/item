@@ -265,9 +265,7 @@ export class View extends Item{
             if (!controller.constructor.options.hasOwnProperty("request")) continue;
 
             // lock the item on request start
-            console.log("controller._options.request", controller._options.request);
             const requestId =  controller.bind("$.request", request=>{
-                console.log("$.request", request);
                 if (this.isDestroyed()) return; // Already destroyed
                 if (request){
                     if (this.#unlock) return;   // Already locked
