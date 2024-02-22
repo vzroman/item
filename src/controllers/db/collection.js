@@ -280,7 +280,9 @@ export class Controller extends Collection{
         request.finally(()=>{
             if (this.isDestroyed()) return;
             this.option("request", null);
-        })
+        });
+
+        return request;
 
     }
 
