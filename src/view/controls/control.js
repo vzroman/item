@@ -43,7 +43,7 @@ export class Control extends View{
         super( options );
 
         if (!this._options.waiting) {
-            this.set({waiting:()=>this.waiting()});
+            this.set({waiting:()=> this.waiting()});
         }
 
         this._widget = undefined;
@@ -130,8 +130,8 @@ export class Control extends View{
     }
 
     waiting( request ){
-        // const unlock = waiting( this.$markup );
-        // request.finally(unlock);
+        const unlock = waiting( this.$markup );
+        request.finally(unlock);
     }
 
     _destroy(){
