@@ -221,7 +221,7 @@ export class Controller extends Linkable{
     }
 
     commit(){
-        return new Promise("commit",(resolve, reject)=>{
+        return new Promise((resolve, reject)=>{
 
             if ( !this.isCommittable() ) {
                 this._trigger("reject", "not ready");
