@@ -32,7 +32,8 @@ export class Controller extends Item{
         autoCommit:false,
         connection:undefined,
         timeout: 60000,
-        subscribe:false
+        subscribe:false,
+        request:true
     };
 
     constructor( options ){
@@ -121,16 +122,20 @@ export class Controller extends Item{
     }
 
     query( filter ){
-        return new Promise((resolve, reject) => {
+        return this.queueRequest(()=>{
 
-            const fields = this._schema.filter({virtual:false}).map(name => this.constructor.toSafeFieldName( name )).join(",");
+            return new Promise((resolve, reject) => {
 
-            this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`,Items=>{
-                 let item = Object.entries( Items[0] ).map(([name, value])=>{ return [ this.constructor.fromSafeFieldName(name), value ] });
-                 item = Object.fromEntries( item );
-                resolve( item );
+                const fields = this._schema.filter({virtual:false}).map(name => this.constructor.toSafeFieldName( name )).join(",");
 
-            }, reject, this._options.timeout );
+                this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`,Items=>{
+                    let item = Object.entries( Items[0] ).map(([name, value])=>{ return [ this.constructor.fromSafeFieldName(name), value ] });
+                    item = Object.fromEntries( item );
+                    resolve( item );
+
+                }, reject, this._options.timeout );
+            });
+
         });
     }
 
@@ -139,48 +144,52 @@ export class Controller extends Item{
     }
 
     commit(){
-        return this._promise("commit",(resolve, reject)=>{
+        return this.queueRequest(()=>{
 
-            const onReject = error => {
-                this._trigger("reject", error);
-                return reject( error );
-            }
-            if ( !this.isCommittable() ) return onReject("not ready");
+            return this._promise("commit",(resolve, reject)=>{
 
-            if ( this._ID ){
-                // the object already exits
-                const changes = this._schema.filter( {virtual:false}, util.patch2value(this._changes, 0) );
-                if ( !Object.keys(changes).length ){
-                    // No changes in persistent fields
-                    super.commit().then(resolve, reject);
+                const onReject = error => {
+                    this._trigger("reject", error);
+                    return reject( error );
+                }
+                if ( !this.isCommittable() ) return onReject("not ready");
+
+                if ( this._ID ){
+                    // the object already exits
+                    const changes = this._schema.filter( {virtual:false}, util.patch2value(this._changes, 0) );
+                    if ( !Object.keys(changes).length ){
+                        // No changes in persistent fields
+                        super.commit().then(resolve, reject);
+                    }else{
+                        // Send a query to the database
+                        this._options.connection().edit_object(this._ID, changes, ()=>{
+
+                            super.commit().then(resolve, reject);
+
+                            // Request the updated item from the database
+                            if (!this._schema) return; // if the schema is undefined then the object is already destroyed
+                            this.refresh();
+
+                        }, onReject, this._options.timeout);
+                    }
                 }else{
-                    // Send a query to the database
-                    this._options.connection().edit_object(this._ID, changes, ()=>{
+                    // new object
+                    const fields = this._schema.filter( {virtual:false}, this.get() );
+                    this._options.connection().create_object(fields, ID=>{
+
+                        this._ID = ID;
+
+                        this._filter = `.oid = $oid('${ ID }')`;
 
                         super.commit().then(resolve, reject);
 
-                        // Request the updated item from the database
                         if (!this._schema) return; // if the schema is undefined then the object is already destroyed
                         this.refresh();
 
-                    }, onReject, this._options.timeout);
+                    },onReject, this._options.timeout);
                 }
-            }else{
-                // new object
-                const fields = this._schema.filter( {virtual:false}, this.get() );
-                this._options.connection().create_object(fields, ID=>{
+            });
 
-                    this._ID = ID;
-
-                    this._filter = `.oid = $oid('${ ID }')`;
-
-                    super.commit().then(resolve, reject);
-
-                    if (!this._schema) return; // if the schema is undefined then the object is already destroyed
-                    this.refresh();
-
-                },onReject, this._options.timeout);
-            }
         });
     }
 
