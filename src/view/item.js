@@ -121,7 +121,7 @@ export class View extends Item{
         });
 
         this._controller.bind("enable", value=>{
-            if (typeof value === "boolean") this.enable( value );
+            this.enable( value !==false );
         });
 
         //-------------------dynamic classes-----------------------------------------
