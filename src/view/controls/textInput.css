@@ -16,3 +16,7 @@
 .invalid{
     color: red
 }
+
+.disabled:not(.invalid){
+    color: #9b9b9b;
+}

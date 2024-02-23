@@ -73,6 +73,12 @@ export class Control extends Parent{
 
     enable( value ){
         this.$markup.prop('disabled', !value);
+
+        if (value){
+            this.$markup.removeClass(styles.disabled);
+        }else{
+            this.$markup.addClass(styles.disabled);
+        }
     }
 
     focus(){
