@@ -123,6 +123,7 @@ export class Control extends View{
     }
 
     waiting( request ){
+        if (!(this.$markup && this.$markup[0])) return;
         const unlock = waiting( this.$markup );
         request.finally(unlock);
     }
