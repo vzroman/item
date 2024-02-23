@@ -230,7 +230,7 @@ export class Controller extends Collection{
         }else{
             return this._promise("commit",(resolve, reject)=>{
 
-                this.queueRequest.finally(()=>{
+                this.queueRequest().finally(()=>{
 
                     const onReject = error => {
                         this._trigger("reject", error);
