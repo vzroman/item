@@ -43,7 +43,7 @@ export class Control extends View{
         super( options );
 
         if (!this._options.waiting) {
-            this.set({waiting:()=> this.waiting()});
+            this.set({waiting:(request)=> this.waiting(request)});
         }
 
         this._widget = undefined;
