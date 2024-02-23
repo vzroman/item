@@ -253,7 +253,14 @@ export class Controller extends Item{
 
     refresh( data ){
         if ( data ) data = this._coerce( data );
-        return this.set( data );
+
+        this._isRefresh = true;
+        return this._promise("refresh",(resolve, reject)=>{
+
+            const result = this.set( data );
+            resolve( result );
+
+        }).finally(()=> this._isRefresh = false);
     }
 
 
