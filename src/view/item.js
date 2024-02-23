@@ -274,7 +274,7 @@ export class View extends Item{
 
             // Check if the controller is lock linkable
             if (!(controller instanceof Controller)) continue;
-            if (!controller.constructor.options.hasOwnProperty("request")) continue;
+            if (!controller.constructor.options.request) continue;
 
             // lock the item on request start
             const requestId =  controller.bind("$.request", request=>this.#onRequest( key, request ));
@@ -293,7 +293,7 @@ export class View extends Item{
 
         this.#pendingRequests = this.#pendingRequests ?? {};
 
-        if (request){
+        if (request?.then){
             this.#pendingRequests[ key ]=true;
             request.finally(()=>{
                 this.#onRequest( key );

@@ -31,7 +31,8 @@ export class Controller extends Linkable{
     static options = {
         schema: undefined,
         autoCommit:true,
-        data:undefined
+        data:undefined,
+        request:false
     };
 
     static events = {
@@ -299,6 +300,29 @@ export class Controller extends Linkable{
         // 2. the controller has changes
         // 3. the data is valid
         return !!(this._data && this._changes && this._isValid);
+    }
+
+    queueRequest( requestFunction ){
+
+        if (this.isDestroyed()) return;
+
+        // The request is already active, queue the next
+        const activeRequest = this._options.request;
+        if (activeRequest){
+            return activeRequest.finally(()=>{
+                this.queueRequest( requestFunction);
+            })
+        }
+
+        const request = requestFunction();
+        this.option("request", request);
+        request.finally(()=>{
+            if (this.isDestroyed()) return;
+            this.option("request", null);
+        });
+
+        return request;
+
     }
 
     _promise( action, fun ){

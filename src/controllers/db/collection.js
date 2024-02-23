@@ -55,7 +55,7 @@ export class Controller extends Collection{
         timeout: 60000,
         subscribe:false,
         serverPaging: false,
-        request:undefined
+        request:true
     };
 
     constructor( options ){
@@ -261,29 +261,6 @@ export class Controller extends Collection{
 
             });
         }
-    }
-
-    queueRequest( requestFunction ){
-
-        if (this.isDestroyed()) return;
-
-        // The request is already active, queue the next
-        const activeRequest = this._options.request;
-        if (activeRequest){
-            return activeRequest.finally(()=>{
-                this.queueRequest( requestFunction );
-            })
-        }
-
-        const request = requestFunction();
-        this.option("request", request);
-        request.finally(()=>{
-            if (this.isDestroyed()) return;
-            this.option("request", null);
-        });
-
-        return request;
-
     }
 
 
