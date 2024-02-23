@@ -308,7 +308,7 @@ export class Controller extends Linkable{
 
         // The request is already active, queue the next
         const activeRequest = this._options.request;
-        if (activeRequest){
+        if (activeRequest?.finally){
             return activeRequest.finally(()=>{
                 this.queueRequest( requestFunction);
             })
