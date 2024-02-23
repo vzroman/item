@@ -158,14 +158,13 @@ export class Controller extends Collection{
 
     query( filter ){
 
-        return this.queueRequest(()=>{
+        return new Promise((resolve, reject)=>{
 
-            this.__queryPage = {
-                page: this._options.page,
-                pageSize:this._options.pageSize
-            };
-
-            return new Promise((resolve, reject)=>{
+            this.queueRequest().finally(()=>{
+                this.__queryPage = {
+                    page: this._options.page,
+                    pageSize:this._options.pageSize
+                };
 
                 const fields = [this._options.id, ...this._schema.filter({virtual:false})]
                     .map(name => ItemController.toSafeFieldName( name ))
@@ -214,7 +213,6 @@ export class Controller extends Collection{
                     resolve( result );
                 }, reject, timeout );
             });
-
         });
     }
 
@@ -230,9 +228,9 @@ export class Controller extends Collection{
         if ( idList ) {
             return super.commit(idList);
         }else{
-            return this.queueRequest(()=>{
+            return this._promise("commit",(resolve, reject)=>{
 
-                return this._promise("commit",(resolve, reject)=>{
+                this.queueRequest.finally(()=>{
 
                     const onReject = error => {
                         this._trigger("reject", error);
@@ -257,8 +255,7 @@ export class Controller extends Collection{
                             this.refresh();
 
                         }, onReject);
-                })
-
+                });
             });
         }
     }

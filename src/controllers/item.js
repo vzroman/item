@@ -302,19 +302,19 @@ export class Controller extends Linkable{
         return !!(this._data && this._changes && this._isValid);
     }
 
-    queueRequest( requestFunction ){
+    queueRequest(){
+        const request = new Promise(resolve=>{
+            if (this.isDestroyed()) resolve();
 
-        if (this.isDestroyed()) return;
+            // The request is already active, queue the next
+            const activeRequest = this._options.request;
+            if (activeRequest?.finally){
+                activeRequest.finally(resolve)
+            }else{
+                resolve();
+            }
+        });
 
-        // The request is already active, queue the next
-        const activeRequest = this._options.request;
-        if (activeRequest?.finally){
-            return activeRequest.finally(()=>{
-                this.queueRequest( requestFunction);
-            })
-        }
-
-        const request = requestFunction();
         this.option("request", request);
         request.finally(()=>{
             if (this.isDestroyed()) return;
@@ -322,7 +322,6 @@ export class Controller extends Linkable{
         });
 
         return request;
-
     }
 
     _promise( action, fun ){

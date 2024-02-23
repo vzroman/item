@@ -122,10 +122,9 @@ export class Controller extends Item{
     }
 
     query( filter ){
-        return this.queueRequest(()=>{
+        return new Promise((resolve, reject) => {
 
-            return new Promise((resolve, reject) => {
-
+            this.queueRequest().finally(()=>{
                 const fields = this._schema.filter({virtual:false}).map(name => this.constructor.toSafeFieldName( name )).join(",");
 
                 this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`,Items=>{
@@ -144,9 +143,9 @@ export class Controller extends Item{
     }
 
     commit(){
-        return this.queueRequest(()=>{
+        return this._promise("commit",(resolve, reject)=>{
 
-            return this._promise("commit",(resolve, reject)=>{
+            this.queueRequest().finally(()=>{
 
                 const onReject = error => {
                     this._trigger("reject", error);
@@ -189,7 +188,6 @@ export class Controller extends Item{
                     },onReject, this._options.timeout);
                 }
             });
-
         });
     }
 
