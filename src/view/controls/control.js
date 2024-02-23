@@ -40,11 +40,11 @@ export class Control extends View{
 
     constructor( options ){
 
-        // if (!options.waiting) {
-        //     options.waiting = ()=>this.waiting();
-        // }
-
         super( options );
+
+        if (!this._options.waiting) {
+            this.set({waiting:()=>this.waiting()});
+        }
 
         this._widget = undefined;
 
