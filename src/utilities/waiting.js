@@ -1,9 +1,10 @@
 import styles from "./lock/lock.css";
+import lock from "./lock/lock.gif";
 
 export function waiting( $container ){
     const $body = $('body');
     const $element = $container ?? $body;
-    const $lock=$(`<div class="${styles.overlay}"><div class="${styles.wait_img}"></div></div>`).appendTo($body);
+    const $lock=$(`<div class="${styles.overlay}"><div class="${styles.wait_img}" style="background-image: ${lock}"></div></div>`).appendTo($body);
     const onResize = ()=>{
         const {top, left} = $element.offset();
         const width = $element.outerWidth();
