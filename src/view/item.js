@@ -120,9 +120,9 @@ export class View extends Item{
             }
         });
 
-        this._controller.bind("enable", value=>{
-            this.enable( value !== false );
-        });
+        // this._controller.bind("enable", value=>{
+        //     this.enable( value !== false );
+        // });
 
         //-------------------dynamic classes-----------------------------------------
         this.bind("classes",(actual = [], previous = [])=>{
