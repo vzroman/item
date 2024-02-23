@@ -253,7 +253,7 @@ export class Controller extends Item{
 
     refresh( data ){
         if ( data ) data = this._coerce( data );
-        return super.refresh( data );
+        return this.set( data );
     }
 
 
