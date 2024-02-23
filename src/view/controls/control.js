@@ -130,8 +130,8 @@ export class Control extends View{
     }
 
     waiting( request ){
-        const unlock = waiting( this.$markup );
-        request.finally(unlock);
+        // const unlock = waiting( this.$markup );
+        // request.finally(unlock);
     }
 
     _destroy(){
