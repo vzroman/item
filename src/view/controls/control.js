@@ -27,6 +27,7 @@ import {View} from "../item.js";
 import {types} from "../../types/index.js";
 import {deepCopy} from "../../utilities/data.js";
 import {waiting} from "../../utilities/waiting.js";
+import styles from "./control.css";
 
 
 // The control is the point where external widgets to be attached
@@ -113,6 +114,12 @@ export class Control extends View{
     enable( value ){
         if (this._widget && typeof this._widget.enable === "function"){
             this._widget.enable( value );
+        }
+
+        if (value){
+            this.$markup.removeClass(styles.disabled);
+        }else{
+            this.$markup.addClass(styles.disabled);
         }
     }
 
