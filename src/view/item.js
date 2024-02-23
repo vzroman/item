@@ -39,7 +39,8 @@ export class View extends Item{
         focus:{type:types.primitives.Bool, default:false, virtual:true},
         classes:{type:types.primitives.Array},
         css:{type:types.primitives.Set, default:{}},
-        widgets:{type:types.primitives.Set}
+        widgets:{type:types.primitives.Set},
+        waiting:{type:types.primitives.Fun}
     };
 
     static events = {
@@ -64,6 +65,7 @@ export class View extends Item{
     }
 
     #lockControllers;
+    #pendingRequests;
     #unlock;
 
     constructor( options ){
@@ -193,6 +195,16 @@ export class View extends Item{
                 },200);
             }
         });
+
+        const dependControllers = {};
+        for (const o of Object.keys(this.constructor.options)){
+            const value = this._options[o];
+            if (value && value instanceof Controller){
+                dependControllers[o] = value;
+            }
+        }
+
+        this.#bindLock( dependControllers );
     }
 
     link( context ){
@@ -251,7 +263,7 @@ export class View extends Item{
     #bindLock( context ){
 
         // check if the view item is lockable
-        if (typeof this.lock !== "function") return;
+        if (this._options.waiting) return;
 
         this.#lockControllers = this.#lockControllers ?? {};
 
@@ -265,27 +277,52 @@ export class View extends Item{
             if (!controller.constructor.options.hasOwnProperty("request")) continue;
 
             // lock the item on request start
-            const requestId =  controller.bind("$.request", request=>{
-                if (this.isDestroyed()) return; // Already destroyed
-                if (request){
-                    if (this.#unlock) return;   // Already locked
-                    // Lock the item view on request
-                    this.#unlock = this.lock();
-                }else{
-                    if (typeof this.#unlock === "function") this.#unlock();
-                    this.#unlock = undefined;
-                }
-            });
+            const requestId =  controller.bind("$.request", request=>this.#onRequest( key, request ));
 
-            this.bind("destroy",()=>controller.unbind( requestId ));
+            const destroyId = controller.bind("destroy", ()=> this.#onRequest(key));
+
+            this.bind("destroy",()=>{
+                controller.unbind( destroyId );
+                controller.unbind( requestId );
+            });
          }
+    }
+
+    #onRequest( key, request ){
+        if (this.isDestroyed()) return; // Already destroyed
+
+        this.#pendingRequests = this.#pendingRequests ?? {};
+
+        if (request){
+            this.#pendingRequests[ key ]=true;
+            request.finally(()=>{
+                this.#onRequest( key );
+            });
+        }else{
+            delete this.#pendingRequests[ key ];
+        }
+
+        const isLocked = Object.keys( this.#pendingRequests ).length > 0;
+
+        this.#lock( isLocked );
+    }
+
+    #lock( value ){
+        if (value && !this.#unlock){
+            const waitPromise = new Promise((resolve)=>this.#unlock = resolve);
+            this._options.waiting( waitPromise );
+        }else if( !value && this.#unlock ){
+            this.#unlock();
+            this.#unlock = undefined;
+        }
     }
 
 
     _destroy(){
 
         this.#lockControllers = undefined;
-        if (typeof this.#unlock === "function") this.#unlock();
+        this.#pendingRequests = undefined;
+        if (this.#unlock) this.#unlock();
         this.#unlock = undefined;
 
         if (this._widgets){
@@ -295,6 +332,7 @@ export class View extends Item{
             this._widgets = undefined;
         }
         this.$markup.remove();
+        this.$markup = undefined;
         super._destroy();
     }
 }

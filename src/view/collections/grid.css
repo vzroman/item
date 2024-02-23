@@ -36,10 +36,6 @@
     line-height: 1.5;
 }
 
-.table_container{
-    flex-grow: 1;
-}
-
 .wrapper{
     position: relative;
     overflow: auto;
