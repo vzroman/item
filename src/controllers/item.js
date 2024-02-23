@@ -221,7 +221,7 @@ export class Controller extends Linkable{
     }
 
     commit(){
-        return this._promise("commit",(resolve, reject)=>{
+        return new Promise("commit",(resolve, reject)=>{
 
             if ( !this.isCommittable() ) {
                 this._trigger("reject", "not ready");
@@ -236,7 +236,7 @@ export class Controller extends Linkable{
             this._trigger("committable", this.isCommittable() );
 
             resolve( changes );
-        });
+        }).catch(error=>this._trigger("error", [error, "commit"]));
     }
 
 
@@ -264,10 +264,11 @@ export class Controller extends Linkable{
                 data = util.patch2value(this._changes,0);
                 return this.refresh( data );
             }else{
-                return this._promise("refresh", resolve => resolve());
+                return new Promise( resolve => resolve())
+                    .catch(error=> this._trigger("error", [error, "refresh"]));
             }
         }else{
-            return this._promise("refresh",(resolve, reject)=>{
+            return new Promise((resolve, reject)=>{
 
                 this._isRefresh = true;
                 this._refresh( data )
@@ -285,7 +286,7 @@ export class Controller extends Linkable{
 
                     }, reject)
                     .finally(()=> this._isRefresh = false);
-            });
+            }).catch(error=>this._trigger("error", [error, "refresh"]));
         }
     }
 
@@ -302,17 +303,19 @@ export class Controller extends Linkable{
         return !!(this._data && this._changes && this._isValid);
     }
 
-    queueRequest(){
-        const request = new Promise(resolve=>{
-            if (this.isDestroyed()) resolve();
+    queueRequest( requestFunction ){
+
+        const request = new Promise((resolve, reject)=>{
+            if (this.isDestroyed()) return;
 
             // The request is already active, queue the next
             const activeRequest = this._options.request;
             if (activeRequest?.finally){
-                activeRequest.finally(resolve)
-            }else{
-                resolve();
+                return activeRequest.finally(()=>{
+                    this.queueRequest( requestFunction );
+                })
             }
+            requestFunction(resolve, reject);
         });
 
         this.option("request", request);
@@ -322,15 +325,7 @@ export class Controller extends Linkable{
         });
 
         return request;
-    }
 
-    _promise( action, fun ){
-        return new Promise((resolve, reject)=>{
-            fun( resolve, error => {
-                this._trigger("error", [error, action]);
-                reject( error )
-            })
-        });
     }
 
     //-------------------------------------------------------------------
