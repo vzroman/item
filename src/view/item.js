@@ -263,7 +263,7 @@ export class View extends Item{
     #bindLock( context ){
 
         // check if the view item is lockable
-        if (this._options.waiting) return;
+        if (typeof this._options.waiting !== "function") return;
 
         this.#lockControllers = this.#lockControllers ?? {};
 
