@@ -19,8 +19,8 @@ export class Window extends ItemView {
         maxWidth:{type: types.primitives.Float},
         maxHeight:{type: types.primitives.Float},
 
-        minWidth:{type: types.primitives.Float},
-        minHeight:{type: types.primitives.Float},
+        minWidth:{type: types.primitives.Float, default: 90},
+        minHeight:{type: types.primitives.Float, default: 50},
 
         title:{type: types.primitives.String, default:""},
         icon:{type: types.primitives.String},
@@ -107,7 +107,8 @@ export class Window extends ItemView {
             }else if(typeof this._options.minWidth === "number" && width < this._options.minWidth){
                 return this.set({width:this._options.minWidth});
             }
-            $view.width( width );
+
+            this.$markup.width( width );
         });
 
         this.bind("height", height =>{
@@ -117,7 +118,7 @@ export class Window extends ItemView {
             }else if(typeof this._options.minHeight === "number" && height < this._options.minHeight){
                 return this.set({height:this._options.minHeight});
             }
-            $view.height( height );
+            this.$markup.height( height );
         });
 
         this.bind("minWidth", minWidth => {
@@ -272,17 +273,16 @@ export class Window extends ItemView {
                     top:0,
                     left:0,
                     bottom:0,
-                    right:0
+                    right:0,
+                    width:"",
+                    height:""
                 });
-                $view.css({width:"",height:""});
             }else{
                 this.$markup.css({
                     top:this._options.position.top,
                     left:this._options.position.left,
                     bottom:"unset",
-                    right:"unset"
-                });
-                $view.css({
+                    right:"unset",
                     width: this._options.width ? `${this._options.width}px`: "",
                     height: this._options.height ? `${this._options.height}px`: "",
                 });
