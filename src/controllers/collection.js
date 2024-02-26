@@ -173,7 +173,7 @@ export class Controller extends Item{
         }else if( !Array.isArray( idList ) ){
             return this.commit( [idList] );
         }else{
-            return this._promise("commit",(resolve, reject) => {
+            return new Promise((resolve, reject) => {
 
                 const onReject = error => {
                     this._trigger("reject", error);
@@ -209,7 +209,7 @@ export class Controller extends Item{
                     this._changes = changes;
                     reject( error );
                 })
-            });
+            }).catch(error=>this._trigger("error", [error, "commit"]));
         }
     }
 
@@ -253,14 +253,7 @@ export class Controller extends Item{
 
     refresh( data ){
         if ( data ) data = this._coerce( data );
-
-        this._isRefresh = true;
-        return this._promise("refresh",(resolve, reject)=>{
-
-            const result = this.set( data );
-            resolve( result );
-
-        }).finally(()=> this._isRefresh = false);
+        return super.refresh( data );
     }
 
 
