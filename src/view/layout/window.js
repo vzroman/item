@@ -260,8 +260,18 @@ export class Window extends ItemView {
         //---------minimize----------------------------------
         this.bind("isMinimized", isMinimized =>{
             if (isMinimized){
+                this.$markup.css({
+                    width:"",
+                    height:"",
+                    minHeight: ""
+                });
                 $view.hide();
             }else{
+                this.$markup.css({
+                    width: this._options.width ? `${this._options.width}px`: "",
+                    height: this._options.height ? `${this._options.height}px`: "",
+                    minHeight: this._options.minHeight ? `${this._options.minHeight}px` : ""
+                });
                 $view.show();
             }
         });
@@ -285,6 +295,7 @@ export class Window extends ItemView {
                     right:"unset",
                     width: this._options.width ? `${this._options.width}px`: "",
                     height: this._options.height ? `${this._options.height}px`: "",
+                    minHeight: this._options.minHeight ? `${this._options.minHeight}px` : ""
                 });
             }
         });
@@ -300,7 +311,13 @@ export class Window extends ItemView {
         }
         const onResize = e =>{
             if (e.buttons !== 1) return onEndResize();
-            resizer( e );
+            const dimensions = resizer( e );
+
+            if (dimensions.position && (dimensions?.width <= this._options.minWidth || dimensions?.height <= this._options.minHeight)) {
+                return;
+            }
+
+            this.set(dimensions);
         }
         $resizers.on("mousedown", e =>{
 
@@ -391,73 +408,73 @@ export class Window extends ItemView {
         if ($(e.target).hasClass(style.resize_n) ){
             return (e)=>{
                 const shiftY = e.clientY - initY;
-                this.set({
+                return {
                     position: { left: initPosition.left, top: initPosition.top + shiftY },
                     height: initHeight - shiftY
-                })
+                };
             }
         }else if($(e.target).hasClass(style.resize_e) ){
             return (e)=>{
                 const shiftX = e.clientX - initX;
-                this.set({ width: initWidth + shiftX })
+                return { width: initWidth + shiftX };
             }
         }else if($(e.target).hasClass(style.resize_s) ){
             return (e)=>{
                 const shiftY = e.clientY - initY;
-                this.set({ height: initHeight + shiftY })
+                return { height: initHeight + shiftY };
             }
         }else if ($(e.target).hasClass(style.resize_w) ){
             return (e)=>{
                 const shiftX = e.clientX - initX;
-                this.set({
+                return {
                     position: { left: initPosition.left + shiftX, top: initPosition.top },
                     width: initWidth - shiftX
-                })
+                };
             }
         }else if ($(e.target).hasClass(style.resize_se) ){
             return (e)=>{
                 const shiftX = e.clientX - initX;
                 const shiftY = e.clientY - initY;
-                this.set({
+                return {
                     width: initWidth + shiftX,
                     height: initHeight + shiftY
-                })
+                };
             }
         }else if ($(e.target).hasClass(style.resize_sw) ){
             return (e)=>{
                 const shiftX = e.clientX - initX;
                 const shiftY = e.clientY - initY;
-                this.set({
+                return {
                     position: {top:initPosition.top, left: initPosition.left + shiftX},
                     width: initWidth - shiftX,
                     height: initHeight + shiftY
-                })
+                };
             }
         }else if ($(e.target).hasClass(style.resize_ne) ){
             return (e)=>{
                 const shiftX = e.clientX - initX;
                 const shiftY = e.clientY - initY;
-                this.set({
+                return {
                     position: {
                         top:initPosition.top + shiftY,
                         left: initPosition.left
                     },
                     width: initWidth + shiftX,
                     height: initHeight - shiftY
-                })
+                };
             }
         }else{
             return (e)=>{
                 const shiftX = e.clientX - initX;
                 const shiftY = e.clientY - initY;
-                this.set({
+                return {
                     position: {
                         top:initPosition.top + shiftY,
                         left: initPosition.left + shiftX
                     },
                     width: initWidth - shiftX,
                     height: initHeight - shiftY
-                })
+                };
             }
         }
     }
