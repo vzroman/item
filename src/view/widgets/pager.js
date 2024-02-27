@@ -171,10 +171,12 @@ export class Pager extends ItemView{
                                 text:"data@page", 
                                 css: { source: this, event: "page",  handler: (current, _prev, _, controller) => {
                                     const {page} = controller.data?.get() ?? {};
+                                    let backgroundColor = null, color = null;
                                     if (current === page) {
-                                        return { "background-color": "#1274AC", color: "#fff" };
+                                        backgroundColor = "#1274AC";
+                                        color = "#fff";
                                     }
-                                    return { "background-color": null, color: null };
+                                    return { "background-color": backgroundColor, color };
                                 } } 
                             },
                             events:{ click:{ handler:(_,button)=>{
