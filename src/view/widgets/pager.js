@@ -167,7 +167,16 @@ export class Pager extends ItemView{
                     item:{
                         view:controls.Button,
                         options:{
-                            links:{text:"data@page" },
+                            links:{
+                                text:"data@page", 
+                                css: { source: this, event: "page",  handler: (current, _prev, _, controller) => {
+                                    const {page} = controller.data?.get() ?? {};
+                                    if (current === page) {
+                                        return { "background-color": "#1274AC", color: "#fff" };
+                                    }
+                                    return { "background-color": null, color: null };
+                                } } 
+                            },
                             events:{ click:{ handler:(_,button)=>{
                                 this.set({page:+button.get("text")})
                             }}}
