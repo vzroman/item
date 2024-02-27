@@ -76,7 +76,7 @@ export class Controller extends Collection{
     //-------------------------------------------------------------------
     init( filter ){
 
-        return this._promise("init",(resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
             const _filter = this.constructor.filter2query( filter );
 
@@ -88,7 +88,7 @@ export class Controller extends Collection{
                 resolve( super.init(data) );
 
             }, reject);
-        });
+        }).catch(error=>this._trigger("error", [error, "init"]));
     }
 
     updatePage() {
@@ -123,7 +123,7 @@ export class Controller extends Collection{
     }
 
     rollback(changes, error){
-        return this._promise("rollback",(resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
             if (changes) {
                 resolve( super.rollback(changes, error) );
@@ -136,12 +136,12 @@ export class Controller extends Collection{
 
                 }, reject);
             }
-        });
+        }).catch(error=>this._trigger("error", [error, "rollback"]));
     }
 
     refresh( data ){
         if ( !data ){
-            return this._promise("refresh",(resolve, reject) => {
+            return new Promise((resolve, reject) => {
 
                 if (this._filter === undefined) return reject("not initialized");
 
@@ -150,71 +150,65 @@ export class Controller extends Collection{
                     super.refresh( data ).then( resolve, reject );
 
                 }, reject);
-            });
+            }).catch(error=>this._trigger("error", [error, "refresh"]));
         }else{
             return super.refresh( data );
         }
     }
 
     query( filter ){
-
-        return this.queueRequest(()=>{
-
+        return this.queueRequest((resolve, reject)=>{
             this.__queryPage = {
                 page: this._options.page,
                 pageSize:this._options.pageSize
             };
 
-            return new Promise((resolve, reject)=>{
+            const fields = [this._options.id, ...this._schema.filter({virtual:false})]
+                .map(name => ItemController.toSafeFieldName( name ))
+                .join(",");
 
-                const fields = [this._options.id, ...this._schema.filter({virtual:false})]
-                    .map(name => ItemController.toSafeFieldName( name ))
-                    .join(",");
+            const {
+                serverPaging,
+                page,
+                pageSize,
+                connection,
+                timeout
+            } = this._options;
 
-                const {
-                    serverPaging,
-                    page,
-                    pageSize,
-                    connection,
-                    timeout
-                } = this._options;
+            const pagination = serverPaging && page !== undefined && pageSize !== undefined
+                ? `PAGE ${page}:${pageSize}`
+                : "";
 
-                const pagination = serverPaging && page !== undefined && pageSize !== undefined
-                    ? `PAGE ${page}:${pageSize}`
-                    : "";
+            const DBs = Array.isArray( this._options.DBs)
+                ? this._options.DBs.join(",")
+                : typeof this._options.DBs === "string"
+                    ? this._options.DBs
+                    : "*";
 
-                const DBs = Array.isArray( this._options.DBs)
-                    ? this._options.DBs.join(",")
-                    : typeof this._options.DBs === "string"
-                        ? this._options.DBs
-                        : "*";
+            const orderBy = !this._options.orderBy || this._options.orderBy === ".oid"
+                ? ""
+                : "order by " + this._options.orderBy;
 
-                const orderBy = !this._options.orderBy || this._options.orderBy === ".oid"
-                    ? ""
-                    : "order by " + this._options.orderBy;
+            connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
+                if (pagination !== ""){
+                    this._totalCount = result.count;
+                    result = result.result;
+                }else{
+                    this._totalCount = result.length - 1;
+                }
 
-                connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
-                    if (pagination !== ""){
-                        this._totalCount = result.count;
-                        result = result.result;
-                    }else{
-                        this._totalCount = result.length - 1;
+                let [header,...items] = result;
+                header = header.map( f => ItemController.fromSafeFieldName(f) );
+
+                result = items.map( fields =>{
+                    const item = {};
+                    for (let i = 0; i < header.length; i++){
+                        item[header[i]] = fields[i]
                     }
-
-                    let [header,...items] = result;
-                    header = header.map( f => ItemController.fromSafeFieldName(f) );
-
-                    result = items.map( fields =>{
-                        const item = {};
-                        for (let i = 0; i < header.length; i++){
-                            item[header[i]] = fields[i]
-                        }
-                        return item;
-                    })
-                    resolve( result );
-                }, reject, timeout );
-            });
-
+                    return item;
+                })
+                resolve( result );
+            }, reject, timeout );
         });
     }
 
@@ -230,36 +224,32 @@ export class Controller extends Collection{
         if ( idList ) {
             return super.commit(idList);
         }else{
-            return this.queueRequest(()=>{
+            return this.queueRequest((resolve, reject)=>{
 
-                return this._promise("commit",(resolve, reject)=>{
+                const onReject = error => {
+                    this._trigger("reject", error);
+                    return reject( error );
+                }
 
-                    const onReject = error => {
-                        this._trigger("reject", error);
-                        return reject( error );
-                    }
+                if ( !this.isCommittable() ) return onReject("not ready");
 
-                    if ( !this.isCommittable() ) return onReject("not ready");
+                const DBs = Array.isArray( this._options.DBs)
+                    ? this._options.DBs.join(",")
+                    : typeof this._options.DBs === "string"
+                        ? this._options.DBs
+                        : "*";
 
-                    const DBs = Array.isArray( this._options.DBs)
-                        ? this._options.DBs.join(",")
-                        : typeof this._options.DBs === "string"
-                            ? this._options.DBs
-                            : "*";
+                this.constructor.transaction(DBs, this._changes,  this._options.connection(), this._options.timeout)
+                    .then(()=>{
 
-                    this.constructor.transaction(DBs, this._changes,  this._options.connection(), this._options.timeout)
-                        .then(()=>{
+                        // The changes settled to the database
+                        super.commit().then(resolve, reject);
 
-                            // The changes settled to the database
-                            super.commit().then(resolve, reject);
+                        // Refresh the data after successful commit
+                        this.refresh();
 
-                            // Refresh the data after successful commit
-                            this.refresh();
-
-                        }, onReject);
-                })
-
-            });
+                    }, onReject);
+            }).catch(error=>this._trigger("error", [error, "commit"]));
         }
     }
 
