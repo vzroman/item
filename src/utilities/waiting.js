@@ -4,7 +4,9 @@ import lock from "./lock/lock.gif";
 export function waiting( $container ){
     const $body = $('body');
     const $element = $container ?? $body;
-    const $lock=$(`<div class="${styles.overlay}"><div class="${styles.wait_img}" style="background-image: url(${lock})"></div></div>`).appendTo($body);
+    const $lock=$(`<div class="${styles.overlay}" style="background-image: url(${lock})"></div>`).appendTo($body);
+
+    //const $lock=$(`<div class="${styles.overlay}"><div class="${styles.wait_img}" style="background-image: url(${lock})"></div></div>`).appendTo($body);
     const onResize = ()=>{
         const {top, left} = $element.offset();
         const width = $element.outerWidth();
