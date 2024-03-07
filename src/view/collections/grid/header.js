@@ -74,7 +74,7 @@ export class Header extends Item{
 
         const getTableHeader = (columns, level = 0, name) => {
             for (let i = 0; i < columns.length; i++) {
-                const { text, children } =  columns[i];
+                const { children } =  columns[i];
         
                 let colSpan = getColSpan({ children });
                 colSpan = colSpan > 1 ? `colspan="${colSpan}"` : "";
@@ -88,7 +88,7 @@ export class Header extends Item{
                  
                 const _name = toName(name, i);
         
-                tr[level].push(`<td name="${_name}" ${colSpan} ${rowSpan}></td>`);
+                tr[level].push(`<th name="${_name}" ${colSpan} ${rowSpan}></th>`);
         
                 if (children) {
                     getTableHeader(children, level + 1, _name);
@@ -98,37 +98,28 @@ export class Header extends Item{
 
         getTableHeader(this._options.columns);
 
-        let trMarkup = "";
+        let markup = "";
 
         for (const header of tr) {
-            trMarkup += "<tr>";
+            markup += "<tr>";
 
             for (const th of header) {
-                trMarkup += th;
+                markup += th;
             }
 
-            trMarkup += "</tr>";
+            markup += "</tr>";
         }
 
-       // const $markup = $(`<div></div>`);
-        const $markup = $(trMarkup);
+        markup = $(markup);
 
-        // $(trMarkup).appendTo($markup);
-        
-        // this._options.columns.forEach(({colspan=1}, i)=> $(`<td colspan="${colspan}" name=${ i }></td>`).appendTo($markup));
         if (this._options.checkbox){
             const pos = this._options.numerated ? 2 : 1;
-            $markup.find(`td::nth-child(${ pos })`).width(32);
+            markup.find(`th::nth-child(${ pos })`).width(32);
         }
-        return $markup;
+        return markup;
     }
 
-    widgets(){
-        // return this._options.columns.reduce((acc, col, i)=>{
-        //     acc[i] = col;
-        //     return acc;
-        // },{});
-
+    widgets() {
         return cols2widget(this._options.columns);
     }
 }
@@ -144,10 +135,10 @@ function cols2widget(columns, name) {
             
             if (typeof text === "function") {
                 options = {
-                    ...options,
                     links:{ 
                         html:{source:"data", event:[], handler: text}
-                    }
+                    },
+                    ...options
                 };
             }
             

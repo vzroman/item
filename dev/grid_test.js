@@ -34,15 +34,59 @@ export function run( $container ){
             connection:()=>connection,
             schema:{
                 ".name":{ type:item.types.primitives.String },
-                ".pattern":{type:item.types.primitives.String}
+                ".pattern":{type:item.types.primitives.String},
+                ".folder":{type:item.types.primitives.String},
+                ".oid":{type:item.types.primitives.String},
             }
         });
+
+        
+        let header;
+        
+        // nested header
+        header = [
+            {text: "I", children: [
+                {text: "LIKE", children: [
+                    {text: "On"},
+                    {text: "High"}
+                ]},
+                {text: "HOT WOMEN", children: [
+                    {text:"heels"}, {text: "!"}
+                ]},
+            ]}
+        ];
+
+        // header type 2
+        header = ["name", "pattern", "folder", "oid"];
+
+        // header type 3
+        header = [
+            {  view: item.view.controls.TextInput, options:{ value: "name"} },
+            {  view: item.view.primitives.Html, options:{ html: "pattern"} },
+            {  text: "Folder" },
+            {  text: () => "OID" },
+        ];
+
+        // nested header with different views
+        header = [
+            { view: item.view.primitives.Label, options:{ text: "I"}, children: [
+                {text: () => "LIKE", children: [
+                    {view: item.view.primitives.Label, options:{ text: "ON", css: { "color": "red" }}},
+                    {text: "High"}
+                ]},
+                {text: "HOT WOMEN", children: [
+                    { view: item.view.controls.TextInput, options:{ value: "heels"}}, {text: "!"}
+                ]},
+            ]}
+        ];
+
 
         const grid = new item.view.collections.Grid({
             $container,
             data:controller,
-            columns:[".name",".pattern"],    // string | { fields, handler } | Item }
-            header:["name", "pattern"],                    // string | Item | function -> string | $markup
+            columns:[".name",".pattern", ".folder", ".oid"],    // string | { fields, handler } | Item }
+            //header:["name", "pattern"],                    // string | Item | function -> string | $markup
+            header,
             resizable:true,
             numerated:true,
             multiselect:true,

@@ -67,13 +67,18 @@ table>td {
     background-color: #86B0CC;
 }
 .table>tfoot>tr>td,
-.table>thead>tr>td {
+.table>thead>tr>td,
+.table>thead>tr:not(:nth-child(1))>th {
     background: #fff;
     border-bottom: 1px solid #ccc;
     border-right: 1px solid #ccc;
     border-top: 1px solid #ccc;
     padding: 3px;
     background-color: #EEE;
+}
+
+.table>thead>tr:nth-child(n + 3)>th {
+    border-top: none;
 }
 
 .table>thead{
