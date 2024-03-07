@@ -68,8 +68,54 @@ export class Header extends Item{
     }
 
     markup() {
-        const $markup = $(`<tr></tr>`);
-        this._options.columns.forEach(({colspan=1}, i)=> $(`<td colspan="${colspan}" name=${ i }></td>`).appendTo($markup));
+        const rows = getRowDepth(this._options.columns);
+
+        const tr = Array(rows).fill().map(() => []);
+
+        const getTableHeader = (columns, level = 0, name) => {
+            for (let i = 0; i < columns.length; i++) {
+                const { text, children } =  columns[i];
+        
+                let colSpan = getColSpan({ children });
+                colSpan = colSpan > 1 ? `colspan="${colSpan}"` : "";
+        
+                let rowSpan = "";
+        
+                if (!children) {
+                    const diff = rows - level;
+                    rowSpan = diff > 1 ? `rowspan="${diff}"` : rowSpan;
+                }
+                 
+                const _name = name !== undefined ? `${name}-${i}` : i;
+        
+                tr[level].push(`<td name="${_name}" ${colSpan} ${rowSpan}></td>`);
+        
+                if (children) {
+                    getTableHeader(children, level + 1, _name);
+                }
+            }
+        };
+
+        getTableHeader(this._options.columns);
+
+        let trMarkup = "";
+
+        for (const header of tr) {
+            trMarkup += "<tr>";
+
+            for (const th of header) {
+                trMarkup += th;
+            }
+
+            trMarkup += "</tr>";
+        }
+
+       // const $markup = $(`<div></div>`);
+        const $markup = $(trMarkup);
+
+        // $(trMarkup).appendTo($markup);
+        
+        // this._options.columns.forEach(({colspan=1}, i)=> $(`<td colspan="${colspan}" name=${ i }></td>`).appendTo($markup));
         if (this._options.checkbox){
             const pos = this._options.numerated ? 2 : 1;
             $markup.find(`td::nth-child(${ pos })`).width(32);
@@ -78,10 +124,78 @@ export class Header extends Item{
     }
 
     widgets(){
-        return this._options.columns.reduce((acc, col, i)=>{
-            acc[i] = col;
-            return acc;
-        },{});
+        // return this._options.columns.reduce((acc, col, i)=>{
+        //     acc[i] = col;
+        //     return acc;
+        // },{});
+
+        return cols2widget(this._options.columns);
     }
 }
 Header.extend();
+
+function cols2widget(columns, name) {
+    return columns.reduce((widgets, col, i) => {
+        if (typeof col === "object") {
+            let {children, text, view, options, ...rest} = col;
+            
+            view ||= Html;
+            options ||= { html: text };
+            
+            if (typeof text === "function") {
+                options = {
+                    ...options,
+                    links:{ 
+                        html:{source:"data", event:[], handler: text}
+                    }
+                };
+            }
+            
+            const _name = name ? `${name}-${i}` : i + "";
+            
+            widgets[_name] = { view, options, ... rest };
+            
+            if (children) {
+                widgets = {...widgets, ...cols2widget(children, _name)};
+            }
+        } else {
+            widgets[i] = col;
+        }
+        
+        return widgets;
+    }, {});
+}
+
+function getColSpan({ children }, colSpan = 0) {
+    if (!children) return 1;
+
+    children.forEach((c) => {
+        if (!c.children) {
+            colSpan++;
+        } else {
+            c.children.forEach((c) => {
+                const r = getColSpan(c);
+                colSpan += r;
+            });
+        }
+    });
+
+    return colSpan;
+}
+
+function getRowDepth(columns) {
+    let maxDepth = 0;
+
+    function traverse(columns, depth = 1) {
+        for (const { children } of columns) {
+            if (children) {
+                traverse(children, depth + 1);
+            }
+        }
+        maxDepth = Math.max(maxDepth, depth);
+    }
+
+    traverse(columns);
+
+    return maxDepth;
+}
