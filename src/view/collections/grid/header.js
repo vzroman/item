@@ -86,7 +86,7 @@ export class Header extends Item{
                     rowSpan = diff > 1 ? `rowspan="${diff}"` : rowSpan;
                 }
                  
-                const _name = name !== undefined ? `${name}-${i}` : i;
+                const _name = toName(name, i);
         
                 tr[level].push(`<td name="${_name}" ${colSpan} ${rowSpan}></td>`);
         
@@ -151,7 +151,7 @@ function cols2widget(columns, name) {
                 };
             }
             
-            const _name = name ? `${name}-${i}` : i + "";
+            const _name = toName(name, i);
             
             widgets[_name] = { view, options, ... rest };
             
@@ -198,4 +198,8 @@ function getRowDepth(columns) {
     traverse(columns);
 
     return maxDepth;
+}
+
+function toName(name, i) {
+    return name !== undefined ? `${name}-${i}` : i + "";
 }
