@@ -72,7 +72,7 @@ export class Header extends Item{
 
         const tr = Array(rows).fill().map(() => []);
 
-        const getTableHeader = (columns, level = 0, name) => {
+        const fillRowCells = (columns, level = 0, name) => {
             for (let i = 0; i < columns.length; i++) {
                 const { children } =  columns[i];
         
@@ -91,12 +91,12 @@ export class Header extends Item{
                 tr[level].push(`<th name="${_name}" ${colSpan} ${rowSpan}></th>`);
         
                 if (children) {
-                    getTableHeader(children, level + 1, _name);
+                    fillRowCells(children, level + 1, _name);
                 }
             }
         };
 
-        getTableHeader(this._options.columns);
+        fillRowCells(this._options.columns);
 
         let markup = "";
 
