@@ -45,7 +45,7 @@ export function run( $container ){
         
         // nested header
         header = [
-            {text: "I", children: [
+            {text: "MEN", children: [
                 {text: "LIKE", children: [
                     {text: "On"},
                     {text: "High"}
@@ -69,7 +69,7 @@ export function run( $container ){
 
         // nested header with different views
         header = [
-            { view: item.view.primitives.Label, options:{ text: "I"}, children: [
+            { view: item.view.primitives.Label, options:{ text: "MEN"}, children: [
                 {text: () => "LIKE", children: [
                     {view: item.view.primitives.Label, options:{ text: "ON", css: { "color": "red" }}},
                     {text: "High"}
