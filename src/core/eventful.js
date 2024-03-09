@@ -101,6 +101,5 @@ function trigger() {
                 }
             })
         }
-        __triggerQueue.shift();
     }
 }
