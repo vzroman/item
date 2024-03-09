@@ -55,7 +55,8 @@ export class Controller extends Collection{
         timeout: 60000,
         subscribe:false,
         serverPaging: false,
-        request:true
+        request:true,
+        filter:undefined
     };
 
     constructor( options ){
@@ -69,6 +70,13 @@ export class Controller extends Collection{
 
         if (typeof this._options.connection !== "function")
             throw new Error("invalid connection: " + this._options.connection);
+
+        this.bind("$.filter", ()=>{
+            if (!this._filter) return;
+            this.query( this._filter ).then(data => {
+                this.refresh( data );
+            })
+        });
     }
 
     //-------------------------------------------------------------------
@@ -162,6 +170,10 @@ export class Controller extends Collection{
                 page: this._options.page,
                 pageSize:this._options.pageSize
             };
+
+            if (this._options.filter){
+                filter = `and(${ filter }, ${ this.constructor.filter2query( this._options.filter ) })`;
+            }
 
             const fields = [this._options.id, ...this._schema.filter({virtual:false})]
                 .map(name => ItemController.toSafeFieldName( name ))
