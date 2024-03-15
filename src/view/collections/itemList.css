@@ -27,22 +27,28 @@
     position: relative;
     box-shadow: 0 1px 2px 1px rgba(0,0,0,.08), 0 3px 6px rgba(0,0,0,.08);
     border: 1px solid rgba(20,53,80,0.14);
-    padding: 1em;
+    padding: 8px;
     margin: 0.2em;
 }
 
 .item>[name="remove"]{
     position: absolute;
-    top:0;
-    right: 0;
-    opacity:0.1
-}
-
-.item:hover>[name="remove"]{
-    opacity: 1;
+    top:8px;
+    right: 10px;
 }
 
 .item>[name="item"]{
     height: 100%;
     width: 100%;
+}
+
+.item_wrapper{
+    position:relative;
+    gap:10px;
+}
+
+.item>[name="addItem"]{
+    position: absolute;
+    top:8px;
+    right: 10px;
 }
