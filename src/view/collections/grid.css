@@ -77,7 +77,7 @@ table>td {
     background-color: #EEE;
 }
 
-.table>thead>tr:nth-child(n + 3)>th {
+.table>thead>tr:nth-child(n + 2)>th {
     border-top: none;
 }
 
