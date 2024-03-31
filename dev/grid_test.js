@@ -71,7 +71,7 @@ export function run( $container ){
         header = [
             { view: item.view.primitives.Label, options:{ text: "MEN"}, children: [
                 {text: () => "LIKE", children: [
-                    {view: item.view.primitives.Label, options:{ text: "ON", css: { "color": "red" }}},
+                    {view: item.view.primitives.Label, options:{ text: "ON", css: { "color": "green" }}},
                     {text: "High"}
                 ]},
                 {text: "HOT WOMEN", children: [
