@@ -54,7 +54,9 @@ export class Controller extends Collection{
         connection:undefined,
         timeout: 60000,
         subscribe:false,
-        serverPaging: false
+        serverPaging: false,
+        request:true,
+        filter:undefined
     };
 
     constructor( options ){
@@ -68,6 +70,13 @@ export class Controller extends Collection{
 
         if (typeof this._options.connection !== "function")
             throw new Error("invalid connection: " + this._options.connection);
+
+        this.bind("$.filter", ()=>{
+            if (!this._filter) return;
+            this.query( this._filter ).then(data => {
+                this.refresh( data );
+            })
+        });
     }
 
     //-------------------------------------------------------------------
@@ -75,7 +84,7 @@ export class Controller extends Collection{
     //-------------------------------------------------------------------
     init( filter ){
 
-        return this._promise("init",(resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
             const _filter = this.constructor.filter2query( filter );
 
@@ -87,14 +96,27 @@ export class Controller extends Collection{
                 resolve( super.init(data) );
 
             }, reject);
-        });
+        }).catch(error=>this._trigger("error", [error, "init"]));
     }
 
     updatePage() {
         if (this._options.serverPaging && this._filter) {
-            this.refresh();
+
+            // Check if the query is already active
+            if (this._options.request){
+                return this._options.request.finally(()=>{
+                    if (this.isDestroyed()) return;
+                    this.updatePage();
+                });
+            }
+
+            // Check if the page is already loaded
+            if (this.__queryPage.page === this._options.page && this.__queryPage.pageSize === this._options.pageSize){
+                return;
+            }
+            return this.refresh();
         } else {
-            super._updateView();
+            return super._updateView();
         }
     }
 
@@ -109,7 +131,7 @@ export class Controller extends Collection{
     }
 
     rollback(changes, error){
-        return this._promise("rollback",(resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
             if (changes) {
                 resolve( super.rollback(changes, error) );
@@ -122,12 +144,12 @@ export class Controller extends Collection{
 
                 }, reject);
             }
-        });
+        }).catch(error=>this._trigger("error", [error, "rollback"]));
     }
 
     refresh( data ){
         if ( !data ){
-            return this._promise("refresh",(resolve, reject) => {
+            return new Promise((resolve, reject) => {
 
                 if (this._filter === undefined) return reject("not initialized");
 
@@ -136,15 +158,22 @@ export class Controller extends Collection{
                     super.refresh( data ).then( resolve, reject );
 
                 }, reject);
-            });
+            }).catch(error=>this._trigger("error", [error, "refresh"]));
         }else{
             return super.refresh( data );
         }
     }
 
     query( filter ){
+        return this.queueRequest((resolve, reject)=>{
+            this.__queryPage = {
+                page: this._options.page,
+                pageSize:this._options.pageSize
+            };
 
-        return new Promise((resolve, reject)=>{
+            if (this._options.filter){
+                filter = `and(${ filter }, ${ this.constructor.filter2query( this._options.filter ) })`;
+            }
 
             const fields = [this._options.id, ...this._schema.filter({virtual:false})]
                 .map(name => ItemController.toSafeFieldName( name ))
@@ -204,10 +233,10 @@ export class Controller extends Collection{
     }
 
     commit( idList ){
-        if ( idList ){
-            return super.commit( idList );
+        if ( idList ) {
+            return super.commit(idList);
         }else{
-            return this._promise("commit",(resolve, reject)=>{
+            return this.queueRequest((resolve, reject)=>{
 
                 const onReject = error => {
                     this._trigger("reject", error);
@@ -232,7 +261,7 @@ export class Controller extends Collection{
                         this.refresh();
 
                     }, onReject);
-            });
+            }).catch(error=>this._trigger("error", [error, "commit"]));
         }
     }
 

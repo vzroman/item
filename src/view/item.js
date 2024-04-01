@@ -26,6 +26,7 @@
 import {Item} from "../core/item.js";
 import {types} from "../types/index.js";
 import {deepMerge} from "../utilities/data.js";
+import {Controller} from "../controllers/item.js";
 //import $ from "jquery";
 
 
@@ -38,7 +39,8 @@ export class View extends Item{
         focus:{type:types.primitives.Bool, default:false, virtual:true},
         classes:{type:types.primitives.Array},
         css:{type:types.primitives.Set, default:{}},
-        widgets:{type:types.primitives.Set}
+        widgets:{type:types.primitives.Set},
+        waiting:{type:types.primitives.Fun}
     };
 
     static events = {
@@ -61,6 +63,10 @@ export class View extends Item{
     static getItem( $item ){
         return $item.data("@item");
     }
+
+    #lockControllers;
+    #pendingRequests;
+    #unlock;
 
     constructor( options ){
         super( options );
@@ -189,6 +195,16 @@ export class View extends Item{
                 },200);
             }
         });
+
+        const dependControllers = {};
+        for (const o of Object.keys(this.constructor.options)){
+            const value = this._options[o];
+            if (value && value instanceof Controller){
+                dependControllers[o] = value;
+            }
+        }
+
+        this.#bindLock( dependControllers );
     }
 
     link( context ){
@@ -197,6 +213,8 @@ export class View extends Item{
 
         // Init own links and events to the external data
         super.link( context );
+
+        this.#bindLock( context );
 
         this.linkWidgets( context );
     }
@@ -242,8 +260,71 @@ export class View extends Item{
         }
     }
 
+    #bindLock( context ){
+
+        // check if the view item is lockable
+        if (typeof this._options.waiting !== "function") return;
+
+        this.#lockControllers = this.#lockControllers ?? {};
+
+        for (const [key, controller] of Object.entries(context)){
+
+            // the controller is already linked
+            if (this.#lockControllers[key]) continue;
+
+            // Check if the controller is lock linkable
+            if (!(controller instanceof Controller)) continue;
+            if (!controller.constructor.options.request) continue;
+
+            // lock the item on request start
+            const requestId =  controller.bind("$.request", request=>this.#onRequest( key, request ));
+
+            const destroyId = controller.bind("destroy", ()=> this.#onRequest(key));
+
+            this.bind("destroy",()=>{
+                controller.unbind( destroyId );
+                controller.unbind( requestId );
+            });
+         }
+    }
+
+    #onRequest( key, request ){
+        if (this.isDestroyed()) return; // Already destroyed
+
+        this.#pendingRequests = this.#pendingRequests ?? {};
+
+        if (request?.then){
+            this.#pendingRequests[ key ]=true;
+            request.finally(()=>{
+                this.#onRequest( key );
+            });
+        }else{
+            delete this.#pendingRequests[ key ];
+        }
+
+        const isLocked = Object.keys( this.#pendingRequests ).length > 0;
+
+        this.#lock( isLocked );
+    }
+
+    #lock( value ){
+        if (value && !this.#unlock){
+            const waitPromise = new Promise((resolve)=>this.#unlock = resolve);
+            this._options.waiting( waitPromise );
+        }else if( !value && this.#unlock ){
+            this.#unlock();
+            this.#unlock = undefined;
+        }
+    }
+
 
     _destroy(){
+
+        this.#lockControllers = undefined;
+        this.#pendingRequests = undefined;
+        if (this.#unlock) this.#unlock();
+        this.#unlock = undefined;
+
         if (this._widgets){
             Object.values(this._widgets).forEach(widget =>{
                 widget.destroy();
@@ -251,6 +332,7 @@ export class View extends Item{
             this._widgets = undefined;
         }
         this.$markup.remove();
+        this.$markup = undefined;
         super._destroy();
     }
 }

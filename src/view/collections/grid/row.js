@@ -52,8 +52,6 @@ export class Row extends Item{
     constructor( options ) {
         super( options );
 
-        this.#placeAfter( this._options.previousRow );
-
         this.bind("selected", (val=false) => {
             this.$markup.toggleClass(style.selected_row, val);
             this.$markup.trigger("item-grid-row-select",[this, val]);
@@ -68,15 +66,24 @@ export class Row extends Item{
         }
 
         this.bind("previousRow", row=>{
-            this.#unbind.forEach( u => u());
-            this.#unbind = [];
+            
+            setTimeout(()=>{
 
-            if (this._options.numerated && row){
-                const id = row.bind("index",()=>{
-                    this.#updateIndex( );
-                });
-                this.#unbind.push(()=> row.unbind( id ));
-            }
+                if (this.isDestroyed()) return;
+
+                this.#reorder();
+
+                this.#unbind.forEach( u => u());
+                this.#unbind = [];
+
+                if (this._options.numerated && row){
+                    const id = row.bind("index",()=>{
+                        this.#updateIndex( );
+                    });
+                    this.#unbind.push(()=> row.unbind( id ));
+                }
+
+            });
         });
     }
 
@@ -100,7 +107,7 @@ export class Row extends Item{
         },{});
     }
 
-    unfold(  ){
+    unfold(){
 
         if (!this._options.getSubitems) return;
 
@@ -152,9 +159,6 @@ export class Row extends Item{
         this.#unbind?.forEach( u => u());
         this.#unbind = undefined;
 
-        this._options.nextRow?.set({previousRow: this._options.previousRow});
-        this._options.previousRow?.set({nextRow: this._options.nextRow});
-
         if (this.#children){
             this.#children.destroy();
             this.#children = undefined;
@@ -165,15 +169,12 @@ export class Row extends Item{
         super._destroy();
     }
 
-    #placeAfter( previousRow ){
-        let nextRow;
-        if (previousRow){
-            nextRow = previousRow.get("nextRow");
-            if (nextRow) {
-                this.$markup.insertBefore(nextRow.$markup);
-            } else {
-                const $nextRows = previousRow.$markup.nextAll('tr');
-                let $previous = previousRow.$markup;
+    #reorder(){
+        if(this._options.previousRow){
+            if (this._options.previousRow.get("isUnfolded")){
+                const $previousRow = this._options.previousRow.$markup;
+                const $nextRows = $previousRow.nextAll('tr');
+                let $previous = $previousRow;
                 for (let i=0; i<$nextRows.length; i++){
                     const $row = $($nextRows[i]);
                     if (this.constructor.getItem( $row ).get("level") > this._options.level){
@@ -183,27 +184,14 @@ export class Row extends Item{
                     }
                 }
                 this.$markup.insertAfter( $previous );
+            }else{
+                this.$markup.insertAfter( this._options.previousRow.$markup );
             }
-            previousRow.set({nextRow:this});
         }else if(this._options.parentRow){
-            if (this._options.parentRow.get("children").get("$.totalCount") > 1){
-                nextRow = this.constructor.getItem( this._options.parentRow.$markup.next() );
-            }
             this.$markup.insertAfter( this._options.parentRow.$markup );
         }else{
             this.$markup.prependTo(this._options.$container);
-            const $firstRow = this._options.$container.children('tr:nth-child(1)');
-            if ( $firstRow.length>0 ){
-                nextRow = this.constructor.getItem( $firstRow );
-                if (nextRow === this) nextRow = undefined;
-            }
         }
-
-        if (nextRow){
-            nextRow.set({previousRow: this});
-            this.set({nextRow});
-        }
-
     }
 
     #updateIndex(){

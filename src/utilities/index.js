@@ -26,9 +26,11 @@
 import * as css from "./css.js";
 import * as data from "./data.js";
 import * as errors from "./errors.js";
+import {waiting} from "./waiting.js";
 
 export const util = {
     css,
     data,
-    errors
+    errors,
+    waiting
 };

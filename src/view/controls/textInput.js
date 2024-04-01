@@ -33,6 +33,7 @@ export class Control extends Parent{
     static options = {
         value:{type: types.primitives.String},
         length:{type: types.primitives.Integer},
+        placeholder:{type: types.primitives.String},
     };
 
     static events = {
@@ -56,6 +57,14 @@ export class Control extends Parent{
                 onChange();
             }
         });
+
+        this.bind("placeholder",value => {
+            if (value){
+                this.$markup.prop("placeholder", value);
+            }else{
+                this.$markup.removeAttr("placeholder");
+            }
+        });
     }
 
     updateValue( value, prev ){
@@ -64,6 +73,12 @@ export class Control extends Parent{
 
     enable( value ){
         this.$markup.prop('disabled', !value);
+
+        if (value){
+            this.$markup.removeClass(styles.disabled);
+        }else{
+            this.$markup.addClass(styles.disabled);
+        }
     }
 
     focus(){

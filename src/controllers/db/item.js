@@ -32,7 +32,8 @@ export class Controller extends Item{
         autoCommit:false,
         connection:undefined,
         timeout: 60000,
-        subscribe:false
+        subscribe:false,
+        request:true
     };
 
     constructor( options ){
@@ -45,7 +46,7 @@ export class Controller extends Item{
     // Data access API
     //-------------------------------------------------------------------
     init( Data ){
-        return this._promise("init",(resolve, reject)=>{
+        return new Promise((resolve, reject)=>{
 
             let ID = undefined;
             if (typeof Data === "string"){
@@ -82,12 +83,12 @@ export class Controller extends Item{
                 resolve( super.init( data ) );
 
             }, reject);
-        });
+        }).catch(error=>this._trigger("error", [error, "init"]));
 
     }
 
     rollback(changes, error){
-        return this._promise("rollback",(resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
             if (changes || !this._filter) {
                 resolve( super.rollback(changes, error) );
@@ -100,12 +101,12 @@ export class Controller extends Item{
 
                 }, reject);
             }
-        });
+        }).catch(error=>this._trigger("error", [error, "rollback"]));
     }
 
     refresh( data ){
         if ( !data ){
-            return this._promise("refresh",(resolve, reject) => {
+            return new Promise((resolve, reject) => {
 
                 if (this._filter === undefined) return reject("not initialized");
 
@@ -114,20 +115,19 @@ export class Controller extends Item{
                     super.refresh( data ).then( resolve, reject );
 
                 }, reject);
-            });
+            }).catch(error=>this._trigger("error", [error, "refresh"]));
         }else{
             return super.refresh( data );
         }
     }
 
     query( filter ){
-        return new Promise((resolve, reject) => {
-
+        return this.queueRequest((resolve, reject)=>{
             const fields = this._schema.filter({virtual:false}).map(name => this.constructor.toSafeFieldName( name )).join(",");
 
             this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`,Items=>{
-                 let item = Object.entries( Items[0] ).map(([name, value])=>{ return [ this.constructor.fromSafeFieldName(name), value ] });
-                 item = Object.fromEntries( item );
+                let item = Object.entries( Items[0] ).map(([name, value])=>{ return [ this.constructor.fromSafeFieldName(name), value ] });
+                item = Object.fromEntries( item );
                 resolve( item );
 
             }, reject, this._options.timeout );
@@ -139,7 +139,7 @@ export class Controller extends Item{
     }
 
     commit(){
-        return this._promise("commit",(resolve, reject)=>{
+        return this.queueRequest((resolve, reject)=>{
 
             const onReject = error => {
                 this._trigger("reject", error);
@@ -181,7 +181,7 @@ export class Controller extends Item{
 
                 },onReject, this._options.timeout);
             }
-        });
+        }).catch(error=>this._trigger("error", [error, "commit"]));
     }
 
     static keywords = new Set(["AND", "ANDNOT", "AS", "BY", "DELETE", "DESC", "GROUP","GET","FROM","SUBSCRIBE","UNSUBSCRIBE",

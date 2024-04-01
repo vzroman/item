@@ -35,7 +35,7 @@ export class Control extends Parent{
         value:{type: types.primitives.String},
         size:{type: types.primitives.Integer},
         items:{type: types.primitives.Any},
-        itemValue:{type: types.primitives.String},
+        itemValue:{type: types.primitives.Any},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
         hideClear:{type: types.primitives.Bool, default: false}
@@ -139,7 +139,10 @@ export class Control extends Parent{
             return this._initItemsController([]);
         }
 
-        this._updateItems();
+        this._itemsController.onReady().then(()=>{
+            if (this.isDestroyed()) return;
+            this._updateItems();
+        });
 
         this._subscription = this._itemsController.bind("change",()=> this._updateItems() );
 
@@ -160,7 +163,7 @@ export class Control extends Parent{
 
         const currentValue = this.getValue();
         this._itemsController.view().forEach(([id, item])=>{
-            const value = itemValueFun( item );
+            const value = ''+itemValueFun( item );
             const text = itemTextFun( item );
             const selected = value === currentValue ? "selected" : "";
 

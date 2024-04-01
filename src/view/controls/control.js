@@ -25,7 +25,8 @@
 
 import {View} from "../item.js";
 import {types} from "../../types/index.js";
-import {deepCopy, deepEqual} from "../../utilities/data.js";
+import {deepCopy} from "../../utilities/data.js";
+import {waiting} from "../../utilities/waiting.js";
 
 
 // The control is the point where external widgets to be attached
@@ -37,7 +38,12 @@ export class Control extends View{
     };
 
     constructor( options ){
+
         super( options );
+
+        // if (!this._options.waiting) {
+        //     this.set({waiting:(request)=> this.waiting(request)});
+        // }
 
         this._widget = undefined;
 
@@ -57,6 +63,7 @@ export class Control extends View{
 
                 changes.value = this._validator.coerce( changes.value );
                 this.setValid(changes.value!==undefined, value);
+                if (changes.value===undefined) delete changes.value;
             });
         }
         // We do it asynchronously because descendants should be
@@ -113,6 +120,12 @@ export class Control extends View{
         if (this._widget && typeof this._widget.focus === "function"){
             this._widget.focus();
         }
+    }
+
+    waiting( request ){
+        if (!(this.$markup && this.$markup[0])) return;
+        const unlock = waiting( this.$markup );
+        request.finally(unlock);
     }
 
     _destroy(){

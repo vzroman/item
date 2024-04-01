@@ -38,7 +38,7 @@ export class Type{
     }
 
     static coerce( value ){
-        return value;
+        return value === null ? undefined : value;
     }
 
     constructor( options ){

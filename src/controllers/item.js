@@ -23,7 +23,6 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Linkable} from "../core/linkable.js";
-import {Eventful} from "../core/eventful.js";
 import * as util from "../utilities/data.js";
 import {Schema} from "../core/schema.js";
 
@@ -32,7 +31,8 @@ export class Controller extends Linkable{
     static options = {
         schema: undefined,
         autoCommit:true,
-        data:undefined
+        data:undefined,
+        request:false
     };
 
     static events = {
@@ -166,7 +166,7 @@ export class Controller extends Linkable{
     //------------------------------------------------------------------
     bind(event, callback){
 
-        if ( this._data || this.constructor.events[event] ){
+        if ( this._data || (typeof event === "string" && event.startsWith("$.")) || this.constructor.events[event] ){
             return [ super.bind( event, callback ) ]
         }
 
@@ -195,6 +195,7 @@ export class Controller extends Linkable{
             const changes = super.set( this._schema.coerce( Data ) );
             this._data = util.patch(this._data, changes);
             this._changes = undefined;
+            this._schema.link({data:this});
             this._onReady();
         }finally {
             this._isRefresh = false;
@@ -220,7 +221,7 @@ export class Controller extends Linkable{
     }
 
     commit(){
-        return this._promise("commit",(resolve, reject)=>{
+        return new Promise((resolve, reject)=>{
 
             if ( !this.isCommittable() ) {
                 this._trigger("reject", "not ready");
@@ -235,7 +236,7 @@ export class Controller extends Linkable{
             this._trigger("committable", this.isCommittable() );
 
             resolve( changes );
-        });
+        }).catch(error=>this._trigger("error", [error, "commit"]));
     }
 
 
@@ -263,10 +264,11 @@ export class Controller extends Linkable{
                 data = util.patch2value(this._changes,0);
                 return this.refresh( data );
             }else{
-                return this._promise("refresh", resolve => resolve());
+                return new Promise( resolve => resolve())
+                    .catch(error=> this._trigger("error", [error, "refresh"]));
             }
         }else{
-            return this._promise("refresh",(resolve, reject)=>{
+            return new Promise((resolve, reject)=>{
 
                 this._isRefresh = true;
                 this._refresh( data )
@@ -284,7 +286,7 @@ export class Controller extends Linkable{
 
                     }, reject)
                     .finally(()=> this._isRefresh = false);
-            });
+            }).catch(error=>this._trigger("error", [error, "refresh"]));
         }
     }
 
@@ -301,13 +303,29 @@ export class Controller extends Linkable{
         return !!(this._data && this._changes && this._isValid);
     }
 
-    _promise( action, fun ){
-        return new Promise((resolve, reject)=>{
-            fun( resolve, error => {
-                this._trigger("error", [error, action]);
-                reject( error )
-            })
+    queueRequest( requestFunction ){
+
+        const request = new Promise((resolve, reject)=>{
+            if (this.isDestroyed()) return;
+
+            // The request is already active, queue the next
+            const activeRequest = this._options.request;
+            if (activeRequest?.finally){
+                return activeRequest.finally(()=>{
+                    this.queueRequest( requestFunction );
+                })
+            }
+            requestFunction(resolve, reject);
         });
+
+        this.option("request", request);
+        request.finally(()=>{
+            if (this.isDestroyed()) return;
+            this.option("request", null);
+        });
+
+        return request;
+
     }
 
     //-------------------------------------------------------------------
