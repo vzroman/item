@@ -87,8 +87,14 @@ export class Header extends Item{
                 }
                  
                 const _name = toName(name, i);
+
+                let style = "";
+
+                if (level > 0) {
+                    style = "style='border-top: none;'";
+                }
         
-                tr[level].push(`<th name="${_name}" ${colSpan} ${rowSpan}></th>`);
+                tr[level].push(`<th ${style} name="${_name}" ${colSpan} ${rowSpan}></th>`);
         
                 if (children) {
                     fillRowCells(children, level + 1, _name);
