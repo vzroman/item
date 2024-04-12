@@ -265,6 +265,9 @@ export class TreeGrid extends ItemView{
     }
 
     refresh(){
+        if (this._widgets?.search_bar?.get("visible") === true){
+            this.resetSearch();
+        }
         this._grid?.refresh();
     }
 
