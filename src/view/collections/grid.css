@@ -45,6 +45,7 @@
     width: 100%;
     border-left: 1px solid #ccc;
     border-spacing: 0px;
+    border-collapse: collapse;
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -67,7 +68,8 @@ table>td {
     background-color: #86B0CC;
 }
 .table>tfoot>tr>td,
-.table>thead>tr>td {
+.table>thead>tr>td,
+.table>thead>tr>th:not(.resizer_header) {
     background: #fff;
     border-bottom: 1px solid #ccc;
     border-right: 1px solid #ccc;

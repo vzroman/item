@@ -68,20 +68,129 @@ export class Header extends Item{
     }
 
     markup() {
-        const $markup = $(`<tr></tr>`);
-        this._options.columns.forEach(({colspan=1}, i)=> $(`<td colspan="${colspan}" name=${ i }></td>`).appendTo($markup));
+        const rows = getRowDepth(this._options.columns);
+
+        const tr = Array(rows).fill().map(() => []);
+
+        const fillRowCells = (columns, level = 0, name) => {
+            for (let i = 0; i < columns.length; i++) {
+                const { children } =  columns[i];
+        
+                let colSpan = getColSpan({ children });
+                colSpan = colSpan > 1 ? `colspan="${colSpan}"` : "";
+        
+                let rowSpan = "";
+        
+                if (!children) {
+                    const diff = rows - level;
+                    rowSpan = diff > 1 ? `rowspan="${diff}"` : rowSpan;
+                }
+                 
+                const _name = toName(name, i);
+        
+                tr[level].push(`<th name="${_name}" ${colSpan} ${rowSpan}></th>`);
+        
+                if (children) {
+                    fillRowCells(children, level + 1, _name);
+                }
+            }
+        };
+
+        fillRowCells(this._options.columns);
+
+        let markup = "";
+
+        for (const header of tr) {
+            markup += "<tr>";
+
+            for (const th of header) {
+                markup += th;
+            }
+
+            markup += "</tr>";
+        }
+
+        markup = $(markup);
+
         if (this._options.checkbox){
             const pos = this._options.numerated ? 2 : 1;
-            $markup.find(`td::nth-child(${ pos })`).width(32);
+            markup.find(`th::nth-child(${ pos })`).width(32);
         }
-        return $markup;
+        return markup;
     }
 
-    widgets(){
-        return this._options.columns.reduce((acc, col, i)=>{
-            acc[i] = col;
-            return acc;
-        },{});
+    widgets() {
+        return cols2widget(this._options.columns);
     }
 }
 Header.extend();
+
+function cols2widget(columns, name) {
+    return columns.reduce((widgets, col, i) => {
+        if (typeof col === "object") {
+            let {children, text, view, options, ...rest} = col;
+            
+            view ||= Html;
+            options ||= { html: text };
+            
+            if (typeof text === "function") {
+                options = {
+                    links:{ 
+                        html:{source:"data", event:[], handler: text}
+                    },
+                    ...options
+                };
+            }
+            
+            const _name = toName(name, i);
+            
+            widgets[_name] = { view, options, ... rest };
+            
+            if (children) {
+                widgets = {...widgets, ...cols2widget(children, _name)};
+            }
+        } else {
+            widgets[i] = col;
+        }
+        
+        return widgets;
+    }, {});
+}
+
+function getColSpan({ children }, colSpan = 0) {
+    if (!children) return 1;
+
+    children.forEach((c) => {
+        if (!c.children) {
+            colSpan++;
+        } else {
+            c.children.forEach((c) => {
+                const r = getColSpan(c);
+                colSpan += r;
+            });
+        }
+    });
+
+    return colSpan;
+}
+
+function getRowDepth(columns) {
+    let maxDepth = 0;
+
+    function traverse(columns, depth = 1) {
+        for (const { children } of columns) {
+            if (children) {
+                traverse(children, depth + 1);
+            }
+        }
+        maxDepth = Math.max(maxDepth, depth);
+    }
+
+    traverse(columns);
+
+    return maxDepth;
+}
+
+function toName(name, i) {
+    return name !== undefined ? `${name}-${i}` : i + "";
+}
