@@ -82,7 +82,10 @@ export class Pager extends ItemView{
 
         this._pages = new Collection({
             id:"page",
-            schema:{ page:{type: types.primitives.Integer } },
+            schema:{
+                page:{type: types.primitives.Integer },
+                isActive:{ type: types.primitives.Bool, default:false }
+            },
             keyCompare:([a],[b])=>{
                 a = +a;
                 b = +b;
@@ -114,7 +117,7 @@ export class Pager extends ItemView{
 
 
                 for (let i = first; i <= last; i++){
-                    pages[i]={page:i}
+                    pages[i]={page:i, isActive: i===page}
                 }
             }
             this._pages.set( pages )
@@ -167,7 +170,12 @@ export class Pager extends ItemView{
                     item:{
                         view:controls.Button,
                         options:{
-                            links:{text:"data@page" },
+                            links:{
+                                text:"data@page", 
+                                classes: { source: "data@isActive", handler: isActive => {
+                                    return isActive ? [style.activePage] : [];
+                                } } 
+                            },
                             events:{ click:{ handler:(_,button)=>{
                                 this.set({page:+button.get("text")})
                             }}}

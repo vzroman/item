@@ -31,7 +31,7 @@
    justify-content: center;
 }
 
-.pages > div.activePage {
-   background-color: #1984c8;
-   color: #ffffff;
+.activePage {
+   background-color: #1274AC;
+   color: #fff;
 }
