@@ -35,8 +35,18 @@ export class ItemList extends Control{
         if (i > 1) {
             set[i - 1] = { index: i - 1, value: value[i - 1], isDown: false, isUp: true, isDelete: true };
         }
+
+        let isFilled = true;
+        for (const {value} of Object.values( set )){
+            if (value===undefined || value === null){
+                isFilled = false; break
+            }
+        }
+        if (isFilled){
+            set[value.length] = {index: value.length, value: null, isDelete: false, isUp: false, isDown: false}
+        }
+
         this.itemcontroller.set(set);
-        this.itemcontroller.set({[value.length]: {index: value.length, value: null, isDelete: false, isUp: false, isDown: false}});
     }
 
     widgets(){
@@ -90,7 +100,6 @@ export class ItemList extends Control{
                                     this.set({value});
                                 }},
                                 value: (value, prev, controller, {self})=>{
-                                    if (!value) return;
                                     const val = this.get("value");
                                     val[self._options.index] = value;
                                     this.set({value: val});
