@@ -5,6 +5,7 @@ import { controls } from "./index.js";
 import {View as Flex} from "../collections/flex.js";
 import {View as ItemView} from "../item.js";
 import { controllers } from "../../controllers";
+import { deepEqual } from "../../utilities/data.js";
 import UpIcon from "../../../src/img/arrow_up.png";
 import DownIcon from "../../../src/img/arrow_down.png";
 import DeleteIcon from "../../img/delete.png";
@@ -22,29 +23,62 @@ export class ItemList extends Control{
 
     static markup = `<div name="items" class="${ styles.itemList } item_item_list"></div>`;
 
-    updateValue( value ) {
-        const set = Object.keys(this.itemcontroller.get()).reduce((acc,_,i) => {
-            acc[i] = null;
-            return acc;
-        }, {});
-        let i = 0, isFilled = true;
-        for (; i < value.length; i++){
-            isFilled &= value[i] !== undefined && value[i] !== null;
-            set[i] = { index: i, value: value[i], isUp: true, isDown: true, isDelete: true };
+    updateValue( value =[] ) {
+
+        value = value.filter( v => v  !==  undefined && v !== null );
+
+        const itemsSet = this._itemsController.get();
+        let items = itemsList( itemsSet );
+
+        items = mergeValue( items, value );
+
+        let isFilled = true;
+        for (let i=0; i < items.length; i++){
+
+            const v = items[i];
+            isFilled &= v !== undefined && v !== null;
+            itemsSet[i] = {
+                index: i,
+                value: v,
+                isUp: true,
+                isDown: true,
+                isDelete: true
+            };
+
         }
-        set["0"] = { index: 0, value: value[0], isDown: i > 1, isUp: false, isDelete: true };
-        if (i > 1) {
-            set[i - 1] = { index: i - 1, value: value[i - 1], isDown: false, isUp: true, isDelete: true };
-        }
-        if (isFilled){
-            set[value.length] = {index: value.length, value: null, isDelete: false, isUp: false, isDown: false}
+        const rest = Object.keys(itemsSet).length;
+
+        for (let i = items.length; i < rest; i++){
+            itemsSet[i] = null;
         }
 
-        this.itemcontroller.set(set);
+        itemsSet[0] = { index: 0, value: items[0], isDown: items.length > 1, isUp: false, isDelete: true };
+
+        if (isFilled){
+            itemsSet[items.length] = {
+                index: items.length,
+                value: undefined,
+                isDelete: false,
+                isUp: false,
+                isDown: false
+            };
+        }else if(items.length>0){
+            itemsSet[items.length - 1] = {
+                index: items.length - 1,
+                value: items[items.length - 1],
+                isDown: false,
+                isUp: true,
+                isDelete: true
+            };
+        }
+
+
+        this._itemsController.set( itemsSet );
     }
 
     widgets(){
-        this.itemcontroller = new controllers.Collection({
+
+        this._itemsController = new controllers.Collection({
             id:"index",
             schema:{
                 index:{ type: types.primitives.Integer },
@@ -60,14 +94,25 @@ export class ItemList extends Control{
                 if ( a < b ) return -1;
                 return 0;
             },
+            autoCommit:false,
             data:[]
+        });
+
+        this._itemsController.bind("commit",()=>{
+
+            let value = itemsList( this._itemsController.get() )
+                .filter(v => (v !== undefined && v !== null));
+
+            if (value.length === 0) value = null;
+
+            this.set({value});
         });
 
         return {
             items: {
                 view: Flex,
                 options: {
-                    data: this.itemcontroller,
+                    data: this._itemsController,
                     direction:"vertical",
                     classes:[styles.flex_collection],
                     item: {
@@ -80,23 +125,25 @@ export class ItemList extends Control{
                             },
                             events: {
                                 onDelete: {handler: index => {
-                                    const value = this.get("value");
-                                    if (value.length === 1){
-                                        this.set({value: []});
-                                    } else {
-                                        value.splice(index, 1);
-                                        this.set({value});
-                                    }
+                                    this._itemsController.set({[index]:null});
+                                    this._itemsController.commit();
                                 }},
                                 onReorder: {handler: (from, to) => {
-                                    const value = this.get("value");
-                                    [ value[from], value[to] ] = [value[to], value[from]];
-                                    this.set({value});
+                                    const fromValue = this._itemsController.get(from);
+                                    const toValue = this._itemsController.get(to);
+
+                                    this._itemsController.set({
+                                        [from]: toValue,
+                                        [to]: fromValue
+                                    });
+                                    this._itemsController.commit();
                                 }},
                                 value: (value, prev, controller, {self})=>{
-                                    const val = this.get("value");
-                                    val[self._options.index] = value;
-                                    this.set({value: val});
+                                    if (value===null) value = undefined;
+                                    const i = self._options.index;
+                                    const item = this._itemsController.get( ''+i );
+                                    this._itemsController.set({ [i]: {...item, value } });
+                                    this._itemsController.commit();
                                 }
                             },
                         }
@@ -186,3 +233,60 @@ class ListItem extends ItemView{
     }
 }
 ListItem.extend();
+
+//---------------------------------------------------------------------------
+//  Internal helpers
+//---------------------------------------------------------------------------
+function itemsList( itemsSet ){
+    return Object.entries( itemsSet )
+        .sort()
+        .filter(([i,value])=>!!value)
+        .map(([i,{value}])=> value);
+}
+
+function mergeValue( items, value ){
+
+    // Remove not existent items, but keep undefined
+    items = items.filter( item => item === undefined || item === null || indexOf( item, value ) !==-1 );
+
+    // If the last item is undefined, then we consider it a placeholder
+    const lastItem = items[items.length-1];
+    if (lastItem === undefined || lastItem===null){
+        items = items.slice(0, -1);
+    }
+
+    let i = 0;
+    for (const v of value){
+
+        // keep undefined items
+        while (i < items.length && (items[i] === undefined || items[i]===null)){
+            i++;
+        }
+
+        if (deepEqual( v, items[i] )){
+            i++;
+            continue;
+        }
+
+        const prev = indexOf( v, items, i );
+        if (prev !== -1){
+            items.splice(prev,1)
+        }
+
+        items.splice( i, 0, v)
+
+    }
+
+    return items;
+}
+
+function indexOf( item, value, startFrom =0){
+    let result = -1;
+    for (let i = startFrom; i < value.length; i++){
+        if (deepEqual( value[i], item )){
+            result = i;
+            break;
+        }
+    }
+    return result;
+}
