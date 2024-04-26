@@ -26,6 +26,7 @@
 import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
 import styles from "./textInput.css"
+import { Label } from "../primitives/label.js";
 
 // The control is the point where external widgets to be attached
 export class Control extends Parent{
@@ -34,24 +35,40 @@ export class Control extends Parent{
         value:{type: types.primitives.String},
         length:{type: types.primitives.Integer},
         placeholder:{type: types.primitives.String},
+        clearable:{type: types.primitives.Bool}
     };
 
     static events = {
         onInvalidInput:true
     };
 
-    static markup = `<input type="text" class="item_text_input ${ styles.input }"/>`;
+    markup(){
+        const $markup = $(`<div class="${ styles.input_container }">
+            <input class="item_text_input ${ styles.input }" name="input" type="text"/>
+            <div class="${styles.clear}" style="display: ${this._options.clearable ? 'flex' : 'none'}" name="clear"></div>
+        </div>`);
+
+        this.$input = $markup.find('[name="input"]');
+        return $markup;
+    }
 
     constructor( options ){
         super( options );
 
+        this.$input = this.$markup.find('[name="input"]');
+        this.$clear = this.$markup.find('[name="clear"]');
+
+        this.bind("value", value => {
+            this.$clear.toggleClass(styles.hidden_clear, !!!value);
+        })
+
         const onChange = ()=> {
-            const value = this.$markup.val();
-            this.$markup.val( this.value() );
+            const value = this.$input.val();
+            this.$input.val( this.value() );
             this.set({value})
         };
 
-        this.$markup.on("change", onChange).on("keypress", event=>{
+        this.$input.on("change", onChange).on("keypress", event=>{
             if (event.which === 13){
                 event.preventDefault();
                 onChange();
@@ -60,29 +77,44 @@ export class Control extends Parent{
 
         this.bind("placeholder",value => {
             if (value){
-                this.$markup.prop("placeholder", value);
+                this.$input.prop("placeholder", value);
             }else{
-                this.$markup.removeAttr("placeholder");
+                this.$input.removeAttr("placeholder");
             }
         });
     }
 
+    widgets(){
+        return {
+            clear: {
+                view: Label,
+                options: {
+                    text: "x",
+                    events: { click: () =>{
+                        this.$input.val("");
+                        this.set({value: ""});
+                    }}
+                }
+            }
+        }
+    }
+
     updateValue( value, prev ){
-        this.$markup.val( value )
+        this.$input.val( value )
     }
 
     enable( value ){
-        this.$markup.prop('disabled', !value);
+        this.$input.prop('disabled', !value);
 
         if (value){
-            this.$markup.removeClass(styles.disabled);
+            this.$input.removeClass(styles.disabled);
         }else{
-            this.$markup.addClass(styles.disabled);
+            this.$input.addClass(styles.disabled);
         }
     }
 
     focus(){
-        this.$markup.focus();
+        this.$input.focus();
     }
 
     setValid(isValid, value){
@@ -92,7 +124,7 @@ export class Control extends Parent{
         }else{
             this.$markup.addClass(styles.invalid);
             this.$markup.addClass("invalid");
-            this.$markup.val(value);
+            this.$input.val(value);
         }
     }
 }
