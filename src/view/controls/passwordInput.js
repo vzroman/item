@@ -22,30 +22,12 @@
 //     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //------------------------------------------------------------------------------------
-import {Control} from "./control.js";
-import {Control as Button} from "./button.js";
-import {Control as TextInput} from "./textInput.js";
-import {Checkbox} from "./checkbox.js";
-import {Control as NumberInput} from "./numberInput.js";
-import {Control as Dropdown} from "./dropdown.js";
-import {ItemList} from "./itemList.js";
-import {SelectList} from "./selectList.js";
-import { MultiSelect } from "./multiSelect.js";
-import {Toggle} from "./toggle.js";
-import {ColorPicker} from "./colorPicker.js";
-import {Control as PasswordInput} from "./passwordInput.js";
 
-export const controls = {
-    Control,
-    Button,
-    TextInput,
-    Checkbox,
-    NumberInput,
-    Dropdown,
-    SelectList,
-    MultiSelect,
-    ItemList,
-    Toggle,
-    ColorPicker,
-    PasswordInput
-};
+import {Control as Parent} from "./textInput.js";
+import styles from "./textInput.css";
+
+// The control is the point where external widgets to be attached
+export class Control extends Parent{
+    static markup = `<input type="password" class="item_text_input ${ styles.input }"/>`;
+}
+Control.extend();
