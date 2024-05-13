@@ -34,11 +34,12 @@ import style from "./itemList.css";
 export class View extends Flex{
 
     static options = {
-        confirm:{ type:types.primitives.Fun }
+        confirm:{ type:types.primitives.Fun },
+        buttonText : { type: types.primitives.String },
     };
 
     markup(){
-        return `<div class="${ mainCss.vertical }">
+        return `<div class="${ mainCss.vertical } ${ style.item_wrapper }">
             <div name="items"></div>
             <div style="display: flex; justify-content: flex-start">
                 <div name="addItem"></div>
@@ -51,7 +52,7 @@ export class View extends Flex{
             addItem:{
                 view: controls.Button,
                 options:{
-                    text:"add",
+                    text:this._options.buttonText,
                     events:{ click:()=>this.addItem() }
                 }
             }
@@ -70,13 +71,15 @@ export class View extends Flex{
             id,
             $container:this.$items,
             item: this._options.item,
-            events:{remove:() => {
-                if ( this._options.confirm ){
-                    this._options.confirm( id ).then(() => this.removeItem( id ),()=>{})
-                }else{
-                    this.removeItem( id )
+            events:{
+                remove:() => {
+                    if ( this._options.confirm ){
+                        this._options.confirm( id ).then(() => this.removeItem( id ),()=>{})
+                    }else{
+                        this.removeItem( id )
+                    }
                 }
-            }}
+            }
         });
     }
 }
@@ -97,19 +100,20 @@ class Wrapper extends Item{
 
     markup(){
         return `<div class="${ style.item }">
-            <div name="remove"></div>
             <div name="item"></div>
+            <div name="remove"></div>
         </div>`;
     }
 
     widgets(){
         let {view, options} = this._options.item;
         options = {...options, id:this._options.id};
+
         return {
             remove:{
                 view: controls.Button,
                 options:{
-                    text:"remove",
+                    icon:`url("dev/img/trash_bin.svg")`,
                     events:{ click:() => this._trigger("remove") }
                 }
             },
@@ -119,4 +123,3 @@ class Wrapper extends Item{
 
 }
 Wrapper.extend();
-
