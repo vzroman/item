@@ -88,7 +88,10 @@ export class Form extends Parent{
                 options:{
                     enable:true,
                     text:i18n("cancel"),
-                    events:{ click:()=> this._options.rollback( this._options.data ) }
+                    events:{ click:()=> {
+                        this._options.rollback( this._options.data ); 
+                        this._trigger("cancel");
+                    } }
                 }
             }
         }
