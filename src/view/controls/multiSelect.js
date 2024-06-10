@@ -38,8 +38,8 @@ import close from "../../img/close.svg"
 import styles from "./multiSelect.css";
 
 export class MultiSelect extends Control{
-    static markup = `<div class="${ styles.multiselect }">
-        <div class="${styles.selected_items}">
+    static markup = `<div class="${ styles.multiselect }" name="multiselect_container">
+        <div class="${styles.selected_items}" name="selected_items">
             <div name="selected"></div>
             <div name="items"></div>
         </div>
@@ -53,7 +53,7 @@ export class MultiSelect extends Control{
         itemValue:{type: types.primitives.String},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
-        isExpanded:{type: types.primitives.Bool}
+        isExpanded:{type: types.primitives.Bool, default: false}
     }
 
     constructor( options ){
@@ -109,6 +109,23 @@ export class MultiSelect extends Control{
         });
 
         this._widgets.selected.link({data:selectedController});
+        
+        
+        this.bind("isExpanded", val => {
+            if(val){
+                $(document).on("click", (event) =>{
+                    if(!event.target.closest('[name="multiselect_container"]')){
+                        this.set({isExpanded: false})
+                    }
+                })
+            }else{
+                $(document).off("click", (event) =>{
+                    if(!event.target.closest('[name="multiselect_container"]')){
+                        this.set({isExpanded: false})
+                    }
+                })
+            }
+        })
     }
 
     widgets() {
@@ -140,7 +157,7 @@ export class MultiSelect extends Control{
                 options:{
                     icon:`url("${ dropdown }")`,
                     events:{
-                        click:{handler:() => this._widgets.items.set({visible: !this._widgets.items.get("visible")})}
+                        click:{handler:() => this.set({isExpanded: !this.get("isExpanded")})}
                     }
                 }
             },
@@ -157,6 +174,7 @@ export class MultiSelect extends Control{
                         items:"parent@items",
                         itemValue:"parent@itemValue",
                         itemText:"parent@itemText",
+                        visible:"parent@isExpanded"
                     },
                     events:{
                         value:"parent@value",
@@ -164,6 +182,10 @@ export class MultiSelect extends Control{
                 }
             }
         }
+    }
+
+    unfold(){
+
     }
 
 }
@@ -205,3 +227,11 @@ class SelectButton extends ItemView{
     }
 }
 SelectButton.extend();
+
+function unfold (event){
+    // if(!event.target.closest($('#selected_items'))){
+    //     this.set({isExpanded: false})
+    // }
+    console.log(event);
+    console.log(event.target)
+}

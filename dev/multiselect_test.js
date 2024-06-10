@@ -31,37 +31,37 @@ export function run( $container ){
     function doTest(){
 
 
-        // const a = new item.view.controls.MultiSelect({
-        //     $container,
-        //     items: ["item1", "item2", "item3", "item322", "item5", "item6"],
-        //     // itemText: "text",
-        //     // itemValue: "id",
-        //     // events:{
-        //     //     value:(val)=>{
-        //     //         console.log(111, val);
-        //     //     }
-        //     // }
-        // });
+        const a = new item.view.controls.MultiSelect({
+            $container,
+            items: ["item1", "item2", "item3", "item322", "item5", "item6"],
+            itemText: "text",
+            itemValue: "id",
+            events:{
+                value:(val)=>{
+                    console.log(111, val);
+                }
+            }
+        });
 
-        const b = new item.view.controls.MultiSelect({
-            $container:$(`<div></div>`).appendTo($container),
-            items: new item.controllers.db.Collection({
-                connection:()=>connection,
-                schema:{
-                    ".name":{ type:item.types.primitives.String },
-                    ".pattern":{type:item.types.primitives.String},
-                    ".path":{type:item.types.primitives.String}
-                },
-                data:[".folder","=","$oid('/root')"]
-            }),
-            itemText: ".name",
-            itemValue: ".name"
+        // const b = new item.view.controls.MultiSelect({
+        //     $container:$(`<div></div>`).appendTo($container),
+        //     items: new item.controllers.db.Collection({
+        //         connection:()=>connection,
+        //         schema:{
+        //             ".name":{ type:item.types.primitives.String },
+        //             ".pattern":{type:item.types.primitives.String},
+        //             ".path":{type:item.types.primitives.String}
+        //         },
+        //         data:[".folder","=","$oid('/root')"]
+        //     }),
+        //     itemText: ".name",
+        //     itemValue: ".name"
             // events:{
             //     value:(val)=>{
             //         console.log(111, val);
             //     }
             // }
-        });
+        // });
 
         //          setTimeout(() => {
         //     b.set({value: [1, 2]})
