@@ -39,7 +39,7 @@ import styles from "./multiSelect.css";
 
 export class MultiSelect extends Control{
     static markup = `<div class="${ styles.multiselect }" name="multiselect_container">
-        <div class="${styles.selected_items}" name="selected_items">
+        <div class="${styles.selected_items}">
             <div name="selected"></div>
             <div name="items"></div>
         </div>
@@ -114,15 +114,11 @@ export class MultiSelect extends Control{
         this.bind("isExpanded", val => {
             if(val){
                 $(document).on("click", (event) =>{
-                    if(!event.target.closest('[name="multiselect_container"]')){
-                        this.set({isExpanded: false})
-                    }
+                    this.unfold(event)
                 })
             }else{
                 $(document).off("click", (event) =>{
-                    if(!event.target.closest('[name="multiselect_container"]')){
-                        this.set({isExpanded: false})
-                    }
+                    this.unfold(event)
                 })
             }
         })
@@ -184,8 +180,10 @@ export class MultiSelect extends Control{
         }
     }
 
-    unfold(){
-
+    unfold(event){
+        if(!event.target.closest('[name="multiselect_container"]')){
+            this.set({isExpanded: false})
+        }
     }
 
 }
@@ -227,11 +225,3 @@ class SelectButton extends ItemView{
     }
 }
 SelectButton.extend();
-
-function unfold (event){
-    // if(!event.target.closest($('#selected_items'))){
-    //     this.set({isExpanded: false})
-    // }
-    console.log(event);
-    console.log(event.target)
-}
