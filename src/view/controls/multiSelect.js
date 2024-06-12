@@ -112,12 +112,13 @@ export class MultiSelect extends Control{
         
         
         this.bind("isExpanded", val => {
+            console.log(val)
             if(val){
-                $(document).on("click", (event) =>{
+                document.documentElement.addEventListener("click", (event) =>{
                     this.unfold(event)
                 })
             }else{
-                $(document).off("click", (event) =>{
+                document.documentElement.removeEventListener("click", (event) =>{
                     this.unfold(event)
                 })
             }
@@ -225,3 +226,4 @@ class SelectButton extends ItemView{
     }
 }
 SelectButton.extend();
+
