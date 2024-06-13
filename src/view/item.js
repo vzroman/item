@@ -27,6 +27,8 @@ import {Item} from "../core/item.js";
 import {types} from "../types/index.js";
 import {deepMerge} from "../utilities/data.js";
 import {Controller} from "../controllers/item.js";
+import {Controller as collectionController} from "../controllers/collection.js"
+import { view as views } from "./index.js";
 //import $ from "jquery";
 
 
@@ -40,7 +42,8 @@ export class View extends Item{
         classes:{type:types.primitives.Array},
         css:{type:types.primitives.Set, default:{}},
         widgets:{type:types.primitives.Set},
-        waiting:{type:types.primitives.Fun}
+        waiting:{type:types.primitives.Fun},
+        context_menu:{type: types.primitives.Any}
     };
 
     static events = {
@@ -196,6 +199,38 @@ export class View extends Item{
             }
         });
 
+        //Context menu event
+        if(this._options.context_menu){
+            this.$markup.on("contextmenu", (event) =>{
+                event.preventDefault()
+                const {x, y} = this.getClientPosition(event)
+                this.contextmenu?.destroy();
+               this.contextmenu = new ContextMenuWrapper({
+                    $container: this._options.$container,
+                    item: this.get(),
+                    context_menu: this._options.context_menu,
+                    css: {
+                        "left": `${x}px`,
+                        "top": `${y}px`,
+                        "position":"absolute",
+                        "border":"2px solid black",
+                        "width":"200px",
+                        "height":"200px",
+                        "background":"red"
+                    },
+                })
+                setTimeout(() => {
+                    $("body").on("click.test contextmenu.test", () => {
+                        this.contextmenu?.destroy();
+                        $("body").off("click.test contextmenu.test");
+                    })
+                })
+                console.log(this.get("data")?.get(".name"));
+            });
+
+            
+        }
+
         const dependControllers = {};
         for (const o of Object.keys(this.constructor.options)){
             const value = this._options[o];
@@ -317,6 +352,21 @@ export class View extends Item{
         }
     }
 
+    getClientPosition(e){
+        let x
+        let y
+
+        if(!e) e = window.event
+        if(e.pageX || e.pageY){
+            x = e.pageX
+            y = e.pageY
+        }else if(e.clientX || e.clientY){
+            x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+            y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+        }
+
+        return {x,y}
+    }
 
     _destroy(){
 
@@ -337,3 +387,73 @@ export class View extends Item{
     }
 }
 View.extend();
+
+class ContextMenuWrapper extends View{
+
+    static options = {
+        item: { type: types.primitives.Set, default: {} },
+        context_menu:{type: types.primitives.Array, default: [] }
+    }
+
+    static markup = `<div name="context_menu">
+        <div name="items"></div>
+    </div>`
+
+    widgets(){
+        const controller = new collectionController({
+            schema:{ 
+                icon:{ type: types.primitives.String }, 
+                caption:{type: types.primitives.String},
+                handler:{type: types.primitives.Fun}
+            },
+            data:this._options.context_menu
+        })
+
+        return {
+            items: {
+                view: views.collections.Flex,
+                options: {
+                    data: controller,
+                    item: {
+                        view: MenuItem,
+                        options: {
+                            events:{}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+ContextMenuWrapper.extend()
+
+class MenuItem extends View {
+
+    markup(){
+        return `<div style="display: flex">
+            <div name="icon"></div>
+            <div name="caption"></div>
+        </div>`
+    }
+    widgets() {
+        return {
+            icon:{
+                view: views.primitives.Html,
+                options:{
+                    links:{
+                        html:{source:"data@icon", handler: (icon) =>{ return `<img src="${icon}" alt="Не прогрузился">`}}
+                    }
+                }
+            },
+            caption:{
+                view: views.primitives.Label,
+                options:{
+                    links:{
+                        text:{source:"data@caption"}
+                    }
+                }
+            }
+        }
+    }
+}
+MenuItem.extend();
