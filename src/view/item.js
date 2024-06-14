@@ -201,14 +201,15 @@ export class View extends Item{
 
         //Context menu event
         if(this._options.context_menu){
+            
             this.$markup.on("contextmenu", (event) =>{
                 event.preventDefault()
                 const {x, y} = this.getClientPosition(event)
                 this.contextmenu?.destroy();
-               this.contextmenu = new ContextMenuWrapper({
+                this.contextmenu = new ContextMenuWrapper({
                     $container: this._options.$container,
                     item: this.get(),
-                    context_menu: this._options.context_menu,
+                    context_data: this._options.context_menu,
                     css: {
                         "left": `${x}px`,
                         "top": `${y}px`,
@@ -219,13 +220,15 @@ export class View extends Item{
                         "background":"red"
                     },
                 })
+                // click.test 
                 setTimeout(() => {
-                    $("body").on("click.test contextmenu.test", () => {
+                    $("body").on("contextmenu", (event) => {
+                        event.preventDefault();
                         this.contextmenu?.destroy();
-                        $("body").off("click.test contextmenu.test");
+                        $("body").off("contextmenu");
                     })
                 })
-                console.log(this.get("data")?.get(".name"));
+                // console.log(this.get("data")?.get(".name"));
             });
 
             
@@ -392,13 +395,21 @@ class ContextMenuWrapper extends View{
 
     static options = {
         item: { type: types.primitives.Set, default: {} },
-        context_menu:{type: types.primitives.Array, default: [] }
+        context_data:{type: types.primitives.Array, default: [] }
     }
 
     static markup = `<div name="context_menu">
         <div name="items"></div>
     </div>`
 
+    constructor(options){
+        super(options);
+           
+        document.documentElement.addEventListener("click", (e) =>{
+            if(this._clickOutside(e)) this.destroy()
+        })
+
+    }
     widgets(){
         const controller = new collectionController({
             schema:{ 
@@ -406,7 +417,7 @@ class ContextMenuWrapper extends View{
                 caption:{type: types.primitives.String},
                 handler:{type: types.primitives.Fun}
             },
-            data:this._options.context_menu
+            data:this._options.context_data
         })
 
         return {
@@ -417,12 +428,25 @@ class ContextMenuWrapper extends View{
                     item: {
                         view: MenuItem,
                         options: {
-                            events:{}
+                            events:{
+                                click:{handler:(_, handler) =>{
+                                    const execute = handler.get("data").get("handler")
+                                    execute(this._options.item);
+                                    this.destroy()
+                                }}
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    _clickOutside(e){
+        if(!e.target.closest('[name="context_menu"]')){
+            return true
+        }
+        return false
     }
 }
 ContextMenuWrapper.extend()
