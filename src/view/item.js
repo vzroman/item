@@ -205,7 +205,6 @@ export class View extends Item{
             this.$markup.on("contextmenu", (event) =>{
                 event.preventDefault()
                 const {x, y} = this.getClientPosition(event)
-                this.contextmenu?.destroy();
                 this.contextmenu = new ContextMenuWrapper({
                     $container: this._options.$container,
                     item: this.get(),
@@ -222,6 +221,7 @@ export class View extends Item{
                 })
                 // click.test 
                 setTimeout(() => {
+                    console.log("timeout context menu");
                     $("body").on("contextmenu", (event) => {
                         event.preventDefault();
                         this.contextmenu?.destroy();
@@ -404,9 +404,13 @@ class ContextMenuWrapper extends View{
 
     constructor(options){
         super(options);
+        console.log("creation of context menu")
            
         document.documentElement.addEventListener("click", (e) =>{
-            if(this._clickOutside(e)) this.destroy()
+            if(this._clickOutside(e)) {
+                console.log("click outside")
+                this.destroy()
+            }
         })
 
     }
@@ -447,6 +451,11 @@ class ContextMenuWrapper extends View{
             return true
         }
         return false
+    }
+
+    destroy(){
+        console.log("дестрой сработал")
+        super.destroy()
     }
 }
 ContextMenuWrapper.extend()
