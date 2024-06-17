@@ -201,8 +201,7 @@ export class View extends Item{
 
         //Context menu event
         if(this._options.context_menu){
-            
-            this.$markup.on("contextmenu", (event) =>{
+                this.$markup.on("contextmenu", (event) =>{
                 event.preventDefault()
                 const {x, y} = this.getClientPosition(event)
                 this.contextmenu = new ContextMenuWrapper({
@@ -220,14 +219,7 @@ export class View extends Item{
                     },
                 })
                 // click.test 
-                setTimeout(() => {
-                    console.log("timeout context menu");
-                    $("body").on("contextmenu", (event) => {
-                        event.preventDefault();
-                        this.contextmenu?.destroy();
-                        $("body").off("contextmenu");
-                    })
-                })
+
                 // console.log(this.get("data")?.get(".name"));
             });
 
@@ -403,17 +395,19 @@ class ContextMenuWrapper extends View{
     </div>`
 
     constructor(options){
-        super(options);
-        console.log("creation of context menu")
-           
-        document.documentElement.addEventListener("click", (e) =>{
-            if(this._clickOutside(e)) {
-                console.log("click outside")
-                this.destroy()
-            }
+        super(options);           
+        
+        setTimeout(()=>{
+            $("body").on("contextmenu click", (event) => {
+                event.preventDefault();
+                if(!event.target.closest('[name="context_menu"]')){
+                    this.destroy()
+                    $("body").off("contextmenu click");
+                }
+            })
         })
-
     }
+
     widgets(){
         const controller = new collectionController({
             schema:{ 
@@ -446,15 +440,7 @@ class ContextMenuWrapper extends View{
         }
     }
 
-    _clickOutside(e){
-        if(!e.target.closest('[name="context_menu"]')){
-            return true
-        }
-        return false
-    }
-
     destroy(){
-        console.log("дестрой сработал")
         super.destroy()
     }
 }
