@@ -206,14 +206,44 @@ export class View extends Item{
                 event.preventDefault()
                 const {x, y} = this.getClientPosition(event)
                 const {css, context_data} = this._options.context_menu;
+
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+
+                const menuWidth = parseInt(css["width"], 10);
+                const menuHeight = parseInt(css["height"], 10);
+
+                let top,
+                    left,
+                    right,
+                    bottom
+                
+                if(x + menuWidth > windowWidth){
+                    right = (windowWidth - x) + "px";
+                    left = "auto"
+                }else {
+                    left = x + "px";
+                    right = "auto";
+                }
+
+                if(y + menuHeight > windowHeight){
+                    bottom = (windowHeight - y) + "px";
+                    top = "auto"
+                }else{
+                    top = y + "px";
+                    bottom = " auto";
+                }
+
                 this.contextmenu = new ContextMenuWrapper({
                     $container: this._options.$container,
                     item: this.get(),
                     context_data,
                     css: {
                         ...css,
-                        "left": `${x}px`,
-                        "top": `${y}px`,
+                        "left": `${left}`,
+                        "top": `${top}`,
+                        "right": `${right}`,
+                        "bottom": `${bottom}`,
                         "position":"absolute",
                         "border":"1px solid black",
                         "border-radius":"5px",
