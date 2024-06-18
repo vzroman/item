@@ -1,5 +1,6 @@
 .menuitem{
     display: flex;
+    margin: 4px;
 }
 
 .menuitem:hover{

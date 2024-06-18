@@ -245,10 +245,10 @@ export class View extends Item{
                         "right": `${right}`,
                         "bottom": `${bottom}`,
                         "position":"absolute",
-                        "border":"1px solid black",
+                        "border":"none",
                         "border-radius":"5px",
-                        "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                        "background":"#F8F8F8"
+                        "box-shadow": "4px 4px 12px rgba(0, 0, 0, 0.25)",
+                        "background":"#FFFFFF"
                     },
                 })
             });
@@ -421,7 +421,7 @@ class ContextMenuWrapper extends View{
     }
 
     static markup = `<div name="context_menu">
-        <div name="items" style="padding: 4px;"></div>
+        <div name="items"></div>
     </div>`
 
     constructor(options){
@@ -453,7 +453,6 @@ class ContextMenuWrapper extends View{
                 view: views.collections.Flex,
                 options: {
                     data: controller,
-                    css:{"gap":"5px"},
                     item: {
                         view: MenuItem,
                         options: {
@@ -479,7 +478,7 @@ class MenuItem extends View {
 
     markup(){
         return `<div class="${styles.menuitem}">
-            <div name="icon" style="width:20px; height:20px; margin-right:5px;"></div>
+            <div name="icon" style="width:20px; height:20px; margin:3px 2px 4px 3px;"></div>
             <div name="caption"></div>
         </div>`
     }
