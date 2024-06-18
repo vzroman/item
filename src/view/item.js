@@ -29,6 +29,7 @@ import {deepMerge} from "../utilities/data.js";
 import {Controller} from "../controllers/item.js";
 import {Controller as collectionController} from "../controllers/collection.js"
 import { view as views } from "./index.js";
+import styles from "./item.css"
 //import $ from "jquery";
 
 
@@ -204,23 +205,22 @@ export class View extends Item{
                 this.$markup.on("contextmenu", (event) =>{
                 event.preventDefault()
                 const {x, y} = this.getClientPosition(event)
+                const {css, context_data} = this._options.context_menu;
                 this.contextmenu = new ContextMenuWrapper({
                     $container: this._options.$container,
                     item: this.get(),
-                    context_data: this._options.context_menu,
+                    context_data,
                     css: {
+                        ...css,
                         "left": `${x}px`,
                         "top": `${y}px`,
                         "position":"absolute",
-                        "border":"2px solid black",
-                        "width":"200px",
-                        "height":"200px",
-                        "background":"red"
+                        "border":"1px solid black",
+                        "border-radius":"5px",
+                        "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
+                        "background":"#F8F8F8"
                     },
                 })
-                // click.test 
-
-                // console.log(this.get("data")?.get(".name"));
             });
 
             
@@ -391,12 +391,12 @@ class ContextMenuWrapper extends View{
     }
 
     static markup = `<div name="context_menu">
-        <div name="items"></div>
+        <div name="items" style="padding: 4px;"></div>
     </div>`
 
     constructor(options){
         super(options);           
-        
+
         setTimeout(()=>{
             $("body").on("contextmenu click", (event) => {
                 event.preventDefault();
@@ -423,6 +423,7 @@ class ContextMenuWrapper extends View{
                 view: views.collections.Flex,
                 options: {
                     data: controller,
+                    css:{"gap":"5px"},
                     item: {
                         view: MenuItem,
                         options: {
@@ -440,17 +441,15 @@ class ContextMenuWrapper extends View{
         }
     }
 
-    destroy(){
-        super.destroy()
-    }
+
 }
 ContextMenuWrapper.extend()
 
 class MenuItem extends View {
 
     markup(){
-        return `<div style="display: flex">
-            <div name="icon"></div>
+        return `<div class="${styles.menuitem}">
+            <div name="icon" style="width:20px; height:20px; margin-right:5px;"></div>
             <div name="caption"></div>
         </div>`
     }
@@ -460,7 +459,7 @@ class MenuItem extends View {
                 view: views.primitives.Html,
                 options:{
                     links:{
-                        html:{source:"data@icon", handler: (icon) =>{ return `<img src="${icon}" alt="Не прогрузился">`}}
+                        html:{source:"data@icon", handler: (icon) =>{ return `<img src="${icon}">`}}
                     }
                 }
             },
