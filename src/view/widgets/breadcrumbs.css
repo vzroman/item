@@ -1,7 +1,44 @@
+
 .breadcrumbs {
 
 }
 
 .pathItem{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    position: relative;
+    height: 30px;
+}
 
+.pathItem:last-child>.delimiter{
+    display: none;
+}
+
+.title{
+    color: #1677ff;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.expand{
+    margin-left: 2px;
+    background-image: url("breadcrumbs/dropdown.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+
+.delimiter{
+    margin: 5px 5px;
+    font-weight: bold;
+}
+
+.expand_level{
+    position: absolute;
+    left: 0;
+    top: 100%;
 }
