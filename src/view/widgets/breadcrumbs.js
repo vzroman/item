@@ -53,11 +53,13 @@ export class Breadcrumbs extends Item{
 
     onActivate( activeIndex ){
         const items = this._pathController.get();
-        const reset = {};
         for (const index of Object.keys(items)){
-            if (index > activeIndex) reset[index] = null
+            if (index > activeIndex) items[index] = null
         }
-        this._pathController.set( reset );
+        this._pathController.set( items );
+
+        const { callback } = items[ activeIndex ];
+        callback();
     }
 
     expandLevel( path ){
@@ -112,13 +114,8 @@ class PathItem extends Item{
     }
 
     activate(){
-        const {
-            index,
-            callback
-        } = this._options.data.get(["index","callback"]);
-
-        callback();
-        this._trigger("activate", [index] )
+        const index = this._options.data.get("index");
+        this._trigger("activate", [index] );
     }
 
     expand(){
