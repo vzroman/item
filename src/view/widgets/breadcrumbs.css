@@ -21,6 +21,9 @@
     cursor: pointer;
     white-space: nowrap;
 }
+.pathItem:first-child>.title{
+    margin-left: 5px;
+}
 
 .expand{
     margin-left: 2px;
