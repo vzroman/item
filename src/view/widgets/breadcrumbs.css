@@ -19,6 +19,7 @@
 .title{
     color: #1677ff;
     cursor: pointer;
+    margin: 10px;
     white-space: nowrap;
 }
 .pathItem:first-child>.title{
@@ -47,3 +48,4 @@
     left: 0;
     top: 100%;
 }
+
