@@ -51,14 +51,12 @@ export class Breadcrumbs extends Item{
         }
     }
 
-    onActivate( activeIndex ){
+    onActivate( {index: activeIndex, callback } ){
         const items = this._pathController.get();
         for (const index of Object.keys(items)){
             if (index > activeIndex) items[index] = null
         }
         this._pathController.set( items );
-
-        const { callback } = items[ activeIndex ];
         callback();
     }
 
