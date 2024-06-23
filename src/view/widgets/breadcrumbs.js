@@ -43,7 +43,7 @@ export class Breadcrumbs extends Item{
                     item:{
                         view:PathItem,
                         options:{
-                            events:{ activate:(index)=>this.onActivate(index) }
+                            events:{ activate:(item)=>this.onActivate(item) }
                         }
                     }
                 }
