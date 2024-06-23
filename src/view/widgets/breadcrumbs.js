@@ -175,8 +175,6 @@ class LevelItems extends Item{
 
         const items = this._options.items.map((item, index) =>({ ...item, index }));
 
-        console.log("items", items);
-
         const itemsController = new controllers.Collection({
             schema: itemSchema,
             data: items
@@ -195,7 +193,6 @@ class LevelItems extends Item{
                             links:{ text:"title" },
                             events:{ click:( event, label)=> {
                                 const index = label.get("data").get("index");
-                                console.log("index",index);
                                 this._trigger("activate",[ index ])
                             }}
                         }
