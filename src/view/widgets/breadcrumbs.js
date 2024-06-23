@@ -112,8 +112,8 @@ class PathItem extends Item{
     }
 
     activate(){
-        const index = this._options.data.get("index");
-        this._trigger("activate", [index] );
+        const item = this._options.data.get();
+        this._trigger("activate", [item] );
     }
 
     expand(){
