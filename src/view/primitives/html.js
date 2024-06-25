@@ -33,11 +33,13 @@ export class Html extends Parent{
         html:{type:types.primitives.Any}
     };
 
+    static markup = `<div style="width:100%;height: 100%; flex-grow: 1;"></div>`;
+
     constructor( options ){
         super( options );
 
         this.bind("html", value =>
-            this._options.$container.html( value )
+            this.$markup.html( value )
         );
     }
 }

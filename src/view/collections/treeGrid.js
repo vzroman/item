@@ -437,7 +437,7 @@ class TreeCell extends ItemView{
     static markup = `<div class="${style.treeCell}">
         <div name="offset"></div>
         <div name="expand"></div>
-        <div name="icon">icon</div>
+        <div name="icon"></div>
         <div name="cell"></div>
         <div name="total" style="margin-left: auto"></div>
     </div>`;

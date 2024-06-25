@@ -23,7 +23,9 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Pager} from "./pager";
+import {Breadcrumbs} from "./breadcrumbs";
 
 export const widgets = {
-    Pager
+    Pager,
+    Breadcrumbs
 };
