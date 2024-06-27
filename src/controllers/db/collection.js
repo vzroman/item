@@ -73,7 +73,7 @@ export class Controller extends Collection{
 
         this.bind("$.filter", ()=>{
             if (!this._filter) return;
-            this.query( this._filter ).then(data => {
+            this.query().then(data => {
                 this.refresh( data );
             })
         });
@@ -86,11 +86,10 @@ export class Controller extends Collection{
 
         return new Promise((resolve, reject) => {
 
-            const _filter = this.constructor.filter2query( filter );
+            this._filter = this.constructor.filter2query( filter );
 
-            this.query( _filter ).then(data => {
-
-                this._filter = _filter;
+            this.query().then(data => {
+                // it won't work as needed if a line below is removed
                 this.option("filter", filter);
 
                 resolve( super.init(data) );
@@ -153,7 +152,7 @@ export class Controller extends Collection{
 
                 if (this._filter === undefined) return reject("not initialized");
 
-                this.query( this._filter) .then(data => {
+                this.query().then(data => {
 
                     super.refresh( data ).then( resolve, reject );
 
@@ -164,12 +163,14 @@ export class Controller extends Collection{
         }
     }
 
-    query( filter ){
+    query(){
         return this.queueRequest((resolve, reject)=>{
             this.__queryPage = {
                 page: this._options.page,
                 pageSize:this._options.pageSize
             };
+
+            let filter = this._filter;
 
             if (this._options.filter){
                 filter = `and(${ filter }, ${ this.constructor.filter2query( this._options.filter ) })`;
