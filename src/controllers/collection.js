@@ -63,6 +63,11 @@ export class Controller extends Item{
         this.bind("$.page",()=>{
             this.updatePage();
         });
+
+        this.bind("$.filter", (filter, prevFilter)=>{
+            if (filter === prevFilter) return;
+            this.filter( filter );
+        });
     }
 
     init( Data ){
@@ -233,6 +238,10 @@ export class Controller extends Item{
         const data = [];
         this.forEach(id => data.push([id,this.get(id)]) );
         return data;
+    }
+
+    filter( filter ){
+        // TODO
     }
 
     getCount() {

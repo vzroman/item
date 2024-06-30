@@ -71,13 +71,6 @@ export class Controller extends Collection{
         if (typeof this._options.connection !== "function")
             throw new Error("invalid connection: " + this._options.connection);
 
-        this.bind("$.filter", (filter, prevFilter)=>{
-            if (filter === prevFilter) return;
-            if (!this._filter) return;
-            this.query().then(data => {
-                this.refresh( data );
-            })
-        });
     }
 
     //-------------------------------------------------------------------
@@ -125,6 +118,12 @@ export class Controller extends Collection{
             } else {
                 super.forEach( callback );
             }
+        }
+    }
+
+    filter( filter ){
+        if (this._filter) {
+            this.query().then( data => this.refresh( data ) );
         }
     }
 
