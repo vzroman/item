@@ -71,7 +71,8 @@ export class Controller extends Collection{
         if (typeof this._options.connection !== "function")
             throw new Error("invalid connection: " + this._options.connection);
 
-        this.bind("$.filter", ()=>{
+        this.bind("$.filter", (filter, prevFilter)=>{
+            if (filter === prevFilter) return;
             if (!this._filter) return;
             this.query().then(data => {
                 this.refresh( data );
@@ -89,8 +90,6 @@ export class Controller extends Collection{
             this._filter = this.constructor.filter2query( filter );
 
             this.query().then(data => {
-                // it won't work as needed if a line below is removed
-                this.option("filter", filter);
 
                 resolve( super.init(data) );
 
