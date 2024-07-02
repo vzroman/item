@@ -33,6 +33,7 @@ import {Pager} from "../widgets/pager";
 import {Selection} from "../../utilities/selection";
 import {types} from "../../types";
 import style from "./grid.css";
+import {ContextMenu} from "../widgets/contextmenu/contextMenu"
 import {waiting} from "../../utilities/waiting.js";
 
 export class Grid extends Collection{
@@ -51,7 +52,8 @@ export class Grid extends Collection{
         checkbox:{type:types.primitives.Bool},
         multiselect:{type:types.primitives.Bool, default:false},
         pager:{type:types.primitives.Set},
-        row:{type: types.primitives.Set }
+        row:{type: types.primitives.Set },
+        context_menu:{type: types.primitives.Set}
     };
 
     constructor( options ) {
@@ -106,7 +108,49 @@ export class Grid extends Collection{
             if (!$row) return;
             const item = this.constructor.getItem( $row );
             this._trigger("rowDblClick", [item]);
-        })
+        })            
+
+            //Context menu event
+        if(this._options.context_menu){
+            this.$markup.on("contextmenu", (e) =>{
+                e.preventDefault();
+                const {css, context_data} = this._options.context_menu;
+                const coord = this.getContextMenuPosition(e,css);
+
+                const $row = $(e.target).closest( 'tr' );
+                if (!$row) return;
+                const row = this.constructor.getItem( $row );
+                if (!row) return;
+
+                let items =undefined, isIncludedInSelection
+                const selected = this.getSelected();
+                if(selected.includes(row)){
+                    isIncludedInSelection = true
+                }else{
+                    for(const r of selected){
+                        if(row !== r) r.set({selected: false})
+                    }
+                    row.set({selected: true});
+                    isIncludedInSelection = false;
+                }
+                
+                items = isIncludedInSelection ? selected : [row];
+
+                this._contextmenu = new ContextMenu({
+                    $container: this._options.$container,
+                    items,
+                    context_data,
+                    css: {
+                        ...css,
+                        ...coord,
+                        "position":"absolute",
+                        "border":"none",
+                        "border-radius":"5px",
+                        "box-shadow": "4px 4px 12px rgba(0, 0, 0, 0.25)",
+                        "background":"#FFFFFF"
+                }})
+            });
+        }
 
         this._selection = new Selection({
             $container: this.$tbody,
@@ -149,6 +193,42 @@ export class Grid extends Collection{
         return rows;
     }
 
+    getContextMenuPosition(e,css){
+        const {x, y} = this.getClientPosition(e)
+
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        const menuWidth = parseInt(css["width"], 10);
+        const menuHeight = parseInt(css["height"], 10);
+
+        let top,
+            left,
+            right,
+            bottom
+        
+        if(x + menuWidth > windowWidth){
+            right = (windowWidth - x) + "px";
+            left = "auto"
+        }else {
+            left = x + "px";
+            right = "auto";
+        }
+
+        if(y + menuHeight > windowHeight){
+            bottom = (windowHeight - y) + "px";
+            top = "auto"
+        }else{
+            top = y + "px";
+            bottom = " auto";
+        }
+        return {
+            "left": `${left}`,
+            "top": `${top}`,
+            "right": `${right}`,
+            "bottom": `${bottom}`
+        }
+    }
     refresh(){
         this._options.data?.refresh();
         for (const [item] of Object.values( this._items )){
@@ -282,6 +362,7 @@ export class Grid extends Collection{
 
     _destroy() {
         this.heightObserver?.disconnect();
+        this._contextmenu?.destroy();
         this._selection?.destroy();
         super._destroy();
     }

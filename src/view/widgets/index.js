@@ -23,7 +23,9 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 import {Pager} from "./pager";
+import {ContextMenu} from "./contextmenu/contextMenu.js"
 
 export const widgets = {
-    Pager
+    Pager,
+    ContextMenu
 };

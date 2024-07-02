@@ -44,7 +44,6 @@ export class View extends Item{
         css:{type:types.primitives.Set, default:{}},
         widgets:{type:types.primitives.Set},
         waiting:{type:types.primitives.Fun},
-        context_menu:{type: types.primitives.Any}
     };
 
     static events = {
@@ -199,62 +198,6 @@ export class View extends Item{
                 },200);
             }
         });
-
-        //Context menu event
-        if(this._options.context_menu){
-                this.$markup.on("contextmenu", (event) =>{
-                event.preventDefault()
-                const {x, y} = this.getClientPosition(event)
-                const {css, context_data} = this._options.context_menu;
-
-                const windowWidth = window.innerWidth;
-                const windowHeight = window.innerHeight;
-
-                const menuWidth = parseInt(css["width"], 10);
-                const menuHeight = parseInt(css["height"], 10);
-
-                let top,
-                    left,
-                    right,
-                    bottom
-                
-                if(x + menuWidth > windowWidth){
-                    right = (windowWidth - x) + "px";
-                    left = "auto"
-                }else {
-                    left = x + "px";
-                    right = "auto";
-                }
-
-                if(y + menuHeight > windowHeight){
-                    bottom = (windowHeight - y) + "px";
-                    top = "auto"
-                }else{
-                    top = y + "px";
-                    bottom = " auto";
-                }
-
-                this.contextmenu = new ContextMenuWrapper({
-                    $container: this._options.$container,
-                    item: this.get(),
-                    context_data,
-                    css: {
-                        ...css,
-                        "left": `${left}`,
-                        "top": `${top}`,
-                        "right": `${right}`,
-                        "bottom": `${bottom}`,
-                        "position":"absolute",
-                        "border":"none",
-                        "border-radius":"5px",
-                        "box-shadow": "4px 4px 12px rgba(0, 0, 0, 0.25)",
-                        "background":"#FFFFFF"
-                    },
-                })
-            });
-
-            
-        }
 
         const dependControllers = {};
         for (const o of Object.keys(this.constructor.options)){
@@ -412,95 +355,3 @@ export class View extends Item{
     }
 }
 View.extend();
-
-class ContextMenuWrapper extends View{
-
-    static options = {
-        item: { type: types.primitives.Set, default: {} },
-        context_data:{type: types.primitives.Array, default: [] }
-    }
-
-    static markup = `<div name="context_menu">
-        <div name="items"></div>
-    </div>`
-
-    constructor(options){
-        super(options);           
-
-        setTimeout(()=>{
-            $("body").on("contextmenu click", (event) => {
-                event.preventDefault();
-                if(!event.target.closest('[name="context_menu"]')){
-                    this.destroy()
-                    $("body").off("contextmenu click");
-                }
-            })
-        })
-    }
-
-    widgets(){
-        const controller = new collectionController({
-            schema:{ 
-                icon:{ type: types.primitives.String }, 
-                caption:{type: types.primitives.String},
-                handler:{type: types.primitives.Fun}
-            },
-            data:this._options.context_data
-        })
-
-        return {
-            items: {
-                view: views.collections.Flex,
-                options: {
-                    data: controller,
-                    item: {
-                        view: MenuItem,
-                        options: {
-                            events:{
-                                click:{handler:(_, handler) =>{
-                                    const execute = handler.get("data").get("handler")
-                                    execute(this._options.item);
-                                    this.destroy()
-                                }}
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-}
-ContextMenuWrapper.extend()
-
-class MenuItem extends View {
-
-    markup(){
-        return `<div class="${styles.menuitem}">
-            <div name="icon" style="width:20px; height:20px; margin:3px 2px 4px 3px;"></div>
-            <div name="caption"></div>
-        </div>`
-    }
-    widgets() {
-        return {
-            icon:{
-                view: views.primitives.Html,
-                options:{
-                    links:{
-                        html:{source:"data@icon", handler: (icon) =>{ return `<img src="${icon}">`}}
-                    }
-                }
-            },
-            caption:{
-                view: views.primitives.Label,
-                options:{
-                    links:{
-                        text:{source:"data@caption"}
-                    }
-                }
-            }
-        }
-    }
-}
-MenuItem.extend();

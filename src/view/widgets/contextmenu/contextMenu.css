@@ -1,0 +1,9 @@
+.menuitem{
+    display: flex;
+    padding: 4px;
+}
+
+.menuitem:hover{
+    background-color: #e6e6e8;
+    border-radius: 5px;
+}
