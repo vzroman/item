@@ -121,12 +121,6 @@ export class Controller extends Collection{
         }
     }
 
-    filter( filter ){
-        if (this._filter) {
-            this.query().then( data => this.refresh( data ) );
-        }
-    }
-
     rollback(changes, error){
         return new Promise((resolve, reject) => {
 

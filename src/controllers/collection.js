@@ -240,10 +240,6 @@ export class Controller extends Item{
         return data;
     }
 
-    filter( filter ){
-        // TODO
-    }
-
     getCount() {
         return this._view.size;
     }
