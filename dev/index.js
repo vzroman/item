@@ -20,6 +20,6 @@ $(function () {
 
 
 
-    demo_test( $container );
+    grid_test( $container );
 
 });

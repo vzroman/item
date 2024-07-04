@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 import {Controller as Collection} from "../collection.js";
 import {Controller as ItemController} from "./item.js";
-import {diff,patch2value} from "../../utilities/data.js";
+import {deepEqual, diff, patch2value} from "../../utilities/data.js";
 
 function oidCompare([a], [b]) {
     a = a.split(",");
@@ -71,6 +71,16 @@ export class Controller extends Collection{
         if (typeof this._options.connection !== "function")
             throw new Error("invalid connection: " + this._options.connection);
 
+        this._subscription = undefined;
+        this.bind("$.subscribe",value => this.setSubscribe( value ) );
+
+        this.bind("$.filter",(value, prev) => {
+            if (!this._options.subscribe) return;
+            if (deepEqual(value, prev)) return;
+
+            this.setSubscribe( false );
+            this.setSubscribe( this._options.subscribe );
+        });
     }
 
     //-------------------------------------------------------------------
@@ -84,14 +94,17 @@ export class Controller extends Collection{
 
             this.query().then(data => {
 
+
                 resolve( super.init(data) );
+
+                if (this._options.subscribe) this.setSubscribe( this._options.subscribe );
 
             }, reject);
         }).catch(error=>this._trigger("error", [error, "init"]));
     }
 
     updatePage() {
-        if (this._options.serverPaging && this._filter) {
+        if (this._options.serverPaging && this._filter && this._subscription === undefined) {
 
             // Check if the query is already active
             if (this._options.request){
@@ -113,7 +126,7 @@ export class Controller extends Collection{
 
     forEach( callback ){
         if (this._view){
-            if (this._options.serverPaging) {
+            if (this._options.serverPaging && this._subscription === undefined) {
                 this._view.forEach(n => callback( n.key[1] ));
             } else {
                 super.forEach( callback );
@@ -180,7 +193,7 @@ export class Controller extends Collection{
                 timeout
             } = this._options;
 
-            const pagination = serverPaging && page !== undefined && pageSize !== undefined
+            const pagination = serverPaging && page !== undefined && pageSize !== undefined && this._subscription === undefined
                 ? `PAGE ${page}:${pageSize}`
                 : "";
 
@@ -190,7 +203,7 @@ export class Controller extends Collection{
                     ? this._options.DBs
                     : "*";
 
-            const orderBy = !this._options.orderBy || this._options.orderBy === ".oid"
+            const orderBy = !this._options.orderBy || this._options.orderBy === ".oid" || this._subscription !== undefined
                 ? ""
                 : "order by " + this._options.orderBy;
 
@@ -222,7 +235,63 @@ export class Controller extends Collection{
     }
 
     setSubscribe( value ){
-        // TODO
+
+        if (!this._filter) return;
+
+        if (!this._subscription && value){
+
+            let filter = this._filter;
+
+            if (this._options.filter){
+                filter = `and(${ filter }, ${ this.constructor.filter2query( this._options.filter ) })`;
+            }
+
+            const queryFields = [this._options.id, ...this._schema.filter({virtual:false})]
+                .map(name => ItemController.toSafeFieldName( name ))
+                .join(",");
+
+            this._subscription = this._options.connection().subscribe(`get ${ queryFields } from * where ${ filter } format $to_json`,
+                //------------create--------------------------
+                ({oid, fields})=>{
+                    if (!this.get(oid)) this._totalCount++;
+
+                    const update = {};
+                    for (const f in fields){
+                        update[ ItemController.fromSafeFieldName(f) ] = fields[f];
+                    }
+                    this.refreshItem(oid, update);
+                },
+                //------------update--------------------------
+                ({oid, fields})=>{
+                    const update = this.get(oid) ?? {};
+                    for (const f in fields){
+                        update[ ItemController.fromSafeFieldName(f) ] = fields[f];
+                    }
+                    this.refreshItem(oid, update);
+                },
+                //------------delete--------------------------
+                ({oid})=>{
+                    if (this.get(oid)) this._totalCount--;
+                    this.refreshItem(oid, null);
+                },
+                console.error);
+        }else if(this._subscription && !value){
+            this._options.connection().unsubscribe( this._subscription );
+        }
+    }
+
+    refreshItem( oid, fields ){
+        const isRefresh = this._isRefresh;
+        this._isRefresh = true;
+
+        this.set({[oid]: fields});
+
+        if (this._changes && this._changes[oid]){
+            this._data[oid] = this._changes[oid][0];
+            delete this._changes[oid];
+        }
+
+        this._isRefresh = isRefresh;
     }
 
     commit( idList ){

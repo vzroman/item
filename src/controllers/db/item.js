@@ -85,6 +85,8 @@ export class Controller extends Item{
 
                 resolve( super.init( data ) );
 
+                if (this._options.subscribe) this.setSubscribe( this._options.subscribe );
+
             }, reject);
         }).catch(error=>this._trigger("error", [error, "init"]));
 
@@ -137,45 +139,32 @@ export class Controller extends Item{
     }
 
     setSubscribe( value ){
-        console.debug("setSubscribe", value);
-        return this.queueRequest( (resolve, reject)=>{
+        if (!this._filter) return;
 
-            console.debug("setSubscribe2", value);
+        if (!this._subscription && value){
 
-            if (!this._subscription && value){
-
-                console.debug("init subscription");
-
-                const fields = this._schema.filter({virtual:false}).map(name => this.constructor.toSafeFieldName( name )).join(",");
-                this._subscription = this._options.connection().subscribe(`get ${ fields } from * where ${ this._filter } format $to_json`,
-                    //------------create--------------------------
-                    ({fields})=>{
-                        console.debug("on create", fields);
-                        resolve();
-                        this.refresh( this.constructor.parseFields( fields ) );
-                    },
-                    //------------update--------------------------
-                    ({fields})=>{
-                        console.debug("on update", fields);
-                        this.refresh( this.constructor.parseFields( fields ) );
-                    },
-                    //------------delete--------------------------
-                    ()=>{
-                        console.debug("on delete");
-                        const fields = this.get();
-                        for (const f in fields){
-                            fields[f] = null;
-                        }
-                        this.refresh( fields );
-                    },
-                    reject);
-            }else if(this._subscription && !value){
-                this._options.connection().unsubscribe( this._subscription );
-                resolve()
-            }else{
-                resolve();
-            }
-        });
+            const fields = this._schema.filter({virtual:false}).map(name => this.constructor.toSafeFieldName( name )).join(",");
+            this._subscription = this._options.connection().subscribe(`get ${ fields } from * where ${ this._filter } format $to_json`,
+                //------------create--------------------------
+                ({fields})=>{
+                    this.refresh( this.constructor.parseFields( fields ) );
+                },
+                //------------update--------------------------
+                ({fields})=>{
+                    this.refresh( this.constructor.parseFields( fields ) );
+                },
+                //------------delete--------------------------
+                ()=>{
+                    const fields = this.get();
+                    for (const f in fields){
+                        fields[f] = null;
+                    }
+                    this.refresh( fields );
+                },
+                console.error);
+        }else if(this._subscription && !value){
+            this._options.connection().unsubscribe( this._subscription );
+        }
     }
 
     commit(){
