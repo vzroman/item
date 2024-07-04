@@ -20,6 +20,6 @@ $(function () {
 
 
 
-    breadcrumbs( $container );
+    demo_test( $container );
 
 });

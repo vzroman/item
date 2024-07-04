@@ -41,6 +41,9 @@ export class Controller extends Item{
 
         if (typeof this._options.connection !== "function")
             throw new Error("invalid connection: " + this._options.connection);
+
+        this._subscription = undefined;
+        this.bind("$.subscribe",value => this.setSubscribe( value ) );
     }
     //-------------------------------------------------------------------
     // Data access API
@@ -126,16 +129,53 @@ export class Controller extends Item{
             const fields = this._schema.filter({virtual:false}).map(name => this.constructor.toSafeFieldName( name )).join(",");
 
             this._options.connection().get(`get ${ fields } from * where ${ filter } format $to_json`,Items=>{
-                let item = Object.entries( Items[0] ).map(([name, value])=>{ return [ this.constructor.fromSafeFieldName(name), value ] });
-                item = Object.fromEntries( item );
-                resolve( item );
+
+                resolve( this.constructor.parseFields( Items[0] ) );
 
             }, reject, this._options.timeout );
         });
     }
 
     setSubscribe( value ){
-        // TODO
+        console.debug("setSubscribe", value);
+        return this.queueRequest( (resolve, reject)=>{
+
+            console.debug("setSubscribe2", value);
+
+            if (!this._subscription && value){
+
+                console.debug("init subscription");
+
+                const fields = this._schema.filter({virtual:false}).map(name => this.constructor.toSafeFieldName( name )).join(",");
+                this._subscription = this._options.connection().subscribe(`get ${ fields } from * where ${ this._filter } format $to_json`,
+                    //------------create--------------------------
+                    ({fields})=>{
+                        console.debug("on create", fields);
+                        resolve();
+                        this.refresh( this.constructor.parseFields( fields ) );
+                    },
+                    //------------update--------------------------
+                    ({fields})=>{
+                        console.debug("on update", fields);
+                        this.refresh( this.constructor.parseFields( fields ) );
+                    },
+                    //------------delete--------------------------
+                    ()=>{
+                        console.debug("on delete");
+                        const fields = this.get();
+                        for (const f in fields){
+                            fields[f] = null;
+                        }
+                        this.refresh( fields );
+                    },
+                    reject);
+            }else if(this._subscription && !value){
+                this._options.connection().unsubscribe( this._subscription );
+                resolve()
+            }else{
+                resolve();
+            }
+        });
     }
 
     commit(){
@@ -200,6 +240,11 @@ export class Controller extends Item{
         }else{
             return field;
         }
+    }
+
+    static parseFields( fields ){
+        fields = Object.entries( fields ).map(([name, value])=>{ return [ this.fromSafeFieldName(name), value ] });
+        return Object.fromEntries( fields );
     }
 
 
