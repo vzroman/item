@@ -6,9 +6,9 @@ import {View as Flex} from "../collections/flex.js";
 import {View as ItemView} from "../item.js";
 import { controllers } from "../../controllers";
 import { deepEqual } from "../../utilities/data.js";
-import UpIcon from "../../../src/img/arrow_up.png";
-import DownIcon from "../../../src/img/arrow_down.png";
-import DeleteIcon from "../../img/delete.png";
+import UpIcon from "../../../src/img/arrow_up.svg";
+import DownIcon from "../../../src/img/arrow_down.svg";
+import DeleteIcon from "../../img/delete.svg";
 import styles from "./itemList.css";
 
 
@@ -206,6 +206,11 @@ class ListItem extends ItemView{
                     links:{ enable: "data@isUp" },
                     events: {
                         click: { handler: () => this._trigger("onReorder", [this._options.index, this._options.index-1]) }
+                    },
+                    css: {
+                        padding: 5,
+                        gap: 0,
+                        border: "none"
                     }
                 }
             },
@@ -216,6 +221,11 @@ class ListItem extends ItemView{
                     links:{ enable: "data@isDown" },
                     events: {
                         click: { handler: () => this._trigger("onReorder", [this._options.index, this._options.index+1]) }
+                    },
+                    css: {
+                        padding: 5,
+                        gap: 0,
+                        border: "none"
                     }
                 }
             },
@@ -226,6 +236,11 @@ class ListItem extends ItemView{
                     links:{ enable: "data@isDelete" },
                     events: {
                         click: { handler: () => this._trigger("onDelete", [this._options.index]) }
+                    },
+                    css: {
+                        padding: 5,
+                        gap: 0,
+                        border: "none"
                     }
                 }
             }
