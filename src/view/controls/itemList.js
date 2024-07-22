@@ -129,13 +129,10 @@ export class ItemList extends Control{
                                     this._itemsController.commit();
                                 }},
                                 onReorder: {handler: (from, to) => {
-                                    const fromValue = this._itemsController.get(from);
-                                    const toValue = this._itemsController.get(to);
+                                    const items = this._itemsController.get();
+                                    [ items[from].value, items[to].value ] = [ items[to].value, items[from].value ];
 
-                                    this._itemsController.set({
-                                        [from]: toValue,
-                                        [to]: fromValue
-                                    });
+                                    this._itemsController.set(items);
                                     this._itemsController.commit();
                                 }},
                                 value: (value, prev, controller, {self})=>{
@@ -289,7 +286,7 @@ function mergeValue( items, value ){
         }
 
         items.splice( i, 0, v)
-
+        i++;
     }
 
     return items;
