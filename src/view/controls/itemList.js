@@ -55,6 +55,9 @@ export class ItemList extends Control{
         itemsSet[0] = { index: 0, value: items[0], isDown: items.length > 1, isUp: false, isDelete: true };
 
         if (isFilled){
+            if ((items.length - 1) in itemsSet) {
+                itemsSet[items.length - 1].isDown = false;
+            }
             itemsSet[items.length] = {
                 index: items.length,
                 value: undefined,
