@@ -33,7 +33,7 @@ export class ContextMenu extends ItemView{
 
     static options = {
         context_data:{type: types.primitives.Array, default: [] },
-        items:{type: types.primitives.Array}
+        // items:{type: types.primitives.Array}
     };
 
     static markup = `<div name="context_menu">
@@ -63,7 +63,7 @@ export class ContextMenu extends ItemView{
                 isEnable:{type: types.primitives.Fun, default: ()=>{
                     return true
                 }},
-                items:{type: types.primitives.Array}
+                // items:{type: types.primitives.Array}
             },
             data:this._options.context_data
         })
