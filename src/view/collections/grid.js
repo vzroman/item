@@ -53,7 +53,7 @@ export class Grid extends Collection{
         multiselect:{type:types.primitives.Bool, default:false},
         pager:{type:types.primitives.Set},
         row:{type: types.primitives.Set },
-        context_menu:{type: types.primitives.Set}
+        contextmenu:{type: types.primitives.Array,default:[]}
     };
 
     constructor( options ) {
@@ -110,12 +110,12 @@ export class Grid extends Collection{
             this._trigger("rowDblClick", [item]);
         })            
 
-            //Context menu event
-        if(this._options.context_menu){
+        //Context menu event
+        if(this._options.contextmenu?.length){
             this.$markup.on("contextmenu", (e) =>{
                 e.preventDefault();
-                const {css, context_data} = this._options.context_menu;
-                const coord = this.getContextMenuPosition(e,css);
+                // const {css, context_data} = this._options.contextmenu;
+                // const coord = this.getContextMenuPosition(e,css);
 
                 // const $row = $(e.target).closest( 'tr' );
                 // if (!$row) return;
@@ -138,17 +138,10 @@ export class Grid extends Collection{
 
                 this._contextmenu = new ContextMenu({
                     $container: this._options.$container,
-                    // items,
-                    context_data,
-                    css: {
-                        ...css,
-                        ...coord,
-                        "position":"absolute",
-                        "border":"none",
-                        "border-radius":"5px",
-                        "box-shadow": "4px 4px 12px rgba(0, 0, 0, 0.25)",
-                        "background":"#FFFFFF"
-                }})
+                    items: this._options.contextmenu,
+                    x: e.clientX,
+                    y: e.clientY
+                });
             });
         }
 
@@ -193,42 +186,6 @@ export class Grid extends Collection{
         return rows;
     }
 
-    getContextMenuPosition(e,css){
-        const {x, y} = this.getClientPosition(e)
-
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-
-        const menuWidth = parseInt(css["width"], 10);
-        const menuHeight = parseInt(css["height"], 10);
-
-        let top,
-            left,
-            right,
-            bottom
-        
-        if(x + menuWidth > windowWidth){
-            right = (windowWidth - x) + "px";
-            left = "auto"
-        }else {
-            left = x + "px";
-            right = "auto";
-        }
-
-        if(y + menuHeight > windowHeight){
-            bottom = (windowHeight - y) + "px";
-            top = "auto"
-        }else{
-            top = y + "px";
-            bottom = " auto";
-        }
-        return {
-            "left": `${left}`,
-            "top": `${top}`,
-            "right": `${right}`,
-            "bottom": `${bottom}`
-        }
-    }
     refresh(){
         this._options.data?.refresh();
         for (const [item] of Object.values( this._items )){
