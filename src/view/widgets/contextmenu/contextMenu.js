@@ -37,74 +37,29 @@ export class ContextMenu extends ItemView{
         y:{type: types.primitives.Float },
     };
 
+    constructor(options){
+        super(options);
+        setTimeout(() => {
+            this.check_overflow();
+        })
+    }
+
     markup(){
         const { x, y } = this._options;
         const $markup = $(`<div name="wrapper" class="${styles.wrapper}">
             <div name="context_menu" style="top:${y}px;left:${x}px;" class="${styles.menu}">
-                <div name="items"></div>
+                <div name="items" style="padding:4px;"></div>
             </div>
         <div>`);
         $markup.on("click", () => {
             this.destroy();
         });
-        $markup.find('[name="context_menu"]').on("click", (e) => {
+        this.$contextmenu = $markup.find('[name="context_menu"]');
+        this.$contextmenu.on("click", (e) => {
             e.stopPropagation();
         });
         return $markup;
     };
-
-    getClientPosition(e){
-        let x
-        let y
-
-        if(!e) e = window.event
-        if(e.pageX || e.pageY){
-            x = e.pageX
-            y = e.pageY
-        }else if(e.clientX || e.clientY){
-            x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-            y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-        }
-
-        return {x,y}
-    }
-
-    getContextMenuPosition(e,css){
-        const {x, y} = this.getClientPosition(e)
-
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-
-        const menuWidth = parseInt(css["width"], 10);
-        const menuHeight = parseInt(css["height"], 10);
-
-        let top,
-            left,
-            right,
-            bottom
-        
-        if(x + menuWidth > windowWidth){
-            right = (windowWidth - x) + "px";
-            left = "auto"
-        }else {
-            left = x + "px";
-            right = "auto";
-        }
-
-        if(y + menuHeight > windowHeight){
-            bottom = (windowHeight - y) + "px";
-            top = "auto"
-        }else{
-            top = y + "px";
-            bottom = " auto";
-        }
-        return {
-            "left": `${left}`,
-            "top": `${top}`,
-            "right": `${right}`,
-            "bottom": `${bottom}`
-        }
-    }
 
     widgets(){
         const controller = new Collection({
@@ -141,15 +96,29 @@ export class ContextMenu extends ItemView{
             }
         }
     }
+
+    check_overflow(){
+        const total_width = this._options.$container.offset().left + this._options.$container.width();
+        const total_height = this._options.$container.offset().top + this._options.$container.height();
+        const if_overflow_x = (this._options.x + this.$contextmenu.width()) > total_width;
+        const if_overflow_y = (this._options.y + this.$contextmenu.height()) > total_height;
+
+        if (if_overflow_x){
+            this.$contextmenu.css({"left": this._options.x - this.$contextmenu.width()});
+        }
+        if (if_overflow_y){
+            this.$contextmenu.css({"top": this._options.y - this.$contextmenu.height()});
+        }
+    }
 }
 
 ContextMenu.extend();
 
 
 class MenuItem extends ItemView {
-    
+
     static markup = `<div class="${styles.menuitem}">
-        <div name="icon" style="width:20px; height:20px; margin:3px 2px 4px 3px;"></div>
+        <div name="icon" style="width:20px; height:20px;display:flex;align-items:center;justify-content:center;"></div>
         <div name="caption"></div>
     </div>`
 
@@ -159,7 +128,7 @@ class MenuItem extends ItemView {
                 view: views.primitives.Html,
                 options:{
                     links:{
-                        html:{source:"data@icon", handler: icon => `<img src="${icon}">`}
+                        html:{source:"data@icon", handler: icon => icon ? `<img width="18" src="${icon}">` : `<div style="width:20px;"></div>`}
                     }
                 }
             },

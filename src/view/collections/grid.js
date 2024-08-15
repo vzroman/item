@@ -114,27 +114,17 @@ export class Grid extends Collection{
         if(this._options.contextmenu?.length){
             this.$markup.on("contextmenu", (e) =>{
                 e.preventDefault();
-                // const {css, context_data} = this._options.contextmenu;
-                // const coord = this.getContextMenuPosition(e,css);
-
-                // const $row = $(e.target).closest( 'tr' );
-                // if (!$row) return;
-                // const row = this.constructor.getItem( $row );
-                // if (!row) return;
-
-                // let items =undefined, isIncludedInSelection
-                // const selected = this.getSelected();
-                // if(selected.includes(row)){
-                //     isIncludedInSelection = true
-                // }else{
-                //     for(const r of selected){
-                //         if(row !== r) r.set({selected: false})
-                //     }
-                //     row.set({selected: true});
-                //     isIncludedInSelection = false;
-                // }
-                
-                // items = isIncludedInSelection ? selected : [row];
+                const $row = $(e.target).closest( 'tr' );
+                if ($row?.length){
+                    const row = this.constructor.getItem( $row );
+                    const selected = this.getSelected();
+                    if(!selected.includes(row)){
+                        for(const r of selected){
+                            if(row !== r) r.set({selected: false});
+                        }
+                        row.set({selected: true});
+                    }
+                }
 
                 this._contextmenu = new ContextMenu({
                     $container: this._options.$container,

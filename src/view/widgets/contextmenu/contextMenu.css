@@ -16,13 +16,22 @@
 
 .menuitem{
     display: flex;
-    padding: 4px;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 8px;
+    margin-bottom: 4px;
+}
+
+.menuitem:last-of-type{
+    margin-bottom: 0;
 }
 
 .menuitem:hover{
     background-color: #e6e6e8;
     border-radius: 5px;
 }
+
 .disabled{
     color: #9b9b9b;
     opacity: .5;
