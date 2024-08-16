@@ -51,11 +51,11 @@ export class ContextMenu extends ItemView{
                 <div name="items" style="padding:4px;"></div>
             </div>
         <div>`);
-        $markup.on("click", () => {
+        $markup.on("click mousedown", () => {
             this.destroy();
         });
         this.$contextmenu = $markup.find('[name="context_menu"]');
-        this.$contextmenu.on("click", (e) => {
+        this.$contextmenu.on("click mousedown", (e) => {
             e.stopPropagation();
         });
         return $markup;
