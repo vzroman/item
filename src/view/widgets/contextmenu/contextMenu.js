@@ -58,6 +58,7 @@ export class ContextMenu extends ItemView{
         this.$contextmenu.on("click mousedown", (e) => {
             e.stopPropagation();
         });
+        this.$contextmenu.on("contextmenu", () => false);
         return $markup;
     };
 
