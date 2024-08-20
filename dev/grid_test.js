@@ -33,10 +33,9 @@ export function run( $container ){
         const controller = new item.controllers.db.Collection({
             connection:()=>connection,
             schema:{
-                "prop1":{ type:item.types.primitives.String },
-                "prop2":{type:item.types.primitives.Integer}
-            },
-            subscribe:true
+                "dt_on":{ type:item.types.primitives.Integer },
+                "text":{type:item.types.primitives.String}
+            }
         });
 
         
@@ -83,9 +82,9 @@ export function run( $container ){
         const grid = new item.view.collections.Grid({
             $container,
             data:controller,
-            columns:["prop1","prop2"],    // string | { fields, handler } | Item }
+            columns:["dt_on","text"],    // string | { fields, handler } | Item }
             //header:["name", "pattern"],                    // string | Item | function -> string | $markup
-            header:["prop1", "prop2"],
+            header:["dt_on", "text"],
             resizable:true,
             numerated:true,
             multiselect:true,
@@ -96,7 +95,21 @@ export function run( $container ){
             // getSubitems:{type:types.primitives.Any}
         });
 
-        controller.init([".pattern","=","$oid('/root/FP/primitives/prim1')"]);
+        let $from = +new Date();
+        let $to = +new Date() + 86400000;
+
+        controller.init(["or",[
+            ["dt_on","[]",[$from, $to]],
+            ["dt_off","[]",[$from, $to]],
+            ["dt_ack","[]",[$from, $to]]
+        ]]);
+
+
+        // let kendo = {"logic": "or", "filters":[
+        //     {"field": "dt_on", "operator": "[]", "value":[$from, $to]},
+        //     {"field": "dt_off", "operator": "[]", "value":[$from, $to]},
+        //     {"field": "dt_ack", "operator": "[]", "value":[$from, $to]}
+        // ]}
 
     }
 }
