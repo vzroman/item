@@ -1,4 +1,4 @@
-import {run as grid_test} from "./grid_test.js";
+import {run as grid_test} from "./reorder_test.js";
 import {run as treeGrid_test} from "./treeGrid_test.js";
 import {run as selectlist_test} from "./selectlist_test.js"
 import {run as demo_test} from "./demo_test.js"
@@ -10,6 +10,7 @@ import {run as panel_test} from "./panel_test.js"
 import {run as splitter_test} from "./splitter_test.js"
 import {run as validate_input} from "./validate_input.js"
 import {run as breadcrumbs} from "./breadcrumbs.js"
+import {run as reorder} from "./reorder_test.js"
 
 
 $(function () {
@@ -20,6 +21,6 @@ $(function () {
 
 
 
-    grid_test( $container );
+    reorder( $container );
 
 });

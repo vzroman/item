@@ -68,11 +68,23 @@ export class Controller extends Item{
             if (filter === prevFilter) return;
             this.filter( filter );
         });
+
+        this.bind("$.orderBy", (orderBy, prevOrderBy)=>{
+            if(orderBy === prevOrderBy) return;
+            this.init(this._options.data)
+            this.updatePage()
+        })
+
+        this.bind("$.keyCompare", (keyCompare, prevKeyCompare)=>{
+            if(keyCompare === prevKeyCompare) return;
+            this.init(this._options.data)
+            this.updatePage()
+        })
     }
 
     init( Data ){
+        // console.log(Data)
         Data = this._coerce( Data );
-
         this._isRefresh = true;
         try{
             if (this._view) this._view.destroy();
