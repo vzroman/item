@@ -36,170 +36,109 @@ export function run( $container ){
                 "type_ss":{type:item.types.primitives.Integer},
                 "region":{type:item.types.primitives.String},
             },
-            orderBy:"name",
+            orderBy:"type_ss",
             data:[
                 {
                     name:"Almaty",
-                    type_ss:220,
+                    type_ss:"220",
                     region:"South"
                 },
                 {
                     name:"Pavlodar",
-                    type_ss:110,
+                    type_ss:"300",
                     region:"North"
                 },
                 {
                     name:"Atyrau",
-                    type_ss:220,
+                    type_ss:"1150",
                     region:"West"
                 },
                 {
                     name:"Aktau",
-                    type_ss:500,
+                    type_ss:"6",
                     region:"West"
                 },
                 {
                     name:"Aktobe",
-                    type_ss:220,
+                    type_ss:"220",
                     region:"West"
                 },
                 {
                     name:"Shymkent",
-                    type_ss:500,
+                    type_ss:"500",
                     region:"South"
                 },
                 {
-                    name:"Astana",
-                    type_ss:6,
+                    name:"Semei",
+                    type_ss:"6",
+                    region:"North"
+                },  {
+                    name:"Karaganda",
+                    type_ss:"6",
+                    region:"West"
+                },
+                {
+                    name:"Oral",
+                    type_ss:"220",
+                    region:"West"
+                },
+                {
+                    name:"Kostanai",
+                    type_ss:"500",
+                    region:"South"
+                },
+                {
+                    name:"Zhambul",
+                    type_ss:"6",
                     region:"North"
                 }
             ]
         });
 
         
-        // let header;
-        //
-        // // nested header
-        // header = [
-        //     {text: "MEN", children: [
-        //         {text: "LIKE", children: [
-        //             {text: "On"},
-        //             {text: "High"}
-        //         ]},
-        //         {text: "HOT WOMEN", children: [
-        //             {text:"heels"}, {text: "!"}
-        //         ]},
-        //     ]}
-        // ];
-        //
-        // // header type 2
-        // header = ["name", "pattern", "folder", "oid"];
-        //
-        // // header type 3
-        // header = [
-        //     {  view: item.view.controls.TextInput, options:{ value: "name"} },
-        //     {  view: item.view.primitives.Html, options:{ html: "pattern"} },
-        //     {  text: "Folder" },
-        //     {  text: () => "OID" },
-        // ];
-        //
-        // // nested header with different views
-        // header = [
-        //     { view: item.view.primitives.Label, options:{ text: "MEN"}, children: [
-        //         {text: () => "LIKE", children: [
-        //             {view: item.view.primitives.Label, options:{ text: "ON", css: { "color": "green" }}},
-        //             {text: "High"}
-        //         ]},
-        //         {text: "HOT WOMEN", children: [
-        //             { view: item.view.controls.TextInput, options:{ value: "heels"}}, {text: "!"}
-        //         ]},
-        //     ]}
-        // ];
-
-
         const grid = new item.view.collections.Grid({
             $container,
             data:controller,
-            columns:["name","type_ss", "region"],    // string | { fields, handler } | Item }                  // string | Item | function -> string | $markup
+            columns:["name","type_ss", "region"],   
             header:["name", "type_ss", "region"],
             resizable:true,
             numerated:true,
             multiselect:true,
             checkbox:true,
             pager:{}
-            // isFolder:{type:types.primitives.Any},
-            // getIcon:{type:types.primitives.Any},
-            // getSubitems:{type:types.primitives.Any}
         });
 
-
         setTimeout(()=>{
-            controller.option("orderBy", "region")
-        }, 3000)
+            controller.option("keyCompare", DEFAULT_COMPARE)
+        }, 15000)
 
         setTimeout(()=>{
             controller.option("keyCompare", REVERSE_COMPARE)
-        }, 6000)
+        }, 10000)
 
-        const controller2 = new item.controllers.Collection({
-            schema:{
-                "name":{ type:item.types.primitives.String },
-                "type_ss":{type:item.types.primitives.Integer},
-                "region":{type:item.types.primitives.String},
-            },
-            orderBy:"region",
-            data:[
-                {
-                    name:"Almaty",
-                    type_ss:220,
-                    region:"South"
-                },
-                {
-                    name:"Pavlodar",
-                    type_ss:110,
-                    region:"North"
-                },
-                {
-                    name:"Atyrau",
-                    type_ss:220,
-                    region:"West"
-                },
-                {
-                    name:"Aktau",
-                    type_ss:500,
-                    region:"West"
-                },
-                {
-                    name:"Aktobe",
-                    type_ss:220,
-                    region:"West"
-                },
-                {
-                    name:"Shymkent",
-                    type_ss:500,
-                    region:"South"
-                },
-                {
-                    name:"Astana",
-                    type_ss:6,
-                    region:"North"
-                }
-            ]
-        });
-        // console.log(grid.get("data"))
-        // setTimeout(() =>{
-        //     controller._destroy();
-        //     console.log("event прошёл")
-        //     grid.set({data:controller2})
-        //     console.log(grid.get("data"));
-        // }, 3000)
+        setTimeout(()=>{
+            controller.option("keyCompare", DEFAULT_COMPARE)
+        }, 5000)
+        
+
     }
 
-    function REVERSE_COMPARE(a,b) {
-        return a < b ? 1 : a > b ? -1 : 0; 
+    //Compare for number typeof data
+    function REVERSE_COMPARE(a, b) {
+        if (a[0] < b[0]) return 1;
+        if (a[0] > b[0]) return -1;
+        // Если a[0] == b[0], то сравниваем по a[1] и b[1] в обратном порядке
+        return a[1] < b[1] ? 1 : a[1] > b[1] ? -1 : 0;
     }
     
-    function DEFAULT_COMPARE (a, b) { 
-        return a > b ? 1 : a < b ? -1 : 0; 
+    //Compare for number typeof data
+    function DEFAULT_COMPARE(a, b) {
+        if (a[0] > b[0]) return 1;
+        if (a[0] < b[0]) return -1;
+        // Если a[0] == b[0], то сравниваем по a[1] и b[1]
+        return a[1] > b[1] ? 1 : a[1] < b[1] ? -1 : 0;
     }
+
+
+    // console.log(DEFAULT_COMPARE([6,"1"], [1150,"9"]))
 }

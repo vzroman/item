@@ -72,18 +72,15 @@ export class Controller extends Item{
         this.bind("$.orderBy", (orderBy, prevOrderBy)=>{
             if(orderBy === prevOrderBy) return;
             this.init(this._options.data)
-            this.updatePage()
         })
 
         this.bind("$.keyCompare", (keyCompare, prevKeyCompare)=>{
-            if(keyCompare === prevKeyCompare) return;
+            if(keyCompare?.toString() === prevKeyCompare?.toString()) return;
             this.init(this._options.data)
-            this.updatePage()
         })
     }
 
     init( Data ){
-        // console.log(Data)
         Data = this._coerce( Data );
         this._isRefresh = true;
         try{
