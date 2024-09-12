@@ -70,6 +70,41 @@ export class Controller extends Item{
         });
     }
 
+    static operatorAction = {
+        "=": (a, b) => {
+            return Object.is(a, b);
+        },
+        ">": (a, b) => {
+            return a > b;
+        },
+        "<": (a, b) => {
+            return a < b;
+        },
+        "like": (a, b) => {
+            return a.includes(b);
+        }
+    };
+
+    static checkByConditions(filter, item) {
+        if (filter.length === 2) {
+            const [logic, conditions] = filter;
+            if (logic === "or") {
+                return conditions.some((c) => this.checkByConditions(c, item));
+            } else if (logic === "and") {
+                return conditions.every((c) => this.checkByConditions(c, item));
+            } else if (logic === "andnot") {
+                const [and, not] = conditions;
+                return this.checkByConditions(and, item) && !this.checkByConditions(not, item);
+            } else {
+                throw new Error(`undefined logic: ${logic}`);
+            }
+        } else {
+            const [field, operator, value] = filter;
+            const applyOperator = this.operatorAction[operator];
+            return applyOperator?.(item[field], value) ?? false;
+        }
+    }
+
     init( Data ){
         Data = this._coerce( Data );
 
@@ -87,6 +122,11 @@ export class Controller extends Item{
         }finally {
             this._isRefresh = false;
         }
+    }
+
+    filter(value) {
+        // todo
+        this._filter = this.checkByConditions.bind(this, value);
     }
 
     fork( {id, params, isSource, isConsumer, onCommit} ){

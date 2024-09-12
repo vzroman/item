@@ -10,6 +10,7 @@ import {run as panel_test} from "./panel_test.js"
 import {run as splitter_test} from "./splitter_test.js"
 import {run as validate_input} from "./validate_input.js"
 import {run as breadcrumbs} from "./breadcrumbs.js"
+import { run as collection_filter_test } from "./collection_filter_test.js";
 
 
 $(function () {
@@ -20,6 +21,6 @@ $(function () {
 
 
 
-    breadcrumbs( $container );
+    collection_filter_test( $container );
 
 });
