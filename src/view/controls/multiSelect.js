@@ -189,6 +189,7 @@ class SelectButton extends ItemView{
             text:{
                 view: Label,
                 options:{
+                    css: { "white-space": "nowrap"},
                     links:{text:"parent@text" }
                 }
             },

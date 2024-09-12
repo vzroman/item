@@ -34,7 +34,6 @@
     top: 100%;
     width:100%;
     overflow: auto;
-    max-height: 15vh;
     z-index: 9999;
 }
 
