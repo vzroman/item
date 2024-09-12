@@ -36,6 +36,7 @@ export function run( $container ){
                 "type_ss":{type:item.types.primitives.Integer},
                 "region":{type:item.types.primitives.String},
             },
+            keyCompare: DEFAULT_COMPARE_NUMBER,
             orderBy:"type_ss",
             data:[
                 {
@@ -100,31 +101,99 @@ export function run( $container ){
             $container,
             data:controller,
             columns:["name","type_ss", "region"],   
-            header:["name", "type_ss", "region"],
-            resizable:true,
-            numerated:true,
-            multiselect:true,
-            checkbox:true,
-            pager:{}
+            header:[
+                {
+                    view: item.view.controls.Button,
+                    options:{
+                        text:"Name",
+                        events:{
+                            click:(_, data) =>{
+                                const _controller = data.get("data")
+                                const prevOrderBy = _controller.get("$.orderBy");
+                                const _keyCompare = _controller.get("$.keyCompare");
+
+                                const orderBy = "name";
+                                controller.option("orderBy", orderBy)
+                                let keyCompare
+                                if(prevOrderBy === orderBy){
+                                    _keyCompare.toString() === DEFAULT_COMPARE.toString() ? keyCompare = REVERSE_COMPARE : keyCompare = DEFAULT_COMPARE
+                                }else{
+                                    keyCompare = DEFAULT_COMPARE
+                                }
+                                controller.option("keyCompare", keyCompare)
+                            }
+                        }
+                    }
+                }, 
+                {
+                    view: item.view.controls.Button,
+                    options:{
+                        text:"Type_ss",
+                        events:{
+                            click:(_, data) =>{
+                                const _controller = data.get("data")
+                                const prevOrderBy = _controller.get("$.orderBy");
+                                const _keyCompare = _controller.get("$.keyCompare");
+
+                                const orderBy = "type_ss";
+                                controller.option("orderBy", orderBy)
+                                let keyCompare
+                                if(prevOrderBy === orderBy){
+                                    _keyCompare.toString() === DEFAULT_COMPARE_NUMBER.toString() ? keyCompare = REVERSE_COMPARE_NUMBER : keyCompare = DEFAULT_COMPARE_NUMBER
+                                }else{
+                                    keyCompare = DEFAULT_COMPARE_NUMBER
+                                }
+                                controller.option("keyCompare", keyCompare)
+                            }
+                        }
+                    }
+                }, 
+                {
+                    view: item.view.controls.Button,
+                    options:{
+                        text:"Region",
+                        events:{
+                            click:(_, data) =>{
+                                const _controller = data.get("data")
+                                const prevOrderBy = _controller.get("$.orderBy");
+                                const _keyCompare = _controller.get("$.keyCompare");
+
+                                const orderBy = "region";
+                                controller.option("orderBy", orderBy)
+                                let keyCompare
+                                if(prevOrderBy === orderBy){
+                                    _keyCompare.toString() === DEFAULT_COMPARE.toString() ? keyCompare = REVERSE_COMPARE : keyCompare = DEFAULT_COMPARE
+                                }else{
+                                    keyCompare = DEFAULT_COMPARE
+                                }
+                                controller.option("keyCompare", keyCompare)
+                            }
+                        }
+                    }
+                }],
+                resizable:true,
+                multiselect:true,
+                checkbox:true,
+                pager:{}
         });
 
-        setTimeout(()=>{
-            controller.option("keyCompare", DEFAULT_COMPARE)
-        }, 15000)
+        // setTimeout(()=>{
+        //     controller.option("keyCompare", DEFAULT_COMPARE)
+        // }, 15000)
 
-        setTimeout(()=>{
-            controller.option("keyCompare", REVERSE_COMPARE)
-        }, 10000)
+        // setTimeout(()=>{
+        //     controller.option("keyCompare", REVERSE_COMPARE)
+        // }, 10000)
 
-        setTimeout(()=>{
-            controller.option("keyCompare", DEFAULT_COMPARE)
-        }, 5000)
+        // setTimeout(()=>{
+        //     controller.option("keyCompare", DEFAULT_COMPARE)
+        // }, 5000)
         
 
     }
 
     //Compare for number typeof data
-    function REVERSE_COMPARE(a, b) {
+    function REVERSE_COMPARE_NUMBER(a, b) {
         if (a[0] < b[0]) return 1;
         if (a[0] > b[0]) return -1;
         // Если a[0] == b[0], то сравниваем по a[1] и b[1] в обратном порядке
@@ -132,13 +201,20 @@ export function run( $container ){
     }
     
     //Compare for number typeof data
-    function DEFAULT_COMPARE(a, b) {
+    function DEFAULT_COMPARE_NUMBER(a, b) {
         if (a[0] > b[0]) return 1;
         if (a[0] < b[0]) return -1;
         // Если a[0] == b[0], то сравниваем по a[1] и b[1]
         return a[1] > b[1] ? 1 : a[1] < b[1] ? -1 : 0;
     }
 
+    function DEFAULT_COMPARE (a, b) { 
+        return a > b ? 1 : a < b ? -1 : 0; 
+    } 
+
+    function REVERSE_COMPARE(a,b) {
+        return a < b ? 1 : a > b ? -1 : 0; 
+    }
 
     // console.log(DEFAULT_COMPARE([6,"1"], [1150,"9"]))
 }
