@@ -70,7 +70,7 @@ export class Controller extends Item{
         });
     }
 
-    static operatorAction = {
+    #operatorAction = {
         "=": (a, b) => {
             return Object.is(a, b);
         },
@@ -85,22 +85,22 @@ export class Controller extends Item{
         }
     };
 
-    static checkByConditions(filter, item) {
+    _checkByConditions(filter, item) {
         if (filter.length === 2) {
             const [logic, conditions] = filter;
             if (logic === "or") {
-                return conditions.some((c) => this.checkByConditions(c, item));
+                return conditions.some((c) => this._checkByConditions(c, item));
             } else if (logic === "and") {
-                return conditions.every((c) => this.checkByConditions(c, item));
+                return conditions.every((c) => this._checkByConditions(c, item));
             } else if (logic === "andnot") {
                 const [and, not] = conditions;
-                return this.checkByConditions(and, item) && !this.checkByConditions(not, item);
+                return this._checkByConditions(and, item) && !this._checkByConditions(not, item);
             } else {
                 throw new Error(`undefined logic: ${logic}`);
             }
         } else {
             const [field, operator, value] = filter;
-            const applyOperator = this.operatorAction[operator];
+            const applyOperator = this.#operatorAction[operator];
             return applyOperator?.(item[field], value) ?? false;
         }
     }
@@ -125,8 +125,12 @@ export class Controller extends Item{
     }
 
     filter(value) {
-        // todo
-        this._filter = this.checkByConditions.bind(this, value);
+        if (value) {
+            this._filter = this._checkByConditions.bind(this, value);
+        } else {
+            this._filter = undefined;
+        }
+        this._updateView();
     }
 
     fork( {id, params, isSource, isConsumer, onCommit} ){
@@ -262,7 +266,13 @@ export class Controller extends Item{
         if (this._view){
             const { page, pageSize } = this._options;
             if (pageSize === undefined) {
-                this._view.forEach(n => callback( n.key[1] ));
+                this._view.forEach(n => {
+                    if (typeof this._filter === "function") {
+                        this._filter(this.get(n.key[1])) && callback( n.key[1] );
+                    } else {
+                        callback( n.key[1] );
+                    }
+                });
             } else {
                 const startIndex = (page - 1) * pageSize;
                 let n = this._view.at( startIndex );

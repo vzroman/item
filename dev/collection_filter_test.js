@@ -20,6 +20,63 @@ export function run( $container ) {
         ]
     });
 
+
+    let filter = ["or", [
+      [".name", "=", "Dalen"],
+      ["and", [
+          ["age", "=", 23],
+          ["car", "=", "Audi"]
+      ]]
+    ]];
+
+    let filter1 = ["and", [
+      [".name", "=", "Mereke"],
+      ["or", [
+        ["and", [
+          ["car", "=", "BMW"],
+          ["age", "=", 25]
+        ]],
+        ["age", "=", 23]
+      ]]
+    ]];
+
+    let filter2 = ["andnot", [
+      ["and", [
+        [".name", "=", "Mereke"],
+        ["age", ">", 23]
+      ]],
+      ["car", "=", "Lada"]
+    ]];
+
+    filter2 = ["or", [
+      filter2,
+      ["and", [
+        [".name", "=", "Dalen"],
+        ["or", [
+          ["age", "<", 19],
+          ["age", ">", 23]
+        ]]
+      ]],
+      [".name", "=", "Jack"]
+    ]];
+
+    controller.option("filter", filter);
+
+    setTimeout(() => {
+      controller.option("filter", filter1);
+    }, 2000);
+
+    setTimeout(() => {
+      controller.option("filter", filter2);
+
+      setTimeout(() => {
+        controller.set({8: { "id": 8,".name": "Jack", "age": 20, "car": "Tesla" }});
+        setTimeout(() => {
+          controller.option("filter", null);
+        }, 1000)
+      }, 2000);
+    }, 5000);
+
     const grid = new item.view.collections.Grid({
         $container,
         data:controller,
@@ -32,44 +89,6 @@ export function run( $container ) {
     });
 
 }
-
-let filter = ["or", [
-    [".name", "=", "Dalen"],
-    ["and", [
-        ["age", "=", 23],
-        ["car", "=", "Audi"]
-    ]]
-]];
-
-filter = ["and", [
-  [".name", "=", "Mereke"],
-  ["or", [
-    ["and", [
-      ["car", "=", "BMW"],
-      ["age", "=", 25]
-    ]],
-    ["age", "=", 23]
-  ]]
-]];
-
-filter = ["andnot", [
-  ["and", [
-    [".name", "=", "Mereke"],
-    ["age", ">", 23]
-  ]],
-  ["car", "=", "Lada"]
-]];
-
-filter = ["or", [
-  filter,
-  ["and", [
-    [".name", "=", "Dalen"],
-    ["or", [
-      ["age", "<", 19],
-      ["age", ">", 23]
-    ]]
-  ]]
-]];
 
 const items = [
     {".name": "Dalen", "age": 23, "car": "BMW"},
