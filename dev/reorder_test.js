@@ -36,7 +36,6 @@ export function run( $container ){
                 "type_ss":{type:item.types.primitives.Integer},
                 "region":{type:item.types.primitives.String},
             },
-            keyCompare: DEFAULT_COMPARE,
             orderBy:"name",
             data:[
                 {

@@ -46,45 +46,46 @@ export class SortButton extends ItemView{
     static markup = `
     <div style="display:flex">
        <div name="sort" style="flex-grow:1"></div>
-       <div name="sort_icon"></div>
+       <div name="sort_icon" style="background-size:contain; background-repeat:no-repeat"></div>
     </div>`;
  
     constructor( options ) {
         
         super( options );
 
-        this.#initOrderBy = this._options.data.get("$.orderBy")
-        this.#initKeyCompare = this._options.data.get("$.keyCompare")
+        setTimeout(() =>{
+            this.#initOrderBy = this._options.data.get("$.orderBy")
+            this.#initKeyCompare = this._options.data.get("$.keyCompare") ?? DEFAULT_COMPARE
+    
+            this.compareList = {
+                init: this.#initKeyCompare,
+                ascending: this.get("ascendingCompare"),
+                descending: this.get("descendingCompare")
+            }
 
-        this.compareList = {
-            init: this.#initKeyCompare,
-            ascending: this.get("ascendingCompare"),
-            descending: this.get("descendingCompare")
-        }
-        this.compareIndex = 0;
-
-        const _controller = this._options.data
-        _controller.bind("$.keyCompare", (keyCompare)=>{
+            const _controller = this._options.data
+            _controller.bind("$.keyCompare", (keyCompare)=>{
             const orderBy = _controller.option("orderBy")
             let icon ={
                 "display":"block",
                 "width":"20px",
-                "background-size":"contain",
-                "background-repeat":"no-repeat"
             }
             const sortIcon = this.$markup.find('[name="sort_icon"]')
             if(orderBy === this.get("orderBy")){
 
-                if(keyCompare.toString() === this.compareList.ascending.toString()){
+                if(keyCompare?.toString() === this.compareList.ascending.toString()){
                     icon["background-image"] = `url("${ascending_arrow}")`
-                }else if(keyCompare.toString() === this.compareList.descending.toString()){
+                }else if(keyCompare?.toString() === this.compareList.descending.toString()){
                     icon["background-image"] = `url("${descending_arrow}")`
+                }else{
+                    icon["background-image"] = ""
                 }
                 sortIcon.css(icon)
             }else{
-                icon["display"] = "none"
+                icon["background-image"] = ""
                 sortIcon.css(icon)
             }
+        })
         })
     }
 
@@ -113,9 +114,8 @@ export class SortButton extends ItemView{
         const compareList = this.compareList
         const orderBy = this.get("orderBy")
         const prevOrderBy = controller.get("$.orderBy");
-        const _keyCompare = controller.get("$.keyCompare");
-        
-        if(_keyCompare.toString() === compareList.descending.toString()){
+        const _keyCompare = controller.get("$.keyCompare"); 
+        if(_keyCompare?.toString() === compareList.descending.toString()){
             controller.option("orderBy", this.#initOrderBy)
             controller.option("keyCompare", this.#initKeyCompare)
             return
@@ -123,7 +123,7 @@ export class SortButton extends ItemView{
 
         controller.option("orderBy", orderBy)
         let keyCompare
-        if(prevOrderBy === orderBy && _keyCompare.toString() === compareList.ascending.toString()){
+        if(prevOrderBy === orderBy && _keyCompare?.toString() === compareList.ascending.toString()){
             keyCompare = compareList.descending
         }else{
             keyCompare = compareList.ascending
@@ -132,3 +132,7 @@ export class SortButton extends ItemView{
     }
 }
 SortButton.extend();
+
+function DEFAULT_COMPARE (a, b) { 
+    return a > b ? 1 : a < b ? -1 : 0; 
+} 
