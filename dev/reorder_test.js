@@ -36,8 +36,8 @@ export function run( $container ){
                 "type_ss":{type:item.types.primitives.Integer},
                 "region":{type:item.types.primitives.String},
             },
-            keyCompare: DEFAULT_COMPARE_NUMBER,
-            orderBy:"type_ss",
+            keyCompare: DEFAULT_COMPARE,
+            orderBy:"name",
             data:[
                 {
                     name:"Almaty",
@@ -96,79 +96,36 @@ export function run( $container ){
             ]
         });
 
-        
         const grid = new item.view.collections.Grid({
             $container,
             data:controller,
             columns:["name","type_ss", "region"],   
             header:[
                 {
-                    view: item.view.controls.Button,
+                    view: item.view.widgets.SortButton,
                     options:{
-                        text:"Name",
-                        events:{
-                            click:(_, data) =>{
-                                const _controller = data.get("data")
-                                const prevOrderBy = _controller.get("$.orderBy");
-                                const _keyCompare = _controller.get("$.keyCompare");
-
-                                const orderBy = "name";
-                                controller.option("orderBy", orderBy)
-                                let keyCompare
-                                if(prevOrderBy === orderBy){
-                                    _keyCompare.toString() === DEFAULT_COMPARE.toString() ? keyCompare = REVERSE_COMPARE : keyCompare = DEFAULT_COMPARE
-                                }else{
-                                    keyCompare = DEFAULT_COMPARE
-                                }
-                                controller.option("keyCompare", keyCompare)
-                            }
-                        }
+                        name:"Name",
+                        orderBy:"name",
+                        ascendingCompare: DEFAULT_COMPARE,
+                        descendingCompare: REVERSE_COMPARE
                     }
                 }, 
                 {
-                    view: item.view.controls.Button,
+                    view: item.view.widgets.SortButton,
                     options:{
-                        text:"Type_ss",
-                        events:{
-                            click:(_, data) =>{
-                                const _controller = data.get("data")
-                                const prevOrderBy = _controller.get("$.orderBy");
-                                const _keyCompare = _controller.get("$.keyCompare");
-
-                                const orderBy = "type_ss";
-                                controller.option("orderBy", orderBy)
-                                let keyCompare
-                                if(prevOrderBy === orderBy){
-                                    _keyCompare.toString() === DEFAULT_COMPARE_NUMBER.toString() ? keyCompare = REVERSE_COMPARE_NUMBER : keyCompare = DEFAULT_COMPARE_NUMBER
-                                }else{
-                                    keyCompare = DEFAULT_COMPARE_NUMBER
-                                }
-                                controller.option("keyCompare", keyCompare)
-                            }
-                        }
+                        name:"Type_ss",
+                        orderBy:"type_ss",
+                        ascendingCompare: DEFAULT_COMPARE_NUMBER,
+                        descendingCompare: REVERSE_COMPARE_NUMBER
                     }
                 }, 
                 {
-                    view: item.view.controls.Button,
+                    view: item.view.widgets.SortButton,
                     options:{
-                        text:"Region",
-                        events:{
-                            click:(_, data) =>{
-                                const _controller = data.get("data")
-                                const prevOrderBy = _controller.get("$.orderBy");
-                                const _keyCompare = _controller.get("$.keyCompare");
-
-                                const orderBy = "region";
-                                controller.option("orderBy", orderBy)
-                                let keyCompare
-                                if(prevOrderBy === orderBy){
-                                    _keyCompare.toString() === DEFAULT_COMPARE.toString() ? keyCompare = REVERSE_COMPARE : keyCompare = DEFAULT_COMPARE
-                                }else{
-                                    keyCompare = DEFAULT_COMPARE
-                                }
-                                controller.option("keyCompare", keyCompare)
-                            }
-                        }
+                        name:"Region",
+                        orderBy:"region",
+                        ascendingCompare: DEFAULT_COMPARE,
+                        descendingCompare: REVERSE_COMPARE
                     }
                 }],
                 resizable:true,

@@ -24,8 +24,10 @@
 //------------------------------------------------------------------------------------
 import {Pager} from "./pager";
 import {Breadcrumbs} from "./breadcrumbs";
+import {SortButton} from "./sortButton";
 
 export const widgets = {
     Pager,
-    Breadcrumbs
+    Breadcrumbs,
+    SortButton
 };
