@@ -69,7 +69,8 @@ export class SortButton extends ItemView{
             let icon ={
                 "display":"block",
                 "width":"20px",
-                "background-size":"cover"
+                "background-size":"contain",
+                "background-repeat":"no-repeat"
             }
             const sortIcon = this.$markup.find('[name="sort_icon"]')
             if(orderBy === this.get("orderBy")){
