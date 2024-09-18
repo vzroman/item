@@ -130,7 +130,7 @@ export class Controller extends Item{
         } else {
             this._filter = undefined;
         }
-        this._updateView();
+        this.updatePage();
     }
 
     fork( {id, params, isSource, isConsumer, onCommit} ){
@@ -262,16 +262,12 @@ export class Controller extends Item{
         }
     }
 
-    forEach( callback ){
+    _forEach( callback ){
         if (this._view){
             const { page, pageSize } = this._options;
             if (pageSize === undefined) {
                 this._view.forEach(n => {
-                    if (typeof this._filter === "function") {
-                        this._filter(this.get(n.key[1])) && callback( n.key[1] );
-                    } else {
-                        callback( n.key[1] );
-                    }
+                    callback( n.key[1] );
                 });
             } else {
                 const startIndex = (page - 1) * pageSize;
@@ -284,9 +280,24 @@ export class Controller extends Item{
         }
     }
 
+    forEach(callback) {
+        let filter = callback;
+
+        if (typeof this._filter === "function") {
+            filter = (id) => {
+                const meetsCondition = this._filter(this.get(id));
+                if (meetsCondition) {
+                    callback( id );
+                }
+            };
+        }
+
+        this._forEach( filter );
+    }
+
     view(){
         const data = [];
-        this.forEach(id => data.push([id,this.get(id)]) );
+        this._forEach(id => data.push([id,this.get(id)]) );
         return data;
     }
 

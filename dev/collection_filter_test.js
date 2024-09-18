@@ -67,14 +67,14 @@ export function run( $container ) {
     }, 2000);
 
     setTimeout(() => {
-      controller.option("filter", filter2);
+        controller.option("filter", filter2);
 
-      setTimeout(() => {
-        controller.set({8: { "id": 8,".name": "Jack", "age": 20, "car": "Tesla" }});
         setTimeout(() => {
-          controller.option("filter", null);
-        }, 1000)
-      }, 2000);
+            controller.set({8: { "id": 8,".name": "Jack", "age": 20, "car": "Tesla" }});
+            setTimeout(() => {
+                controller.option("filter", null);
+            }, 1000)
+        }, 2000);
     }, 5000);
 
     const grid = new item.view.collections.Grid({
@@ -87,56 +87,4 @@ export function run( $container ) {
         multiselect:true,
         checkbox:true
     });
-
 }
-
-const items = [
-    {".name": "Dalen", "age": 23, "car": "BMW"},
-    {".name": "Alex", "age": 21, "car": "Lexus"},
-    {".name": "Mereke", "age": 23, "car": "Toyota"},
-    {".name": "Martin", "age": 23, "car": "Audi"},
-    {".name": "Mereke", "age": 25, "car": "BMW"},
-    {".name": "Dalen", "age": 25, "car": "Zeekr"},
-    {".name": "Dalen", "age": 18, "car": "Porsche"}
-  ];
-  
-// const operatorAction = {
-//     "=": (a, b) => {
-//         return Object.is(a, b);
-//     },
-//     ">": (a, b) => {
-//         return a > b;
-//     },
-//     "<": (a, b) => {
-//         return a < b;
-//     },
-//     "like": (a, b) => {
-//         return a.includes(b);
-//     }
-// };
-
-// function checkByConditions(filter, item) {
-//     if (filter.length === 2) {
-//         const [logic, conditions] = filter;
-
-//         if (logic === "or") {
-//             return conditions.some((c) => checkByConditions(c, item));
-//         } else if (logic === "and") {
-//             return conditions.every((c) => checkByConditions(c, item));
-//         } else if (logic === "andnot") {
-//             const [and, not] = conditions;
-//             return (
-//                 checkByConditions(and, item) && !checkByConditions(not, item)
-//             );
-//         } else {
-//             throw new Error(`undefined logic: ${logic}`);
-//         }
-//     } else {
-//         const [field, operator, value] = filter;
-//         const check = operatorAction[operator];
-//         return check(item[field], value) ?? false;
-//     }
-// }
-  
-  
-//   const byConditions = checkByConditions.bind(null, filter);
