@@ -33,60 +33,58 @@ export function run( $container ){
         const controller = new item.controllers.db.Collection({
             connection:()=>connection,
             schema:{
-                ".name":{ type:item.types.primitives.String },
-                ".pattern":{type:item.types.primitives.String},
-                ".folder":{type:item.types.primitives.String},
-                ".oid":{type:item.types.primitives.String},
+                "dt_on":{ type:item.types.primitives.Integer },
+                "text":{type:item.types.primitives.String}
             }
         });
 
         
-        let header;
-        
-        // nested header
-        header = [
-            {text: "MEN", children: [
-                {text: "LIKE", children: [
-                    {text: "On"},
-                    {text: "High"}
-                ]},
-                {text: "HOT WOMEN", children: [
-                    {text:"heels"}, {text: "!"}
-                ]},
-            ]}
-        ];
-
-        // header type 2
-        header = ["name", "pattern", "folder", "oid"];
-
-        // header type 3
-        header = [
-            {  view: item.view.controls.TextInput, options:{ value: "name"} },
-            {  view: item.view.primitives.Html, options:{ html: "pattern"} },
-            {  text: "Folder" },
-            {  text: () => "OID" },
-        ];
-
-        // nested header with different views
-        header = [
-            { view: item.view.primitives.Label, options:{ text: "MEN"}, children: [
-                {text: () => "LIKE", children: [
-                    {view: item.view.primitives.Label, options:{ text: "ON", css: { "color": "green" }}},
-                    {text: "High"}
-                ]},
-                {text: "HOT WOMEN", children: [
-                    { view: item.view.controls.TextInput, options:{ value: "heels"}}, {text: "!"}
-                ]},
-            ]}
-        ];
+        // let header;
+        //
+        // // nested header
+        // header = [
+        //     {text: "MEN", children: [
+        //         {text: "LIKE", children: [
+        //             {text: "On"},
+        //             {text: "High"}
+        //         ]},
+        //         {text: "HOT WOMEN", children: [
+        //             {text:"heels"}, {text: "!"}
+        //         ]},
+        //     ]}
+        // ];
+        //
+        // // header type 2
+        // header = ["name", "pattern", "folder", "oid"];
+        //
+        // // header type 3
+        // header = [
+        //     {  view: item.view.controls.TextInput, options:{ value: "name"} },
+        //     {  view: item.view.primitives.Html, options:{ html: "pattern"} },
+        //     {  text: "Folder" },
+        //     {  text: () => "OID" },
+        // ];
+        //
+        // // nested header with different views
+        // header = [
+        //     { view: item.view.primitives.Label, options:{ text: "MEN"}, children: [
+        //         {text: () => "LIKE", children: [
+        //             {view: item.view.primitives.Label, options:{ text: "ON", css: { "color": "green" }}},
+        //             {text: "High"}
+        //         ]},
+        //         {text: "HOT WOMEN", children: [
+        //             { view: item.view.controls.TextInput, options:{ value: "heels"}}, {text: "!"}
+        //         ]},
+        //     ]}
+        // ];
 
 
         const grid = new item.view.collections.Grid({
             $container,
             data:controller,
-            columns:[".name",".pattern", ".folder", ".oid"],    // string | { fields, handler } | Item }
+            columns:["dt_on","text"],    // string | { fields, handler } | Item }
             //header:["name", "pattern"],                    // string | Item | function -> string | $markup
-            header,
+            header:["dt_on", "text"],
             resizable:true,
             numerated:true,
             multiselect:true,
@@ -97,7 +95,21 @@ export function run( $container ){
             // getSubitems:{type:types.primitives.Any}
         });
 
-        controller.init([".folder","=","$oid('/root/FP')"]);
+        let $from = +new Date();
+        let $to = +new Date() + 86400000;
+
+        controller.init(["or",[
+            ["dt_on","[]",[$from, $to]],
+            ["dt_off","[]",[$from, $to]],
+            ["dt_ack","[]",[$from, $to]]
+        ]]);
+
+
+        // let kendo = {"logic": "or", "filters":[
+        //     {"field": "dt_on", "operator": "[]", "value":[$from, $to]},
+        //     {"field": "dt_off", "operator": "[]", "value":[$from, $to]},
+        //     {"field": "dt_ack", "operator": "[]", "value":[$from, $to]}
+        // ]}
 
     }
 }

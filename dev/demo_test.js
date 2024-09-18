@@ -1,7 +1,6 @@
 
 import {item} from "../dist/item.js";
 import {Ecomet} from "./ecomet.js";
-//import restore from "../src/img/restore.svg";
 
 export function run( $container ){
 
@@ -30,72 +29,31 @@ export function run( $container ){
     connect();
 
     function doTest(){
-        // const data = new item.controllers.db.Item({
-        //     connection:()=>connection,
-        //     autoCommit:true,
-        //     schema:{
-        //         prop1:{ type:item.types.primitives.String },
-        //         prop2:{ type:item.types.primitives.Integer }
-        //     },
-        //     data:"/root/o1"
-        // });
-        const tabs = [
-            {
-                text: "Tab 1",
-                view: MyWidget,
-                options: {
-                    color:"white"
-                }
-            }
-        ]
+        const data = new item.controllers.db.Item({
+            connection:()=>connection,
+            autoCommit:true,
+            schema:{
+                prop1:{ type:item.types.primitives.String },
+                prop2:{ type:item.types.primitives.Integer }
+            },
+            data:"/root/FP/PROJECT/P1",
+            subscribe:true
+        });
 
-        new item.view.layout.Window({
-            actions: ["close", "minimize", "maximize"],
-            title:"My window",
-            width: 500,
-            height: 300,
-            resizable: false,
-            draggable: true,
-            icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
-            modal: false,
-            view: {
-                view: item.view.controls.ColorPicker,
-                options: {
-                    events: { onChange: (v) => {
-                        console.log(v)
-                    } },
-                    value: "#fff"
-                }
+
+        const widget = new MyWidget({
+            $container,
+            data,
+            links:{
+                color:"prop1"
             }
         });
 
-        // new item.view.layout.FormWindow({
-        //     actions: ["close",  "maximize"],
-        //     title:"My window2",
-        //     position:{
-        //         top:50,
-        //         left:50
-        //     },
-        //     // width: "500px",
-        //     // height: "300px",
-        //     resizable: true,
-        //     draggable: true,
-        //     icon: `url("https://cdn-icons-png.flaticon.com/512/455/455705.png")`,
-        //     //modal: true,
-        //     view: {
-        //         view: MyWidget,
-        //         options: {
-        //             color:"green"
-        //         }
-        //     }
-        // });
+        debugger
 
-
-        // data.set({prop1:"green"})
+        data.set({prop1:"green"})
 
     }
-
-
 
 
 }
@@ -109,17 +67,22 @@ class MyWidget extends item.view.Item{
 
     static markup = `<div style="width: 100%; height: 100%">
         <div name="text"></div>
+        <div name="number"></div>
     </div>`;
 
     static widgets = {
         text:{
-            view:item.view.controls.Toggle,
+            view:item.view.controls.TextInput,
             options:{
-                // links:{ value:"prop1" },
-                // events:{ value:"prop1" },
-                value:true,
-                textOn: "LONGT TEXT",
-                textOff:"NOT"
+                links:{ value:"prop1" },
+                events:{ value:"prop1" }
+            }
+        },
+        number:{
+            view:item.view.controls.NumberInput,
+            options:{
+                links:{ value:"prop2" },
+                events:{ value:"prop2" }
             }
         }
     };
