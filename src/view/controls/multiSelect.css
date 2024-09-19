@@ -34,6 +34,7 @@
     top: 100%;
     width:100%;
     overflow: auto;
+    max-height: 300px;
     z-index: 9999;
 }
 
