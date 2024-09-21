@@ -66,7 +66,7 @@ export class Controller extends Item{
 
         this.bind("$.filter", (filter, prevFilter)=>{
             if (filter === prevFilter) return;
-            this.filter( filter );
+            this.filter( filter, prevFilter );
         });
     }
 

@@ -74,13 +74,13 @@ export class Controller extends Collection{
         this._subscription = undefined;
         this.bind("$.subscribe",value => this.setSubscribe( value ) );
 
-        this.bind("$.filter",(value, prev) => {
-            if (!this._options.subscribe) return;
-            if (deepEqual(value, prev)) return;
+        // this.bind("$.filter",(value, prev) => {
+        //     if (!this._options.subscribe) return;
+        //     if (deepEqual(value, prev)) return;
 
-            this.setSubscribe( false );
-            this.setSubscribe( this._options.subscribe );
-        });
+        //     this.setSubscribe( false );
+        //     this.setSubscribe( this._options.subscribe );
+        // });
     }
 
     //-------------------------------------------------------------------
@@ -100,6 +100,18 @@ export class Controller extends Collection{
 
             }, reject);
         }).catch(error=>this._trigger("error", [error, "init"]));
+    }
+
+    filter(value, prev) {
+        if (deepEqual(value, prev)) return;
+        
+        if (!this._options.subscribe) {
+            this.refresh();
+            return;
+        }
+
+        this.setSubscribe( false );
+        this.setSubscribe( this._options.subscribe );
     }
 
     updatePage() {
