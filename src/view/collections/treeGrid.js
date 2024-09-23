@@ -62,7 +62,7 @@ export class TreeGrid extends ItemView{
             <div name="search_bar" style="flex-grow:1"></div>
             <div name="search_icon"></div>
         </div>
-        <div name="grid" style="flex-grow: 1;display: flex;flex-direction: column"></div>
+        <div name="grid" style="flex-grow: 1;display: flex;flex-direction: column" class="item_treeGrid_table"></div>
     </div>`;
 
 
