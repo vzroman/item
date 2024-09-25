@@ -29,6 +29,7 @@ import {types} from "../../types/index.js";
 import {controls} from "../controls/index.js";
 import mainCss from "../../css/main.css";
 import style from "./itemList.css";
+import DeleteIcon from "../../img/delete.svg";
 
 
 export class View extends Flex{
@@ -113,7 +114,7 @@ class Wrapper extends Item{
             remove:{
                 view: controls.Button,
                 options:{
-                    icon:`url("dev/img/trash_bin.svg")`,
+                    icon:`url("${DeleteIcon}")`,
                     events:{ click:() => this._trigger("remove") }
                 }
             },

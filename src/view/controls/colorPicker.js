@@ -10,12 +10,15 @@ export class ColorPicker extends Control {
 
     static options = {
         value:{type:types.primitives.String, default: "#000"},
+        hide_hex:{type: types.primitives.Bool, default: false}
     };
 
-    static markup = `<button class="${style.colorBtn}">
-        <div name="color-value" class="${style.colorValue}"></div>
-        <div name="color-preview" class="${style.colorPreview}"></div>
-    </button>`;
+    markup(){
+        return $(`<button class="${style.colorBtn}">
+            <div name="color-value" style="display:${this._options.hide_hex ? 'none' : 'unset'}" class="${style.colorValue}"></div>
+            <div name="color-preview" class="${style.colorPreview}"></div>
+        </button>`);
+    }
  
     constructor( options ) {
         super( options );
