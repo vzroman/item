@@ -31,16 +31,17 @@ import {View as ItemView} from "../item.js";
 import { controllers } from "../../controllers";
 import { controls } from "./index.js";
 import { Label } from "../primitives/label.js";
+import {Control as Parent} from "./dropdown.js";
 
 import dropdown from "../../img/dropdown.svg"
-import close from "../../img/close.svg"
+import close from "../../img/close.svg";
 
 import styles from "./multiSelect.css";
 
 export class MultiSelect extends Control{
     static markup = `<div class="${ styles.multiselect }">
         <div class="${styles.selected_items}">
-            <div name="selected"></div>
+            <div name="selected" style="width: 100%"></div>
             <div name="items"></div>
         </div>
         <div name="toggle"></div>
@@ -113,12 +114,33 @@ export class MultiSelect extends Control{
 
     widgets() {
 
+        const toggleDropdown = () => {
+            let classes = [styles.show];
+            if (this._widgets.items.get("classes")?.length > 0) {
+                classes = [];
+                this._widgets.toggle.set({classes: []});
+            } else {
+                this._widgets.toggle.set({classes: [styles.arrow]});
+            }
+            this._widgets.items.set({classes});
+        };
+
+        const $selectedWrapper = this.$markup.find('[name="selected"]');
+
+        $selectedWrapper.on("click", (e) => {
+            // todo. there might be more consistent way of knowing if element is close btn
+            const isDeleteBtn = e.target.parentNode.className.endsWith("item_button");
+            if (isDeleteBtn) return;
+            toggleDropdown();
+        });
+
         return {
             selected:{
                 view:Flex,
                 options:{
                     data: undefined,
                     direction:"horizontal",
+                    flexWrap: "wrap",
                     item:{
                         view:SelectButton,
                         options:{
@@ -140,14 +162,13 @@ export class MultiSelect extends Control{
                 options:{
                     icon:`url("${ dropdown }")`,
                     events:{
-                        click:{handler:() => this._widgets.items.set({visible: !this._widgets.items.get("visible")})}
+                        click:{handler:toggleDropdown}
                     }
                 }
             },
             items: {
-                view: SelectList,
+                view: Dropdown,
                 options: {
-                    visible: false,
                     value:this._options.value,
                     items:this._options.items,
                     itemValue:this._options.itemValue,
@@ -205,3 +226,74 @@ class SelectButton extends ItemView{
     }
 }
 SelectButton.extend();
+
+class Dropdown extends Parent {
+    static markup = `<div class="${styles.dropdown}"></div>`;
+
+    static options = {
+        value:{type: types.primitives.Array},
+        multiselect:{type: types.primitives.Bool, default:true}
+    };
+
+    constructor( options ){
+        super( options );
+
+        this.$markup.on("click", (event) => {
+            if (!this._options.multiselect && event.target?.checked){
+                this.$markup.find('input:checked').each(function() {
+                    if (this === event.target) return;
+                    $(this).attr("checked", false);
+                });
+            }
+            this.setValue( this._getValues() );
+        });
+
+        this.$markup.off("change");
+    }
+
+    updateValue( value, prev ){
+        value = Array.isArray(value) ? value : [];
+
+        this.$markup.find('input').each(function() {
+            const isChecked = value.includes($(this).data("value"));
+            $(this).attr("checked", isChecked);
+        })
+    }
+
+    _updateItems() {
+        this.$markup.empty();
+
+        const itemValue = this._options.itemValue || "value";
+        const itemText = this._options.itemText || itemValue;
+        const itemValueFun = typeof itemValue === "function" ? itemValue : item => item[itemValue];
+        const itemTextFun = typeof itemText === "function" ? itemText : item => item[itemText];
+
+        const currentValue = this.getValue() || [];
+
+        this._itemsController.view().forEach(([id, item]) => {
+            const value = itemValueFun( item );
+            const text = itemTextFun( item );
+            const checked = currentValue.includes(value) ? "checked" : "";
+
+            const $elem = $(`<a>
+                <input type="checkbox" ${checked}/>
+                ${ text }
+            </a>`);
+
+            $elem.children('input').data("value", value);
+
+            $elem.appendTo( this.$markup );
+        });
+
+        this.setValue( this._getValues() );
+    }
+
+    _getValues() {
+        const _values = [];
+        this.$markup.find('input:checked').each(function() {
+            _values.push($(this).data("value"));
+        });
+        return _values;
+    }
+}
+Dropdown.extend();
