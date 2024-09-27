@@ -25,6 +25,7 @@
     flex-grow: 1;
     overflow-x:auto;
     gap: 2px;
+    width: 100%;
 }
 .selected_items>[name="selected"]>div{
     gap: 2px;
@@ -99,6 +100,7 @@
     opacity: 0;
     transform: translateY(0.5rem);
     transition: all 0.1s cubic-bezier(0.16, 1, 0.5, 1);
+    z-index: 999;
 }
 
 .dropdown a {

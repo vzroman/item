@@ -25,7 +25,7 @@
 
 import {Control} from "./control.js";
 import {types} from "../../types/index.js";
-import { SelectList } from "./selectList.js";
+// import { SelectList } from "./selectList.js";
 import {View as Flex} from "../collections/flex.js";
 import {View as ItemView} from "../item.js";
 import { controllers } from "../../controllers";
@@ -41,7 +41,7 @@ import styles from "./multiSelect.css";
 export class MultiSelect extends Control{
     static markup = `<div class="${ styles.multiselect }">
         <div class="${styles.selected_items}">
-            <div name="selected" style="width: 100%"></div>
+            <div name="selected"></div>
             <div name="items"></div>
         </div>
         <div name="toggle"></div>
