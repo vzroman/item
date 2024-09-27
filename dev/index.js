@@ -20,6 +20,6 @@ $(function () {
 
 
 
-    grid_test( $container );
+    multiselect_test( $container );
 
 });

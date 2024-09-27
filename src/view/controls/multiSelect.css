@@ -111,10 +111,13 @@
     text-decoration: none;
     color: black;
 }
+.dropdown a:has(input:checked) {
+    font-weight: 600;
+    background-color: rgba(25, 118, 210, 0.08);
+}
   
 .dropdown a:hover {
-    background-color: #b6bdca;
-    color: white;
+    background-color: #F5F5F5;
 }
 
 .show {

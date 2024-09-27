@@ -260,6 +260,12 @@ class Dropdown extends Parent {
                     $(this).attr("checked", false);
                 });
             }
+
+            if (this._options.multiselect && !event.target.hasOwnProperty("checked")) {
+                const $input = $(event.target).find('input');
+                $input.prop("checked", !$input.prop("checked"));
+            }
+
             this.setValue( this._getValues() );
         });
 
