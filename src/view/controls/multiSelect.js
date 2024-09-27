@@ -54,7 +54,7 @@ export class MultiSelect extends Control{
         itemValue:{type: types.primitives.String},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
-        isExpanded:{type: types.primitives.Bool}
+        isExpanded:{type: types.primitives.Bool, default: false}
     }
 
     constructor( options ){
@@ -109,31 +109,32 @@ export class MultiSelect extends Control{
             }
         });
 
-        this._widgets.selected.link({data:selectedController});
-    }
-
-    widgets() {
-
-        const toggleDropdown = () => {
-            let classes = [styles.show];
-            if (this._widgets.items.get("classes")?.length > 0) {
-                classes = [];
-                this._widgets.toggle.set({classes: []});
-            } else {
-                this._widgets.toggle.set({classes: [styles.arrow]});
-            }
-            this._widgets.items.set({classes});
-        };
-
         const $selectedWrapper = this.$markup.find('[name="selected"]');
 
         $selectedWrapper.on("click", (e) => {
             // todo. there might be more consistent way of knowing if element is close btn
             const isDeleteBtn = e.target.parentNode.className.endsWith("item_button");
             if (isDeleteBtn) return;
-            toggleDropdown();
+            const isExpanded = !this.get("isExpanded");
+            this.set({isExpanded});
         });
 
+        this._closeDropdown = (e) => {
+            if (!this.get("isExpanded")) {
+                return;
+            }
+
+            if (!this.$markup[0].contains(e.target)) {
+                this.set({isExpanded: false});
+            }
+        };
+
+        window.addEventListener("click", this._closeDropdown);
+
+        this._widgets.selected.link({data:selectedController});
+    }
+
+    widgets() {
         return {
             selected:{
                 view:Flex,
@@ -148,10 +149,9 @@ export class MultiSelect extends Control{
                             events:{
                                 onDelete:{
                                     handler: (id)=>{
-                                        this.set({value: this._options.value.filter(val => val !== id)})
-
+                                        this.set({value: this._options.value.filter(val => val !== id)});
                                     }
-                                },
+                                }
                             }
                         }
                     }
@@ -162,7 +162,15 @@ export class MultiSelect extends Control{
                 options:{
                     icon:`url("${ dropdown }")`,
                     events:{
-                        click:{handler:toggleDropdown}
+                        click:{ handler:() => {
+                            const isExpanded = !this.get("isExpanded");
+                            this.set({ isExpanded });
+                        }}
+                    },
+                    links: {
+                        classes: { source: "parent@isExpanded", handler: isExpanded => {
+                            return isExpanded ? [styles.arrow] : [];
+                        } }
                     }
                 }
             },
@@ -178,6 +186,9 @@ export class MultiSelect extends Control{
                         items:"parent@items",
                         itemValue:"parent@itemValue",
                         itemText:"parent@itemText",
+                        classes: { source: "parent@isExpanded", handler: isExpanded => {
+                            return isExpanded ? [styles.show] : [];
+                        } }
                     },
                     events:{
                         value:"parent@value",
@@ -187,6 +198,10 @@ export class MultiSelect extends Control{
         }
     }
 
+    destroy() {
+        window.removeEventListener("click", this._closeDropdown);
+        super.destroy();
+    }
 }
 MultiSelect.extend();
 
