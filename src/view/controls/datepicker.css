@@ -1,0 +1,45 @@
+.datepicker {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-width: 0;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: .25rem;
+    outline: 0;
+    font-weight: normal;
+    text-align: start;
+    box-shadow: none;
+    display: inline-flex;
+    flex-flow: row nowrap;
+    align-items: stretch;
+    vertical-align: middle;
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #424242;
+    background-color: #fff;
+}
+
+.datepicker:focus {
+    border-color: rgba(0,0,0,0.08);
+    color: #424242;
+    background-color: #fff;
+}
+
+.datepicker_input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    color: inherit;
+    background: none;
+    font: inherit;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    text-overflow: ellipsis;
+    padding-block: .25rem;
+    padding-inline: .5rem;
+}

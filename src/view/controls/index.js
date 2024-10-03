@@ -34,6 +34,7 @@ import { MultiSelect } from "./multiSelect.js";
 import {Toggle} from "./toggle.js";
 import {ColorPicker} from "./colorPicker.js";
 import {Control as PasswordInput} from "./passwordInput.js";
+import {Control as DatePicker} from "./datepicker.js";
 
 export const controls = {
     Control,
@@ -47,5 +48,6 @@ export const controls = {
     ItemList,
     Toggle,
     ColorPicker,
-    PasswordInput
+    PasswordInput,
+    DatePicker
 };
