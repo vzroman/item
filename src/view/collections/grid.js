@@ -205,7 +205,7 @@ export class Grid extends Collection{
                 <tbody name="tbody"></tbody>
                 <tfoot name="footer"></tfoot>
             </table>
-            <div name="pager" class="item_grid_pager"></div>
+            <div name="pager" class="item_grid_pager" style="position:sticky; bottom:0"></div>
         </div>`);
 
         this.$table = $markup.find('table');
