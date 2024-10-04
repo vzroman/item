@@ -239,7 +239,13 @@ ListItem.extend();
 //---------------------------------------------------------------------------
 function itemsList( itemsSet ){
     return Object.entries( itemsSet )
-        .sort()
+        .sort((a,b)=>{
+            a = +a;
+            b = +b;
+            if ( a > b ) return 1;
+            if ( a < b ) return -1;
+            return 0;
+        })
         .filter(([i,value])=>!!value)
         .map(([i,{value}])=> value);
 }

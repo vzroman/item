@@ -179,6 +179,10 @@ export class Controller extends Collection{
         }
     }
 
+    filter(){
+        this.refresh();
+    }
+
     query(){
         return this.queueRequest((resolve, reject)=>{
             this.__queryPage = {

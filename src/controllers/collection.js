@@ -262,6 +262,10 @@ export class Controller extends Item{
         }
     }
 
+    filter(){
+        //Dummy for checkout in constructor, will be overriden in successors
+    }
+
     _forEach( callback ){
         if (this._view){
             const { page, pageSize } = this._options;
