@@ -24,8 +24,10 @@
 //------------------------------------------------------------------------------------
 import {Pager} from "./pager";
 import {Breadcrumbs} from "./breadcrumbs";
+import { Calendar } from "./calendar";
 
 export const widgets = {
     Pager,
-    Breadcrumbs
+    Breadcrumbs,
+    Calendar
 };

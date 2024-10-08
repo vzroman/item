@@ -1,0 +1,92 @@
+/* Calendar */
+.calendar {
+    /* inline-size: min-content;
+    block-size: min-content;
+    position: relative;
+    overflow: hidden; */
+    display: inline-flex;
+    flex-flow: column nowrap;
+    outline: 0;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #424242;
+    background-color: #fff;
+}
+
+.calendarHeader {
+    border-color: inherit;
+    color: #424242;
+    background-color: #fafafa;
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.1);
+    padding-block: .25rem;
+    padding-inline: .25rem;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.calendarView {
+    margin: auto;
+    padding-block: 0;
+    padding-inline: .25rem;
+    width: 256px;
+    inline-size: 256px;
+    min-height: 200px;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.calendarHeader > [name="prev"] > button,
+.calendarHeader > [name="next"] > button,
+.calendarHeader > [name="text"] > button {
+    border: none;
+    background: none;
+} 
+
+.calendarView table {
+    border: unset;
+}
+
+.calendarView table > [name="tbody"] > tr:hover {
+    cursor: default;
+    background-color: transparent;
+}
+
+.calendarView table > [name="tbody"] > tr {
+    background: none !important;
+}
+
+.calendarView table > [name="header"] > tr > th {
+    background: none;
+    border: unset;
+}
+
+.calendarView table > [name="tbody"] > tr > td:hover {
+    cursor: pointer;
+    background-color: #cfcfcf;
+}
+
+.calendarView table > [name="tbody"] > tr > td {
+    border: unset;
+}
+
+.calendarView table > [name="tbody"] > tr > td > div {
+    text-align: center;
+}
+
+.year {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: minmax(50px, 1fr) minmax(50px, 1fr) minmax(50px, 1fr);
+    height: 100%;
+}
+
+.year > span > button {
+    border: none;
+    background: none;
+    gap: 0px;
+}

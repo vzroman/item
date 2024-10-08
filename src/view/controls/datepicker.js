@@ -7,10 +7,13 @@ import calendar from "../../img/calendar.svg";
 import style from "./datepicker.css";
 
 export class Control extends Parent {
-    static markup = `<span class="${style.datepicker}">
-        <input class="${style.datepicker_input}" type="text" />
-        <span name="toggle_calendar"></span>
-    </span>`;
+    static markup = `<div>
+        <span class="${style.datepicker}">
+            <input class="${style.datepicker_input}" type="text" />
+            <span name="toggle_calendar"></span>
+        </span>
+        <div name="calendar"></div>
+    </div>`;
 
     widgets() {
         return {
