@@ -85,8 +85,12 @@
     height: 100%;
 }
 
-.year > span > button {
+.year > div > button {
     border: none;
     background: none;
     gap: 0px;
+}
+
+.year > div > button > [name="text"] {
+    width: 100%;
 }
