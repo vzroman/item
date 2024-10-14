@@ -77,7 +77,7 @@ table>td {
     background-color: #EEE;
 }
 
-.table>thead{
+.table>thead>:last-child{
     position: sticky;
     top:0;
     z-index: 2;
@@ -86,6 +86,11 @@ table>td {
 .table>tfoot{
     position: sticky;
     bottom:0;
+}
+
+.grid>.pager{
+    position:sticky;
+    bottom:0
 }
 
 .resizer_header {
@@ -98,6 +103,7 @@ table>td {
 }
 .resizer {
     position: absolute;
+    z-index:3;
     top: 0;
     right: -5px;
     height: 100%;
