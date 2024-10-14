@@ -32,7 +32,7 @@ import {Label} from "../primitives/label";
 import { controllers } from "../../controllers";
 import { controls } from "../controls";
 import {Html} from "../primitives/html";
-import style from "./grid.css";
+import style from "./treeGrid.css";
 import folderIcon from "./grid/img/folder_icon.svg";
 import fileIcon from "./grid/img/file_icon.svg";
 import {deepCopy, deepMerge} from "../../utilities/data";
@@ -57,13 +57,13 @@ export class TreeGrid extends ItemView{
         opened_search:{type:types.primitives.Bool,default:false}
     };
 
-    static markup = `<div class="${ mainStyles.vertical }" style="height: 100%; width:100%; flex-grow: 1">
-        <div style="display:flex;margin: 6px 0;">
-            <div class="${ style.breadcrumbs }" name="breadcrumbs" style="display:flex; flex-grow:1"></div>
-            <div name="search_bar"></div>
+    static markup = `<div class="${ mainStyles.vertical } ${ style.container }">
+        <div class="${ style.toolbar }">
+            <div class="${ style.breadcrumbs }" name="breadcrumbs"></div>
+            <div name="search_bar" style="flex-grow:1"></div>
             <div name="search_icon"></div>
         </div>
-        <div name="grid" style="flex-grow: 1;display: flex;flex-direction: column" class="item_treeGrid_table"></div>
+        <div name="grid" class="${ style.grid } item_treeGrid_table"></div>
     </div>`;
 
 
