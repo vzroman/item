@@ -220,8 +220,8 @@ export class Window extends ItemView {
             const shiftX = e.clientX - dragPoint.x;
             const shiftY = e.clientY - dragPoint.y;
 
-            const newX = position.x + shiftX;
-            const newY = position.y + shiftY;
+            let newX = position.x + shiftX;
+            let newY = position.y + shiftY;
         
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
@@ -234,10 +234,6 @@ export class Window extends ItemView {
             if (newY + elementHeight > viewportHeight) newY = viewportHeight - elementHeight;
         
             this.set({ position: { top: newY, left: newX } });
-            this.set({position:{
-                top: position.y + shiftY,
-                left: position.x + shiftX
-             }});
         };
         $titlebar.on("mousedown", e =>{
 
