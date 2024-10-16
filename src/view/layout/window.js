@@ -220,6 +220,20 @@ export class Window extends ItemView {
             const shiftX = e.clientX - dragPoint.x;
             const shiftY = e.clientY - dragPoint.y;
 
+            const newX = position.x + shiftX;
+            const newY = position.y + shiftY;
+        
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const elementWidth = this.$markup.outerWidth();
+            const elementHeight = this.$markup.outerHeight();
+        
+            if (newX < 0) newX = 0;
+            if (newX + elementWidth > viewportWidth) newX = viewportWidth - elementWidth;
+            if (newY < 0) newY = 0;
+            if (newY + elementHeight > viewportHeight) newY = viewportHeight - elementHeight;
+        
+            this.set({ position: { top: newY, left: newX } });
             this.set({position:{
                 top: position.y + shiftY,
                 left: position.x + shiftX
