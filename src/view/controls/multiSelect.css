@@ -56,6 +56,7 @@
 .selectButton>div[name="text"]{
     display:flex;
     align-items: center;
+    white-space: nowrap;
 }
 
 .selectButton div[name="close"] button{

@@ -206,11 +206,6 @@ class ListItem extends ItemView{
                     links:{ enable: "data@isUp" },
                     events: {
                         click: { handler: () => this._trigger("onReorder", [this._options.index, this._options.index-1]) }
-                    },
-                    css: {
-                        padding: 5,
-                        gap: 0,
-                        border: "none"
                     }
                 }
             },
@@ -221,11 +216,6 @@ class ListItem extends ItemView{
                     links:{ enable: "data@isDown" },
                     events: {
                         click: { handler: () => this._trigger("onReorder", [this._options.index, this._options.index+1]) }
-                    },
-                    css: {
-                        padding: 5,
-                        gap: 0,
-                        border: "none"
                     }
                 }
             },
@@ -236,11 +226,6 @@ class ListItem extends ItemView{
                     links:{ enable: "data@isDelete" },
                     events: {
                         click: { handler: () => this._trigger("onDelete", [this._options.index]) }
-                    },
-                    css: {
-                        padding: 5,
-                        gap: 0,
-                        border: "none"
                     }
                 }
             }

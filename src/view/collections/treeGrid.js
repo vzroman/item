@@ -53,14 +53,13 @@ export class TreeGrid extends ItemView{
         itemName:{type:types.primitives.Fun},
         contextPath:{type:types.primitives.Array,default:[]},
         search:{type:types.primitives.Fun},
-        getItemContext:{type:types.primitives.Fun},
-        opened_search:{type:types.primitives.Bool,default:false}
+        getItemContext:{type:types.primitives.Fun}
     };
 
     static markup = `<div class="${ mainStyles.vertical }" style="height: 100%; width:100%; flex-grow: 1">
         <div style="display:flex;margin: 6px 0;">
             <div class="${ style.breadcrumbs }" name="breadcrumbs" style="display:flex; flex-grow:1"></div>
-            <div name="search_bar"></div>
+            <div name="search_bar" style="flex-grow:1"></div>
             <div name="search_icon"></div>
         </div>
         <div name="grid" style="flex-grow: 1;display: flex;flex-direction: column"></div>
@@ -143,8 +142,7 @@ export class TreeGrid extends ItemView{
             search_bar:{
                 view:SearchBar,
                 options:{
-                    css: { "flex-grow": this._options.opened_search ? "unset": "1" },
-                    visible: this._options.opened_search,
+                    visible:false,
                     events:{
                         onSearch:(val)=>{
                             this.search(val);
@@ -156,7 +154,7 @@ export class TreeGrid extends ItemView{
             search_icon:{
                 view: controls.Button,
                 options:{
-                    visible: !!(this._options.search && this._options.getItemContext && !this._options.opened_search),
+                    visible: !!(this._options.search && this._options.getItemContext),
                     icon: `url("${icon_search}")`,
                     events:{
                         click:() => {
@@ -246,11 +244,9 @@ export class TreeGrid extends ItemView{
     }
 
     resetSearch(){
-        if (!this._options.opened_search){
-            this._widgets.breadcrumbs.set({"visible": true});
-            this._widgets.search_bar.set({"visible": false});
-            this._widgets.search_icon.set({"visible": true});
-        }
+        this._widgets.breadcrumbs.set({"visible": true});
+        this._widgets.search_bar.set({"visible": false});
+        this._widgets.search_icon.set({"visible": true});
         if (!(this._grid.get("columns")[0].view instanceof TreeCell)) {
             this._contextPath( this._options.contextPath );
         }
@@ -355,10 +351,7 @@ class SearchBar extends ItemView{
     constructor( options ){
         super( options );
 
-        this.$markup.find('[name="close"]').on("click", ()=>{
-            $input.val(null);
-            this._trigger("onClose");
-        });
+        this.$markup.find('[name="close"]').on("click", ()=>this._trigger("onClose"));
 
         const $input = this.$markup.find('input');
         const $searcher = this.$markup.find('[name="searcher"]');
