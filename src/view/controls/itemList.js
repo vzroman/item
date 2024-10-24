@@ -6,9 +6,9 @@ import {View as Flex} from "../collections/flex.js";
 import {View as ItemView} from "../item.js";
 import { controllers } from "../../controllers";
 import { deepEqual } from "../../utilities/data.js";
-import UpIcon from "../../../src/img/arrow_up.png";
-import DownIcon from "../../../src/img/arrow_down.png";
-import DeleteIcon from "../../img/delete.png";
+import UpIcon from "../../../src/img/arrow_up.svg";
+import DownIcon from "../../../src/img/arrow_down.svg";
+import DeleteIcon from "../../img/delete.svg";
 import styles from "./itemList.css";
 
 
@@ -55,6 +55,9 @@ export class ItemList extends Control{
         itemsSet[0] = { index: 0, value: items[0], isDown: items.length > 1, isUp: false, isDelete: true };
 
         if (isFilled){
+            if ((items.length - 1) in itemsSet) {
+                itemsSet[items.length - 1].isDown = false;
+            }
             itemsSet[items.length] = {
                 index: items.length,
                 value: undefined,
@@ -129,13 +132,10 @@ export class ItemList extends Control{
                                     this._itemsController.commit();
                                 }},
                                 onReorder: {handler: (from, to) => {
-                                    const fromValue = this._itemsController.get(from);
-                                    const toValue = this._itemsController.get(to);
+                                    const items = this._itemsController.get();
+                                    [ items[from].value, items[to].value ] = [ items[to].value, items[from].value ];
 
-                                    this._itemsController.set({
-                                        [from]: toValue,
-                                        [to]: fromValue
-                                    });
+                                    this._itemsController.set(items);
                                     this._itemsController.commit();
                                 }},
                                 value: (value, prev, controller, {self})=>{
@@ -206,6 +206,11 @@ class ListItem extends ItemView{
                     links:{ enable: "data@isUp" },
                     events: {
                         click: { handler: () => this._trigger("onReorder", [this._options.index, this._options.index-1]) }
+                    },
+                    css: {
+                        padding: 5,
+                        gap: 0,
+                        border: "none"
                     }
                 }
             },
@@ -216,6 +221,11 @@ class ListItem extends ItemView{
                     links:{ enable: "data@isDown" },
                     events: {
                         click: { handler: () => this._trigger("onReorder", [this._options.index, this._options.index+1]) }
+                    },
+                    css: {
+                        padding: 5,
+                        gap: 0,
+                        border: "none"
                     }
                 }
             },
@@ -226,6 +236,11 @@ class ListItem extends ItemView{
                     links:{ enable: "data@isDelete" },
                     events: {
                         click: { handler: () => this._trigger("onDelete", [this._options.index]) }
+                    },
+                    css: {
+                        padding: 5,
+                        gap: 0,
+                        border: "none"
                     }
                 }
             }
@@ -280,7 +295,7 @@ function mergeValue( items, value ){
         }
 
         items.splice( i, 0, v)
-
+        i++;
     }
 
     return items;
