@@ -9,7 +9,7 @@ export class ColorPicker extends Control {
     static events = { onChange: true };
 
     static options = {
-        value:{type:types.primitives.String, default: "#000"},
+        value:{type:types.primitives.String, default: "#000"}
     };
 
     static markup = `<button class="${style.colorBtn}">
