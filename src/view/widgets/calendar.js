@@ -2,7 +2,7 @@ import {View} from "../item";
 import { Grid } from "../collections/grid.js";
 import { Control as Button } from "../controls/button.js";
 import { Controller as Collection } from "../../controllers/collection.js";
-import { Controller as ItemController } from "../../controllers/item.js";
+import { Controller as Item } from "../../controllers/item.js";
 import { types } from "../../types/index.js";
 
 import prev from "../../img/prev.svg";
@@ -11,9 +11,58 @@ import next from "../../img/next.svg";
 import style from "./calendar.css";
 
 export class Calendar extends View {
+    #views;
+
     static options = {
         value: {type: types.primitives.Integer, default: +new Date()}
     };
+
+    constructor(options) {
+        super(options);
+
+        this.#views = [
+            {view: Month, options: { 
+                value: this._options.value, 
+                events: { value: (v) => {
+
+                } },
+                links: { value: { source: this, event: "value", handler: (v) => {
+                    return v;
+                } } } }
+            },
+            {view: Year, options: { 
+                value: this._options.value,
+                events: { value: (v) => {
+                    
+                } },
+                links: { value: { source: this, event: "value", handler: (v) => {
+                    return v;
+                } } } }
+            }
+        ];
+
+        this._viewModeController = new Item({
+            schema: { active: { type: types.primitives.Integer } },
+            data: { active: 0 }
+        });
+
+        this.$calendarMode = undefined;
+
+        this._viewModeController.bind("active", active => {
+            const {view, options} = this.#views[active];
+
+            if (this.$calendarMode) {
+                this.$calendarMode.destroy();
+                this.$calendar.empty();
+                this.$calendarMode = undefined;
+            }
+
+            this.$calendarMode = new view({ 
+                $container: this.$calendar,
+                ...options
+            });
+        });
+    }
 
     markup() {
         const $markup = $(`<div class="${style.calendar}">
@@ -31,60 +80,6 @@ export class Calendar extends View {
     }
 
     widgets() {
-        const modes = [
-            {view: Month, options: { 
-                value: this._options.value, 
-                events: { value: (v) => {
-
-                } },
-                links: { value: { source: this, event: "value", handler: (v) => {
-                return v;
-            } } } }},
-            {view: Year, options: { 
-                value: this._options.value,
-                events: { value: (v) => {
-                    
-                } },
-                links: { value: { source: this, event: "value", handler: (v) => {
-                return v;
-            } } } }}
-        ];
-
-        this._viewModeController = new ItemController({
-            schema: {
-                active: { type: types.primitives.Integer },
-                modes: { type:types.complex.Collection, options:{schema:{
-                    view:{type: types.primitives.Class, options:{class: View}, required:true },
-                    options:{type: types.primitives.Set }
-                }}, default: []}  // month | year | decade | century
-            },
-            data: {
-                active: 0,
-                modes
-            }
-        });
-
-        this.$calendarMode = undefined;
-
-        this._viewModeController.bind("active", active => {
-            const {view, options} = this._viewModeController.get("modes")[active];
-
-            if (this.$calendarMode) {
-                this.$calendarMode.destroy();
-                this.$calendar.empty();
-            }
-
-            this.$calendarMode = new view({ 
-                $container: this.$calendar,
-                ...options
-            });
-        });
-
-        setTimeout(() => {
-            // this._options.data.set({ value: +new Date() });
-            this.set({value: +new Date().setMonth(3)})
-        }, 5000);
-
         return {
             prev: {
                 view: Button,
@@ -114,12 +109,19 @@ export class Calendar extends View {
                     events:{
                         click: () => {
                             // todo
+                            let active = this._viewModeController.get("active");
+                            active++;
+                            this._viewModeController.set({ active });
                         } 
                     },
                     links: {
                         text: { source: "parent", event: ["value"], handler: ({value}) => {
                             return this.$calendarMode.headerText(value);
-                        } }
+                        } },
+                        // enable: { source: _this._viewModeController, event: ["active"], handler: ({active}) => {
+                        //     if (this.#views[active + 1] === undefined) return false;
+                        //     return true;
+                        // } }
                     },
                     css: {
                         "font-size": "16px"
