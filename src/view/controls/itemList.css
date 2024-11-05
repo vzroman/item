@@ -20,3 +20,10 @@
     align-items: center;
     gap: 6px;
 }
+.buttons_block div[name="up"] button,
+.buttons_block div[name="down"] button,
+.buttons_block div[name="delete"] button{
+    padding: 5px;
+    gap: 0;
+    border: none;
+}

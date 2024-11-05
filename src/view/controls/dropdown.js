@@ -63,7 +63,16 @@ export class Control extends Parent{
             }
         });
 
-        this.bind("items", value=> this._initItemsController(value) );
+        this.bind("items", value=>{
+            if (value instanceof Controller){
+                value.onReady().then(()=>{
+                    if (this.isDestroyed()) return;
+                    this._initItemsController(value);
+                });
+            }else{
+                this._initItemsController(value);
+            }
+        });
 
         this.bind("change", changes=>{
             for (const p of ["itemText", "itemValue", "itemGroup"]){
@@ -139,10 +148,7 @@ export class Control extends Parent{
             return this._initItemsController([]);
         }
 
-        this._itemsController.onReady().then(()=>{
-            if (this.isDestroyed()) return;
-            this._updateItems();
-        });
+        this._updateItems();
 
         this._subscription = this._itemsController.bind("change",()=> this._updateItems() );
 
