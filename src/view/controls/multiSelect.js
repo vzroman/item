@@ -25,15 +25,15 @@
 
 import {Control} from "./control.js";
 import {types} from "../../types/index.js";
-import { SelectList } from "./selectList.js";
 import {View as Flex} from "../collections/flex.js";
 import {View as ItemView} from "../item.js";
 import { controllers } from "../../controllers";
 import { controls } from "./index.js";
 import { Label } from "../primitives/label.js";
+import {Control as Parent} from "./dropdown.js";
 
-import dropdown from "../../img/dropdown.svg"
-import close from "../../img/close.svg"
+import dropdown from "../../img/dropdown.svg";
+import close from "../../img/close.svg";
 
 import styles from "./multiSelect.css";
 
@@ -53,7 +53,7 @@ export class MultiSelect extends Control{
         itemValue:{type: types.primitives.String},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
-        isExpanded:{type: types.primitives.Bool}
+        isExpanded:{type: types.primitives.Bool, default: false}
     }
 
     constructor( options ){
@@ -108,17 +108,39 @@ export class MultiSelect extends Control{
             }
         });
 
+        const $selectedWrapper = this.$markup.find('[name="selected"]');
+
+        $selectedWrapper.on("click", (e) => {
+            // todo. there might be more consistent way of knowing if element is close btn
+            const isDeleteBtn = e.target.parentNode.className.endsWith("item_button");
+            if (isDeleteBtn) return;
+            const isExpanded = !this.get("isExpanded");
+            this.set({isExpanded});
+        });
+
+        this._closeDropdown = (e) => {
+            if (!this.get("isExpanded")) {
+                return;
+            }
+
+            if (!this.$markup[0].contains(e.target)) {
+                this.set({isExpanded: false});
+            }
+        };
+
+        window.addEventListener("click", this._closeDropdown);
+
         this._widgets.selected.link({data:selectedController});
     }
 
     widgets() {
-
         return {
             selected:{
                 view:Flex,
                 options:{
                     data: undefined,
                     direction:"horizontal",
+                    flexWrap: "wrap",
                     item:{
                         view:SelectButton,
                         options:{
@@ -126,10 +148,9 @@ export class MultiSelect extends Control{
                             events:{
                                 onDelete:{
                                     handler: (id)=>{
-                                        this.set({value: this._options.value.filter(val => val !== id)})
-
+                                        this.set({value: this._options.value.filter(val => val !== id)});
                                     }
-                                },
+                                }
                             }
                         }
                     }
@@ -140,14 +161,21 @@ export class MultiSelect extends Control{
                 options:{
                     icon:`url("${ dropdown }")`,
                     events:{
-                        click:{handler:() => this._widgets.items.set({visible: !this._widgets.items.get("visible")})}
+                        click:{ handler:() => {
+                            const isExpanded = !this.get("isExpanded");
+                            this.set({ isExpanded });
+                        }}
+                    },
+                    links: {
+                        classes: { source: "parent@isExpanded", handler: isExpanded => {
+                            return isExpanded ? [styles.arrow] : [];
+                        } }
                     }
                 }
             },
             items: {
-                view: SelectList,
+                view: Dropdown,
                 options: {
-                    visible: false,
                     value:this._options.value,
                     items:this._options.items,
                     itemValue:this._options.itemValue,
@@ -157,6 +185,9 @@ export class MultiSelect extends Control{
                         items:"parent@items",
                         itemValue:"parent@itemValue",
                         itemText:"parent@itemText",
+                        classes: { source: "parent@isExpanded", handler: isExpanded => {
+                            return isExpanded ? [styles.show] : [];
+                        } }
                     },
                     events:{
                         value:"parent@value",
@@ -166,6 +197,10 @@ export class MultiSelect extends Control{
         }
     }
 
+    destroy() {
+        window.removeEventListener("click", this._closeDropdown);
+        super.destroy();
+    }
 }
 MultiSelect.extend();
 
@@ -205,3 +240,80 @@ class SelectButton extends ItemView{
     }
 }
 SelectButton.extend();
+
+class Dropdown extends Parent {
+    static markup = `<div class="${styles.dropdown}"></div>`;
+
+    static options = {
+        value:{type: types.primitives.Array},
+        multiselect:{type: types.primitives.Bool, default:true}
+    };
+
+    constructor( options ){
+        super( options );
+
+        this.$markup.on("click", (event) => {
+            if (!this._options.multiselect && event.target?.checked){
+                this.$markup.find('input:checked').each(function() {
+                    if (this === event.target) return;
+                    $(this).attr("checked", false);
+                });
+            }
+
+            if (this._options.multiselect && !event.target.hasOwnProperty("checked")) {
+                const $input = $(event.target).find('input');
+                $input.prop("checked", !$input.prop("checked"));
+            }
+
+            this.setValue( this._getValues() );
+        });
+
+        this.$markup.off("change");
+    }
+
+    updateValue( value, prev ){
+        value = Array.isArray(value) ? value : [];
+
+        this.$markup.find('input').each(function() {
+            const isChecked = value.includes($(this).data("value"));
+            $(this).attr("checked", isChecked);
+        })
+    }
+
+    _updateItems() {
+        this.$markup.empty();
+
+        const itemValue = this._options.itemValue || "value";
+        const itemText = this._options.itemText || itemValue;
+        const itemValueFun = typeof itemValue === "function" ? itemValue : item => item[itemValue];
+        const itemTextFun = typeof itemText === "function" ? itemText : item => item[itemText];
+
+        const currentValue = this.getValue() || [];
+
+        this._itemsController.view().forEach(([id, item]) => {
+            const value = itemValueFun( item );
+            const text = itemTextFun( item );
+            const checked = currentValue.includes(value) ? "checked" : "";
+
+            const $elem = $(`<a>
+                <input type="checkbox" ${checked}/>
+                ${ text }
+            </a>`);
+
+            $elem.children('input').data("value", value);
+
+            $elem.appendTo( this.$markup );
+        });
+
+        this.setValue( this._getValues() );
+    }
+
+    _getValues() {
+        const _values = [];
+        this.$markup.find('input:checked').each(function() {
+            _values.push($(this).data("value"));
+        });
+        return _values;
+    }
+}
+Dropdown.extend();

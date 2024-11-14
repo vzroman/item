@@ -44,7 +44,12 @@ export class Control extends Parent{
     constructor( options ){
         super( options );
 
-        this.bind("text", value => this.$markup.find('[name="text"]').text( value ));
+        const $text = this.$markup.find('[name="text"]');
+        const $icon = this.$markup.find('[name="icon"]');
+
+        this.bind("text", value => {
+            $text.text( value );
+        });
 
         this.bind("icon", value => {
             let css = value
@@ -56,11 +61,11 @@ export class Control extends Parent{
                     "background-image":"",
                     "display":"none"
                 };
-            this.$markup.find('[name="icon"]').css( css );
+            $icon.css( css );
         });
 
         this.bind("title", value => this.$markup.attr("title", value));
-        this.bind("white_space", value => this.$markup.find('[name="text"]').css("white-space",value))
+        this.bind("white_space", value => $text.css("white-space",value))
     }
 
     enable( value ){
