@@ -39,7 +39,8 @@ export class Grid extends Collection{
 
     static events = {
         onSelect: true,
-        rowDblClick: true
+        rowDblClick: true,
+        onResize:true
     }
 
     static options = {
@@ -243,6 +244,7 @@ export class Grid extends Collection{
             }
         });
 
+        this.$grid_container = this._options.$container.find('.item_grid_container')
 
         this.heightObserver = new ResizeObserver(([entry]) => {
             columns.forEach(({$resizer})=>{
@@ -268,6 +270,8 @@ export class Grid extends Collection{
 
                 $column.css({"width": cell_width + "px"});
                 this.$table.css({"width": table_width + "px"});
+                this.$grid_container.css({"width":table_width + 2 + "px"});
+                this._trigger("onResize", table_width);
             }
             $resizer.on("mousedown", e => {
                 pos = e.clientX;

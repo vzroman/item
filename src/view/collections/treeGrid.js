@@ -56,7 +56,7 @@ export class TreeGrid extends ItemView{
         getItemContext:{type:types.primitives.Fun}
     };
 
-    static markup = `<div class="${ mainStyles.vertical } ${ style.container }">
+    static markup = `<div class="${ mainStyles.vertical } ${ style.container } treeGrid_container">
         <div class="${ style.toolbar }">
             <div class="${ style.breadcrumbs }" name="breadcrumbs"></div>
             <div name="search_bar" style="flex-grow:1"></div>
@@ -92,6 +92,7 @@ export class TreeGrid extends ItemView{
             return [e, (...args)=>this._trigger(e,args) ]
         }));
 
+        this._gridOptions.events.onResize = (v) => this.resizeGrid(v);
         //--------Init breadcrumbs---------------------------------
         this._breadCrumbsController = new controllers.Collection({
             id:"id",
@@ -251,7 +252,10 @@ export class TreeGrid extends ItemView{
             this._contextPath( this._options.contextPath );
         }
     }
-
+    
+    resizeGrid(v){
+        this._options.$container.find('.treeGrid_container').css({"width":v + 2 + "px"})
+    }
     getSelected(){
         return this._grid?.getSelected();
     }
