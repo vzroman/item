@@ -169,7 +169,7 @@ class LevelItems extends Item{
         activate:true
     }
 
-    static markup = `<div name="items"></div>`;
+    static markup = `<div name="items" style="max-height:90vh; overflow-y:auto;"></div>`;
 
     widgets() {
 
