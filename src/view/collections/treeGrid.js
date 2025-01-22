@@ -158,15 +158,19 @@ export class TreeGrid extends ItemView{
                     icon: `url("${icon_search}")`,
                     events:{
                         click:() => {
-                            this._widgets.breadcrumbs.set({"visible": false});
-                            this._widgets.search_bar.set({"visible": true});
-                            this._widgets.search_icon.set({"visible": false});
+                           this.openSearchBar();
                         }
                     }
                 }
             }
         }
 
+    }
+
+    openSearchBar() {
+        this._widgets.breadcrumbs.set({"visible": false});
+        this._widgets.search_bar.set({"visible": true});
+        this._widgets.search_icon.set({"visible": false});
     }
 
     search( value ) {
@@ -340,6 +344,10 @@ class SearchBar extends ItemView{
         onClose: true
     }
 
+    static options = {
+        searchValue: { type: types.primitives.String }
+    }
+
     static markup = `<div class="${style.search_bar}">
         <div name="search_bar_wrapper">
             <input type="text" placeholder="Search..."/>
@@ -353,18 +361,23 @@ class SearchBar extends ItemView{
 
         this.$markup.find('[name="close"]').on("click", ()=>this._trigger("onClose"));
 
-        const $input = this.$markup.find('input');
+        this.$input = this.$markup.find('input');
         const $searcher = this.$markup.find('[name="searcher"]');
 
-        this.bind("visible", ()=>$input.val(null));
+        this.bind("visible", ()=>this.$input.val(null));
         $searcher.on("click", event =>{
             event.preventDefault();
-            this._trigger("onSearch", $input.val());
+            this._trigger("onSearch", this.$input.val());
         })
-        $input.on("keypress", event=>{
+
+        this.$input.on("input", event => {
+            this.set({ searchValue: event.target.value });
+        });
+
+        this.$input.on("keypress", event=>{
             if (event.which === 13){
                 event.preventDefault();
-                this._trigger("onSearch", $input.val());
+                this._trigger("onSearch", this.$input.val());
             }
         });
     }
