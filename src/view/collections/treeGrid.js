@@ -250,6 +250,7 @@ export class TreeGrid extends ItemView{
     resetSearch(){
         this._widgets.breadcrumbs.set({"visible": true});
         this._widgets.search_bar.set({"visible": false});
+        this._widgets.search_bar.$input.val("");
         this._widgets.search_icon.set({"visible": true});
         if (!(this._grid.get("columns")[0].view instanceof TreeCell)) {
             this._contextPath( this._options.contextPath );
@@ -369,10 +370,6 @@ class SearchBar extends ItemView{
             event.preventDefault();
             this._trigger("onSearch", this.$input.val());
         })
-
-        this.$input.on("input", event => {
-            this.set({ searchValue: event.target.value });
-        });
 
         this.$input.on("keypress", event=>{
             if (event.which === 13){
