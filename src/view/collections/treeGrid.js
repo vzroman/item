@@ -247,8 +247,7 @@ export class TreeGrid extends ItemView{
 
     resetSearch(){
         this._widgets.breadcrumbs.set({"visible": true});
-        this._widgets.search_bar.set({"visible": false});
-        this._widgets.search_bar.clear();
+        this._widgets.search_bar.set({"visible": false, value:""});
         this._widgets.search_icon.set({"visible": true});
         if (!(this._grid.get("columns")[0].view instanceof TreeCell)) {
             this._contextPath( this._options.contextPath );
@@ -269,9 +268,10 @@ export class TreeGrid extends ItemView{
 
     refresh(){
         if (this._widgets?.search_bar?.get("visible") === true){
-            this.resetSearch();
+            this.search( this._widgets.search_bar.get("value") );
+        }else{
+            this._grid?.refresh();
         }
-        this._grid?.refresh();
     }
 
     linkWidgets( context ){
@@ -343,6 +343,10 @@ class SearchBar extends ItemView{
         onClose: true
     }
 
+    static options = {
+        value:{type:types.primitives.String}
+    }
+
     static markup = `<div class="${style.search_bar}">
         <div name="search_bar_wrapper">
             <input type="text" placeholder="Search..."/>
@@ -360,20 +364,21 @@ class SearchBar extends ItemView{
         const $searcher = this.$markup.find('[name="searcher"]');
 
         this.bind("visible", ()=>$input.val(null));
+
+        this.bind("value", (value)=>$input.val(value));
+
         $searcher.on("click", event =>{
             event.preventDefault();
+            this.set({value:$input.val()});
             this._trigger("onSearch", $input.val());
         })
         $input.on("keypress", event=>{
             if (event.which === 13){
                 event.preventDefault();
+                this.set({value:$input.val()});
                 this._trigger("onSearch", $input.val());
             }
         });
-    }
-
-    clear(){
-        this.$markup.find('input').val("");
     }
 }
 SearchBar.extend();
