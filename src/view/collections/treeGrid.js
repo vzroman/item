@@ -158,15 +158,19 @@ export class TreeGrid extends ItemView{
                     icon: `url("${icon_search}")`,
                     events:{
                         click:() => {
-                            this._widgets.breadcrumbs.set({"visible": false});
-                            this._widgets.search_bar.set({"visible": true});
-                            this._widgets.search_icon.set({"visible": false});
+                           this.openSearchBar( true );
                         }
                     }
                 }
             }
         }
 
+    }
+
+    openSearchBar( value ) {
+        this._widgets.breadcrumbs.set({"visible": !value});
+        this._widgets.search_bar.set({"visible": value});
+        this._widgets.search_icon.set({"visible": !value});
     }
 
     search( value ) {
@@ -222,9 +226,7 @@ export class TreeGrid extends ItemView{
                         const _isFolder = this._options.isFolder && this._options.isFolder(item);
                         if (!_isFolder) return this._trigger("rowDblClick", [row]);;
 
-                        this._widgets.breadcrumbs.set({"visible": true});
-                        this._widgets.search_bar.set({"visible": false});
-                        this._widgets.search_icon.set({"visible": true});
+                        this.openSearchBar( false );
                         
                         const path = [];
                         while (item) {
@@ -246,6 +248,7 @@ export class TreeGrid extends ItemView{
     resetSearch(){
         this._widgets.breadcrumbs.set({"visible": true});
         this._widgets.search_bar.set({"visible": false});
+        this._widgets.search_bar.clear();
         this._widgets.search_icon.set({"visible": true});
         if (!(this._grid.get("columns")[0].view instanceof TreeCell)) {
             this._contextPath( this._options.contextPath );
@@ -367,6 +370,10 @@ class SearchBar extends ItemView{
                 this._trigger("onSearch", $input.val());
             }
         });
+    }
+
+    clear(){
+        this.$markup.find('input').val("");
     }
 }
 SearchBar.extend();
