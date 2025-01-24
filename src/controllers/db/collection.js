@@ -75,6 +75,7 @@ export class Controller extends Collection{
         this.bind("$.subscribe",value => this.setSubscribe( value ) );
 
         this.bind("$.filter",(value, prev) => {
+            if (!this._filter) return;
             if (!this._options.subscribe) return;
             if (deepEqual(value, prev)) return;
 
