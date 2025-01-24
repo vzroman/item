@@ -66,8 +66,43 @@ export class Controller extends Item{
 
         this.bind("$.filter", (filter, prevFilter)=>{
             if (filter === prevFilter) return;
-            this.filter( filter );
+            this.filter( filter, prevFilter );
         });
+    }
+
+    #operatorAction = {
+        "=": (a, b) => {
+            return Object.is(a, b);
+        },
+        ">": (a, b) => {
+            return a > b;
+        },
+        "<": (a, b) => {
+            return a < b;
+        },
+        "like": (a, b) => {
+            return a.includes(b);
+        }
+    };
+
+    _checkByConditions(filter, item) {
+        if (filter.length === 2) {
+            const [logic, conditions] = filter;
+            if (logic === "or") {
+                return conditions.some((c) => this._checkByConditions(c, item));
+            } else if (logic === "and") {
+                return conditions.every((c) => this._checkByConditions(c, item));
+            } else if (logic === "andnot") {
+                const [and, not] = conditions;
+                return this._checkByConditions(and, item) && !this._checkByConditions(not, item);
+            } else {
+                throw new Error(`undefined logic: ${logic}`);
+            }
+        } else {
+            const [field, operator, value] = filter;
+            const applyOperator = this.#operatorAction[operator];
+            return applyOperator?.(item[field], value) ?? false;
+        }
     }
 
     init( Data ){
@@ -87,6 +122,15 @@ export class Controller extends Item{
         }finally {
             this._isRefresh = false;
         }
+    }
+
+    filter(value) {
+        if (value) {
+            this._filter = this._checkByConditions.bind(this, value);
+        } else {
+            this._filter = undefined;
+        }
+        this.updatePage();
     }
 
     fork( {id, params, isSource, isConsumer, onCommit} ){
@@ -218,15 +262,13 @@ export class Controller extends Item{
         }
     }
 
-    filter(){
-        //Dummy for checkout in constructor, will be overriden in successors
-    }
-
-    forEach( callback ){
+    _forEach( callback ){
         if (this._view){
             const { page, pageSize } = this._options;
             if (pageSize === undefined) {
-                this._view.forEach(n => callback( n.key[1] ));
+                this._view.forEach(n => {
+                    callback( n.key[1] );
+                });
             } else {
                 const startIndex = (page - 1) * pageSize;
                 let n = this._view.at( startIndex );
@@ -238,9 +280,24 @@ export class Controller extends Item{
         }
     }
 
+    forEach(callback) {
+        let filter = callback;
+
+        if (typeof this._filter === "function") {
+            filter = (id) => {
+                const meetsCondition = this._filter(this.get(id));
+                if (meetsCondition) {
+                    callback( id );
+                }
+            };
+        }
+
+        this._forEach( filter );
+    }
+
     view(){
         const data = [];
-        this.forEach(id => data.push([id,this.get(id)]) );
+        this._forEach(id => data.push([id,this.get(id)]) );
         return data;
     }
 
