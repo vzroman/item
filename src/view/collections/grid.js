@@ -71,6 +71,14 @@ export class Grid extends Collection{
 
         super( options );
 
+        // Stop the wheel event of the external container elements because they overshadow
+        // the grid scrolling effect
+        this._options.$container.on("wheel", e => {
+            if (this._options.$container.height() < this._options.$container[0].scrollHeight){
+                e.stopPropagation();
+            }
+        });
+
         if (this._options.resizable) {
             this.#initResize();
         }
