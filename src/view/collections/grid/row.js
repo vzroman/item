@@ -54,7 +54,7 @@ export class Row extends Item{
 
         this.bind("selected", (val=false) => {
             this.$markup.toggleClass(style.selected_row, val);
-            this.$markup.toggleClass("item_grid_row_selected", val)
+            this.$markup.toggleClass("item_grid_row_selected", val);
             this.$markup.trigger("item-grid-row-select",[this, val]);
         });
 
