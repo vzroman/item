@@ -331,6 +331,9 @@ export class Controller extends Collection{
         }
     }
 
+    destroy(){
+        this.setSubscribe( false );
+    }
 
     static filter2query( filter ){
         if ( filter[0] === "and" || filter[0] === "or"){
