@@ -308,6 +308,7 @@ export class TreeGrid extends ItemView{
                 $container: this.$markup.find('[name="grid"]'),
                 data: this._options.data
             });
+            this.refresh();
         }
 
     }
