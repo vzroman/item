@@ -333,6 +333,7 @@ export class Controller extends Collection{
 
     _destroy(){
         this.setSubscribe( false );
+        super._destroy();
     }
 
     static filter2query( filter ){
