@@ -32,7 +32,8 @@ import { primitives } from "../../primitives/index.js";
 export class Panel extends Item{
 
     static options = {
-        title: {type: types.primitives.String, default: ""}
+        title: {type: types.primitives.String, default: ""},
+        isOpen:{type: types.primitives.Bool, default: false}
     };
     
     markup(){
@@ -57,13 +58,22 @@ export class Panel extends Item{
     widgets(){
         const $content = this.$markup.find(`.${ styles.content }`);
 
-        let isOpen = false;
         return {
             panel_title: {
                 view: primitives.Label,
                 options: {
-                    links: { text: "parent@title" },
-                    events: { click: () => this.expandPanel(isOpen =! isOpen, $content) }
+                    links: { 
+                        text: "parent@title",
+                        isOpen:{
+                            source:"parent@isOpen", handler:(isOpen) =>{
+                            this.expandPanel(isOpen, $content)
+                        }
+                        } 
+                    },
+                    events: { click: () =>  {
+                        const isOpen = this.get("isOpen")
+                        this.set({isOpen:!isOpen})
+                    }}
                 }
             }
         }
