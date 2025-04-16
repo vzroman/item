@@ -38,8 +38,9 @@ export class Panel extends Item{
     markup(){
         const $markup = $(`<div class="${ styles.panel }">
             <div class="${ styles.header }">
-                <div name="panel_title"></div>
                 <div class="${ styles.button }"></div>
+                <div name="panel_title" style="height:36px;display: flex;align-items: center;"></div>
+                
             </div>
             <div class="${ styles.content }"></div>
         </div>`);
