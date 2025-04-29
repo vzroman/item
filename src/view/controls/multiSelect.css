@@ -19,6 +19,7 @@
     align-items: stretch;
     flex-grow: 1;
     max-width: calc(100% - 41px);
+    position:relative;
 }
 
 .selected_items>[name="selected"]{
