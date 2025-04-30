@@ -26,25 +26,7 @@ import {Controller as Collection} from "../collection.js";
 import {Controller as ItemController} from "./item.js";
 import {deepEqual, diff, patch2value} from "../../utilities/data.js";
 
-function oidCompare([a], [b]) {
-    a = a.split(",");
-    a = [
-        parseInt( a[0].substring(1) ),
-        parseInt( a[1] )
-    ];
-    b = b.split(",");
-    b = [
-        parseInt( b[0].substring(1) ),
-        parseInt( b[1] )
-    ];
 
-    if (a[0] > b[0]) return 1;
-    if (a[0] < b[0]) return -1;
-    if (a[1] > b[1]) return 1;
-    if (a[1] < b[1]) return -1;
-
-    return 0;
-}
 
 export class Controller extends Collection{
 
@@ -62,9 +44,6 @@ export class Controller extends Collection{
     constructor( options ){
 
         options.id = ".oid";
-        if (!options.keyCompare && options.orderBy === ".oid" ){
-            options.keyCompare = oidCompare
-        }
         // id is always oid
         super( options );
 
@@ -207,9 +186,25 @@ export class Controller extends Collection{
                     ? this._options.DBs
                     : "*";
 
-            const orderBy = !this._options.orderBy || this._options.orderBy === ".oid" || this._subscription !== undefined
-                ? ""
-                : "order by " + this._options.orderBy;
+                const orderBy = !this._options.orderBy || this._options.orderBy === ".oid" || this._subscription !== undefined
+                    ? ""
+                    : "order by " + (
+                        Array.isArray(this._options.orderBy)
+                            ? this._options.orderBy
+                                .map(entry => {
+                                    if (typeof entry === "string") {
+                                        return entry;
+                                    } else if (Array.isArray(entry)) {
+                                        const [field, direction] = entry;
+                                        return `${field} ${String(direction || "ASC")}`;
+                                    } else {
+                                        throw new Error(`Invalid orderBy format: ${JSON.stringify(entry)}`);
+                                    }
+                                })
+                                .join(", ")
+                            : this._options.orderBy
+                    );
+                
 
             connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
                 if (pagination !== ""){

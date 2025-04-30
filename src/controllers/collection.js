@@ -112,7 +112,9 @@ export class Controller extends Item{
         this._isRefresh = true;
         try{
             if (this._view) this._view.destroy();
-            this._view = new util.AVLTree(this._options.keyCompare);
+
+            this.comparator = this.compileComparator(this._options.orderBy, this._options.keyCompare);
+            this._view = new util.AVLTree(this.comparator);
             this._data = {};
             this._count = 0;
             const changes = super.set( Data );
@@ -469,18 +471,29 @@ export class Controller extends Item{
         super._onChange( changes );
     }
 
-    _orderKey(id, item){
+    _orderKey(id, item) {
         let key = id;
-        if ( this._options.orderBy ){
-            if (item.hasOwnProperty(this._options.orderBy)){
-                key = item[this._options.orderBy];
-            }else{
-                key = this._get(id)[this._options.orderBy];
-            }
+    
+        if (Array.isArray(this._options.orderBy) && this._options.orderBy.length > 0) {
+            key = {};
+    
+            this._options.orderBy.forEach(field => {
+                const fieldName = Array.isArray(field) ? field[0] : field;
+    
+                if (item && item.hasOwnProperty(fieldName)) {
+                    key[fieldName] = item[fieldName];
+                } else if (this._get(id) && this._get(id).hasOwnProperty(fieldName)) {
+                    key[fieldName] = this._get(id)[fieldName];
+                } else {
+                    key[fieldName] = null;
+                }
+            });
         }
-        return [key,id];
+    
+        return [key, id];
     }
-
+    
+    
     updatePage() {
         this._updateView();
     }
@@ -506,6 +519,67 @@ export class Controller extends Item{
             this._trigger("remove", [id]);
         }
         this._pageItems = newPageItems;
+    } 
+
+    defaultCompare(a, b) {
+        if (typeof a === "string" && typeof b === "string") {
+          return a.localeCompare(b);
+        }
+        return a < b ? -1 : a > b ? 1 : 0;
     }
+
+    oidCompare([a], [b]) {
+        a = a.split(",");
+        a = [
+            parseInt( a[0].substring(1) ),
+            parseInt( a[1] )
+        ];
+        b = b.split(",");
+        b = [
+            parseInt( b[0].substring(1) ),
+            parseInt( b[1] )
+        ];
+    
+        if (a[0] > b[0]) return 1;
+        if (a[0] < b[0]) return -1;
+        if (a[1] > b[1]) return 1;
+        if (a[1] < b[1]) return -1;
+    
+        return 0;
+    }
+
+    compileComparator(orderBy, keyCompare = {}) {
+        if (!orderBy || orderBy.length === 0) {
+            return () => 0; // Ничего не сортировать
+        }    
+        return  (a, b) => {
+            const [aKey, aId] = a;
+            const [bKey, bId] = b;
+    
+            for (const entry of orderBy) {
+                const [field, direction] = Array.isArray(entry) ? entry : [entry, "asc"];
+                const aVal = aKey[field];
+                const bVal = bKey[field];
+    
+                let cmp = 0;
+                if (keyCompare[field]) {
+                    cmp = keyCompare[field](aVal, bVal);
+                } else {
+                    if (aVal == null && bVal != null) cmp = -1;
+                    else if (aVal != null && bVal == null) cmp = 1;
+                    else if (aVal == null && bVal == null) cmp = 0;
+                    else cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+                }
+    
+                if (cmp !== 0) {
+                    return direction === "desc" ? -cmp : cmp;
+                }
+            }
+    
+            return oidCompare([aId], [bId]);
+        };
+    }
+    
+    
 }
 Controller.extend();
