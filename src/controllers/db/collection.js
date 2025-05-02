@@ -25,8 +25,9 @@
 import {Controller as Collection} from "../collection.js";
 import {Controller as ItemController} from "./item.js";
 import {deepEqual, diff, patch2value} from "../../utilities/data.js";
+import * as util from "../../utilities/data";
 
-function oidCompare([a], [b]) {
+function oidCompare(a, b) {
     a = a.split(",");
     a = [
         parseInt( a[0].substring(1) ),
@@ -62,9 +63,6 @@ export class Controller extends Collection{
     constructor( options ){
 
         options.id = ".oid";
-        if (!options.keyCompare && options.orderBy === ".oid" ){
-            options.keyCompare = oidCompare
-        }
         // id is always oid
         super( options );
 
@@ -103,6 +101,19 @@ export class Controller extends Collection{
         }).catch(error=>this._trigger("error", [error, "init"]));
     }
 
+    compileComparator() {
+        const orderByComparator = this.compileOrderByComparator();
+        return (a, b)=>{
+            const [aKey, aId] = a;
+            const [bKey, bId] = b;
+            let result = orderByComparator( aKey, bKey );
+            if (result === 0){
+                result = oidCompare(aId, bId)
+            }
+            return result;
+        }
+    }
+
     updatePage() {
         if (this._options.serverPaging && this._filter && this._subscription === undefined) {
 
@@ -122,6 +133,25 @@ export class Controller extends Collection{
         } else {
             return super._updateView();
         }
+    }
+
+    onReorder(){
+        super.onReorder();
+
+        const {
+            serverPaging,
+            page,
+            pageSize,
+            orderBy
+        } = this._options;
+        const pagination = serverPaging && page !== undefined && pageSize !== undefined;
+
+        if (orderBy === undefined || pagination || this._subscription !== undefined){
+            // We don't need to query the server if we already have the whole data
+            return;
+        }
+
+        this.refresh();
     }
 
     forEach( callback ){
@@ -207,9 +237,22 @@ export class Controller extends Collection{
                     ? this._options.DBs
                     : "*";
 
-            const orderBy = !this._options.orderBy || this._options.orderBy === ".oid" || this._subscription !== undefined
-                ? ""
-                : "order by " + this._options.orderBy;
+            let orderBy = this._options.orderBy;
+            if (orderBy === undefined || pagination === "" || this._subscription !== undefined){
+                orderBy = "";
+            }else{
+                if(typeof orderBy === "string") {
+                    orderBy = [[orderBy,"asc"]];
+                }else if(Array.isArray(orderBy) && typeof orderBy[0] === "string" && orderBy.length === 2){
+                    orderBy = [orderBy]
+                }
+
+                if (orderBy.length===1 && orderBy[0][0] === ".oid" && orderBy[0][1] ==="asc"){
+                    orderBy = "";
+                }else{
+                    orderBy = orderBy.map(([field, dir])=> `${field} ${dir}`).join(",")
+                }
+            }
 
             connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
                 if (pagination !== ""){

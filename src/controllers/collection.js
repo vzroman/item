@@ -26,6 +26,8 @@ import {Controller as Item} from "./item.js";
 import {Linkable} from "../core/linkable.js";
 import * as util from "../utilities/data.js";
 
+function DEFAULT_COMPARE (a, b) { return a > b ? 1 : a < b ? -1 : 0; }
+
 export class Controller extends Item{
 
     static options = {
@@ -68,6 +70,15 @@ export class Controller extends Item{
             if(!this._filter) return;
             if (filter === prevFilter) return;
             this.filter( filter, prevFilter );
+        });
+
+        this.bind("$.orderBy", (orderBy, prevOrderBy)=>{
+            if (orderBy === prevOrderBy) return;
+            this.onReorder();
+        });
+        this.bind("$.keyCompare", (keyCompare, prevKeyCompare)=>{
+            if (keyCompare === prevKeyCompare) return;
+            this.onReorder();
         });
     }
 
@@ -112,7 +123,8 @@ export class Controller extends Item{
         this._isRefresh = true;
         try{
             if (this._view) this._view.destroy();
-            this._view = new util.AVLTree(this._options.keyCompare);
+
+            this._view = new util.AVLTree( this.compileComparator() );
             this._data = {};
             this._count = 0;
             const changes = super.set( Data );
@@ -132,6 +144,16 @@ export class Controller extends Item{
             this._filter = undefined;
         }
         this.updatePage();
+    }
+
+    onReorder(){
+        this._view.destroy();
+        this._view = new util.AVLTree( this.compileComparator() );
+        const data = this.get();
+        for (const [id, item] in Object.entries(data)){
+            this._view.insert(this._orderKey(id, item));
+        }
+        this._updateView();
     }
 
     fork( {id, params, isSource, isConsumer, onCommit} ){
@@ -469,18 +491,27 @@ export class Controller extends Item{
         super._onChange( changes );
     }
 
-    _orderKey(id, item){
+    _orderKey(id, item) {
         let key = id;
-        if ( this._options.orderBy ){
-            if (item.hasOwnProperty(this._options.orderBy)){
-                key = item[this._options.orderBy];
-            }else{
-                key = this._get(id)[this._options.orderBy];
-            }
+    
+        if (Array.isArray(this._options.orderBy) && this._options.orderBy.length > 0) {
+            key = {};
+    
+            this._options.orderBy.forEach(field => {
+                const fieldName = Array.isArray(field) ? field[0] : field;
+                if (item && item.hasOwnProperty(fieldName)) {
+                    key[fieldName] = item[fieldName];
+                } else {
+                    const _item = this._get(id);
+                    key[fieldName] = _item ? _item[fieldName] ?? null : null;
+                }
+            });
         }
-        return [key,id];
+    
+        return [key, id];
     }
-
+    
+    
     updatePage() {
         this._updateView();
     }
@@ -506,6 +537,53 @@ export class Controller extends Item{
             this._trigger("remove", [id]);
         }
         this._pageItems = newPageItems;
+    }
+
+    compileOrderByComparator() {
+        let orderBy = this._options.orderBy;
+        if (typeof orderBy === "string"){
+            orderBy = [[orderBy,"asc"]];
+        }else if (Array.isArray(orderBy)){
+            if (typeof orderBy[0] === "string" && orderBy.length === 2 ){
+                orderBy = [orderBy]
+            }
+        }else{
+            orderBy = [];
+        }
+        const keyCompare = this._options.keyCompare ?? {};
+        const compareSeq = [];
+
+        for (let i=0; i < orderBy.length; i++){
+            const [field, dir] = orderBy[i];
+            const compareFun = keyCompare[field] ?? DEFAULT_COMPARE;
+            const dirCompareFun = dir === "desc"
+                ? (a, b)=> -compareFun(a, b)
+                : compareFun;
+            compareSeq.push([field, dirCompareFun]);
+        }
+
+        return (aItem, bItem)=>{
+            let result = 0;
+            for (let i=0; i<compareSeq.length; i++){
+                const [field, compareFun] = compareSeq[i];
+                result = compareFun( aItem[field], bItem[field] );
+                if (result !== 0) break;
+            }
+            return result;
+        };
+    }
+    compileComparator() {
+        const orderByComparator = this.compileOrderByComparator();
+
+        return (a, b)=>{
+            const [aKey, aId] = a;
+            const [bKey, bId] = b;
+            let result = orderByComparator( aKey, bKey );
+            if (result === 0){
+                result = DEFAULT_COMPARE(aId, bId)
+            }
+            return result;
+        }
     }
 }
 Controller.extend();
