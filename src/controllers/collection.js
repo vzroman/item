@@ -73,10 +73,16 @@ export class Controller extends Item{
         });
 
         this.bind("$.orderBy", (orderBy, prevOrderBy)=>{
+            if(!this._view) return;
+            console.log(this._options.orderBy);
+
             if (orderBy === prevOrderBy) return;
             this.onReorder();
         });
+
         this.bind("$.keyCompare", (keyCompare, prevKeyCompare)=>{
+            if(!this._view) return;
+
             if (keyCompare === prevKeyCompare) return;
             this.onReorder();
         });
@@ -118,6 +124,7 @@ export class Controller extends Item{
     }
 
     init( Data ){
+        console.log("DATA",Data);
         Data = this._coerce( Data );
 
         this._isRefresh = true;
@@ -148,8 +155,11 @@ export class Controller extends Item{
 
     onReorder(){
         this._view.destroy();
+
         this._view = new util.AVLTree( this.compileComparator() );
         const data = this.get();
+        console.log('data',data);
+
         for (const [id, item] in Object.entries(data)){
             this._view.insert(this._orderKey(id, item));
         }
