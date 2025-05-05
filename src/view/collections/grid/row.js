@@ -72,7 +72,7 @@ export class Row extends Item{
 
                 if (this.isDestroyed()) return;
 
-                this.#reorder();
+                this._reorder();
 
                 this.#unbind.forEach( u => u());
                 this.#unbind = [];
@@ -170,7 +170,7 @@ export class Row extends Item{
         super._destroy();
     }
 
-    #reorder(){
+    _reorder(){
         if(this._options.previousRow){
             if (this._options.previousRow.get("isUnfolded")){
                 const $previousRow = this._options.previousRow.$markup;
@@ -193,6 +193,14 @@ export class Row extends Item{
         }else{
             this.$markup.prependTo(this._options.$container);
         }
+
+        setTimeout(()=>{
+            if (this.isDestroyed()) return;
+            let nextRow = this.$markup.next('tr');
+            if (nextRow.length === 0) return;
+            nextRow = this.constructor.getItem( nextRow );
+            if (nextRow) nextRow._reorder();
+        })
     }
 
     #updateIndex(){
