@@ -26,6 +26,7 @@ import {Form} from "./form.js";
 import {FormField} from "./formField.js";
 import {TabStrip} from "./tabstrip.js";
 import {Window} from "./window.js";
+import {Drawer} from "./drawer/drawer.js";
 import {FormWindow} from "./formWindow.js";
 import {Panel} from './panel/panel.js';
 import {Splitter} from "./splitter.js";
@@ -37,5 +38,6 @@ export const layout = {
     Window,
     FormWindow,
     Panel,
-    Splitter
+    Splitter,
+    Drawer
 };
