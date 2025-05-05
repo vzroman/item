@@ -188,7 +188,6 @@ export class Controller extends Collection{
                 if (this._filter === undefined) return reject("not initialized");
 
                 this.query().then(data => {
-                    console.log("data", data);
 
                     super.refresh( data ).then( resolve, reject );
 
@@ -254,8 +253,6 @@ export class Controller extends Collection{
                     orderBy =  "order by " + orderBy.map(([field, dir])=> `${field} ${dir}`).join(", ")
                 }
             }
-            const query = `get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`;
-            console.log('query', query);
 
             connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
                 if (pagination !== ""){
@@ -286,7 +283,6 @@ export class Controller extends Collection{
 
     setSubscribe( value ){
 
-        console.log(value);
         if (!this._filter) return;
 
         if (!this._subscription && value){

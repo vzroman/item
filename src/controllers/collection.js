@@ -124,7 +124,6 @@ export class Controller extends Item{
     }
 
     init( Data ){
-        console.log("DATA",Data);
         Data = this._coerce( Data );
 
         this._isRefresh = true;
@@ -158,9 +157,8 @@ export class Controller extends Item{
 
         this._view = new util.AVLTree( this.compileComparator() );
         const data = this.get();
-        console.log('data',data);
 
-        for (const [id, item] in Object.entries(data)){
+        for (const [id, item] of Object.entries(data)){
             this._view.insert(this._orderKey(id, item));
         }
         this._updateView();
