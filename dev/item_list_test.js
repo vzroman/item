@@ -15,9 +15,9 @@ export function run( $container ){
     const a = new item.view.controls.ItemList({
         $container,
         item: {
-            view: item.view.controls.SelectList,
+            value: ["item 1", "item 2", "item 3"],
+            view: item.view.controls.TextInput,
             options: {
-                items: ["item 1", "item 2", "item 3"],
                 // events:{
                 //     value:(val)=>{
                 //         console.log(val);

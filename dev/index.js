@@ -21,6 +21,6 @@ $(function () {
 
 
 
-    collection_filter_test( $container );
+    item_list_test( $container );
 
 });

@@ -490,12 +490,13 @@ export class Controller extends Item{
         const newPageItems = new Map();
         let prevId = null;
         if (!this._pageItems) this._pageItems = new Map();
+        const events=[];
         this.forEach(id =>{
             if (!this._pageItems.has(id)) {
-                this._trigger("add", [id, prevId]);
+                events.push({type:"add",params:[id, prevId]});
             }else {
                 if (this._pageItems.get(id) !== prevId) {
-                    this._trigger("edit", [id, prevId]);
+                    events.push({type:"edit",params:[id, prevId]});
                 }
                 this._pageItems.delete(id);
             }
@@ -503,9 +504,12 @@ export class Controller extends Item{
             prevId = id;
         })
         for (const id of this._pageItems.keys()) {
-            this._trigger("remove", [id]);
+            events.push({type:"remove",params:[id]});
         }
         this._pageItems = newPageItems;
+        for (const {type,params} of events){
+            this._trigger(type, params);
+        }
     }
 }
 Controller.extend();
