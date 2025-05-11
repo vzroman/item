@@ -487,29 +487,36 @@ export class Controller extends Item{
 
 
     _updateView(){
-        const newPageItems = new Map();
-        let prevId = null;
-        if (!this._pageItems) this._pageItems = new Map();
-        const events=[];
-        this.forEach(id =>{
-            if (!this._pageItems.has(id)) {
-                events.push({type:"add",params:[id, prevId]});
-            }else {
-                if (this._pageItems.get(id) !== prevId) {
-                    events.push({type:"edit",params:[id, prevId]});
+        if (this.__underUpdateView) return;
+        this.__underUpdateView = true;
+        try {
+            const newPageItems = new Map();
+            let prevId = null;
+            if (!this._pageItems) this._pageItems = new Map();
+            const events=[];
+            this.forEach(id =>{
+                if (!this._pageItems.has(id)) {
+                    events.push({type:"add",params:[id, prevId]});
+                }else {
+                    if (this._pageItems.get(id) !== prevId) {
+                        events.push({type:"edit",params:[id, prevId]});
+                    }
+                    this._pageItems.delete(id);
                 }
-                this._pageItems.delete(id);
+                newPageItems.set( id, prevId );
+                prevId = id;
+            })
+            for (const id of this._pageItems.keys()) {
+                events.push({type:"remove",params:[id]});
             }
-            newPageItems.set( id, prevId );
-            prevId = id;
-        })
-        for (const id of this._pageItems.keys()) {
-            events.push({type:"remove",params:[id]});
+            this._pageItems = newPageItems;
+            for (const {type,params} of events){
+                this._trigger(type, params);
+            }
+        }catch(e){
+            console.error(e)
         }
-        this._pageItems = newPageItems;
-        for (const {type,params} of events){
-            this._trigger(type, params);
-        }
+        this.__underUpdateView = false;
     }
 }
 Controller.extend();
