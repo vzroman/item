@@ -101,15 +101,13 @@ export class ItemList extends Control{
             data:[]
         });
 
-        this._itemsController.bind("commit",()=>{
-
-            let value = itemsList( this._itemsController.get() )
+        const update = (items)=>{
+            items = {...this._itemsController.get(), ...items};
+            let value = itemsList( items )
                 .filter(v => (v !== undefined && v !== null));
-
             if (value.length === 0) value = null;
-
             this.set({value});
-        });
+        };
 
         return {
             items: {
@@ -128,22 +126,18 @@ export class ItemList extends Control{
                             },
                             events: {
                                 onDelete: {handler: index => {
-                                    this._itemsController.set({[index]:null});
-                                    this._itemsController.commit();
+                                    update({[index]:null});
                                 }},
                                 onReorder: {handler: (from, to) => {
-                                    const items = this._itemsController.get();
+                                    const items = this._itemsController.get([from,to]);
                                     [ items[from].value, items[to].value ] = [ items[to].value, items[from].value ];
-
-                                    this._itemsController.set(items);
-                                    this._itemsController.commit();
+                                    update(items);
                                 }},
                                 value: (value, prev, controller, {self})=>{
                                     if (value===null) value = undefined;
                                     const i = self._options.index;
                                     const item = this._itemsController.get( ''+i );
-                                    this._itemsController.set({ [i]: {...item, value } });
-                                    this._itemsController.commit();
+                                    update({ [i]: {...item, value } });
                                 }
                             },
                         }
