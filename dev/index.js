@@ -11,6 +11,8 @@ import {run as splitter_test} from "./splitter_test.js"
 import {run as validate_input} from "./validate_input.js"
 import {run as breadcrumbs} from "./breadcrumbs.js"
 import { run as collection_filter_test } from "./collection_filter_test.js";
+import { run as datepicker_test } from "./datepicker_test.js";
+
 
 
 $(function () {
@@ -22,5 +24,7 @@ $(function () {
 
 
     item_list_test( $container );
+    datepicker_test( $container );
+    validate_input($container) 
 
 });
