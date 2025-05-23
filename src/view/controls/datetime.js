@@ -50,7 +50,7 @@ export class DatePicker extends Control {
             styles:{
                 zIndex:100000
             },
-            classes:"datepicker1",
+            classes:styles.air_datepicker,
             autoClose: false,
             onSelect: ({ date }) => {
                 if (Array.isArray(date)) {
