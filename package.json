@@ -29,6 +29,6 @@
     "webpack-merge": "^5.9.0"
   },
   "dependencies": {
-    "air-datepicker": "^3.6.0"
+    "flatpickr": "^4.6.13"
   }
 }

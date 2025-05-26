@@ -23,8 +23,6 @@ $(function () {
 
 
 
-    item_list_test( $container );
     datepicker_test( $container );
-    validate_input($container) 
 
 });

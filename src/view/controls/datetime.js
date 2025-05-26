@@ -1,81 +1,85 @@
 import {Control} from "./control.js";
 import {types} from "../../types/index.js";
-import AirDatepicker from 'air-datepicker'
-import 'air-datepicker/air-datepicker.css';
 import styles from "./datetime.css";
 
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.min.css";
+import { Russian, English } from "flatpickr/dist/l10n/ru.js";
 
 export class DatePicker extends Control {
-
+    
     static options = {
-        selectedDates:    { type: types.primitives.Array, default: []},
-        timepicker:       { type: types.primitives.Bool, default: false },
-        range:            { type: types.primitives.Bool, default: false },
-        format:           { type: types.primitives.String, default: "dd.MM.yyyy" },
-        timeFormat:       { type: types.primitives.String },
-        value:            { type: types.primitives.Array },
-        min:              { type: types.primitives.Any },
-        max:              { type: types.primitives.Any },
-        interval:         { type: types.primitives.Integer, default: 30 },
-        disableDates:     { type: types.primitives.Fun },
-        placeholder:      { type: types.primitives.String}
+        selectedDates: { type: types.primitives.Array, default: [] },
+        timepicker: { type: types.primitives.Bool, default: true },
+        range: { type: types.primitives.Bool, default: false },
+        format: { type: types.primitives.String, default: "d.m.Y H:i:S" },
+        value: { type: types.primitives.Any },
+        min: { type: types.primitives.Integer },
+        max: { type: types.primitives.Integer },
+        interval: { type: types.primitives.Integer , default: 10},
+        disabled: { type: types.primitives.Bool},
+        placeholder: { type: types.primitives.String }
     };
 
-    static markup = `<input class= "${styles.datepicker}"/>`;
+    static markup = `<input class="${styles.datepicker}"/>`;
 
     constructor(options) {
         super(options);
+        this._suppressOnChange = false;
 
-        this.bind("placeholder",value => {
-            if (value){
+        this.bind("placeholder", value => {
+            if (value) {
                 this.$markup.prop("placeholder", value);
-            }else{
+            } else {
                 this.$markup.removeAttr("placeholder");
             }
         });
 
-        this.$markup.on("input", ({target}) => {
-            if(!target?.value){
-                this.set({value: []})
-            }
-        })
+        this.bind("disabled", value => {
+            this.$markup.prop("disabled", value);
+        });
 
-        this._widget = new AirDatepicker(this.$markup[0], {
-            selectedDates: this._options.selectedDates,
-            timepicker: this._options.timepicker,
-            range: this._options.range,
+        this.$markup.on("input", ({ target }) => {
+            if (!target?.value) {
+                this.set({ value: [] });
+            }
+        });
+
+        const flatpickrOptions = {
+            locale:Russian,
+            enableTime: this._options.timepicker,
+            noCalendar: !this._options.timepicker && !this._options.range,
+            time_24hr: true,
+            enableSeconds: true,
             dateFormat: this._options.format,
+            defaultDate: this._options.selectedDates,
             minDate: this._options.min,
             maxDate: this._options.max,
-            styles:{
-                zIndex:100000
-            },
-            classes:styles.air_datepicker,
-            autoClose: false,
-            onSelect: ({ date }) => {
-                if (Array.isArray(date)) {
-                    const [start, end] = date;
-                
-                    const validStart = start instanceof Date && !isNaN(start);
-                    const validEnd = end instanceof Date && !isNaN(end);
-                
-                    if (validEnd) {
-                        end.setHours(23, 59, 59, 999); // установить конец дня
-                    }
-                
-                    const timestamps = [
-                        validStart ? start.getTime() : null,
-                        validEnd ? end.getTime() : null
-                    ].filter(ts => ts !== null);
-                
-                    this.set({ value: timestamps });                
-                } else if (date instanceof Date && !isNaN(date)) {
-                    this.set({ value: [date.getTime()] });
-                }
-                
+            minuteIncrement: this._options.interval,
+            mode: this._options.range ? "range" : "single",
+            onChange: (selectedDates) => {
+                if (this._suppressOnChange) return; 
+
+                const timestamps = selectedDates.map(d => d.getTime());
+                this.set({ value: timestamps });
             }
-            
-        });
+        };
+
+        this._widget = flatpickr(this.$markup[0], flatpickrOptions);
     }
+
+    updateValue(value) {
+        if (this._widget) {
+            const date = Array.isArray(value)
+                ? value.map(ts => new Date(ts))
+                : new Date(value);
+    
+            this._suppressOnChange = true;
+            this._widget.setDate(date, true);
+            this._suppressOnChange = false;
+        }
+    }
+    
 }
+
 DatePicker.extend();
