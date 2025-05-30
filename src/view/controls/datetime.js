@@ -47,6 +47,7 @@ export class DatePicker extends Control {
 
         const flatpickrOptions = {
             locale:Russian,
+            defaultDate:this._options.value,
             enableTime: this._options.timepicker,
             noCalendar: !this._options.timepicker && !this._options.range,
             time_24hr: true,
@@ -72,14 +73,15 @@ export class DatePicker extends Control {
         if (this._widget) {
             const date = Array.isArray(value)
                 ? value.map(ts => new Date(ts))
-                : new Date(value);
-    
+                : date;
+
             this._suppressOnChange = true;
-            this._widget.setDate(date, true);
+            if(date){
+                this._widget.setDate(new Date(date), true);
+            }
             this._suppressOnChange = false;
         }
     }
-    
 }
 
 DatePicker.extend();
