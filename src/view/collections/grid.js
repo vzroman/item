@@ -35,6 +35,8 @@ import {types} from "../../types";
 import style from "./grid.css";
 import {waiting} from "../../utilities/waiting.js";
 
+// test
+
 export class Grid extends Collection{
 
     static events = {
