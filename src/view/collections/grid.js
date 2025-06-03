@@ -127,6 +127,20 @@ export class Grid extends Collection{
             this.$markup.on("contextmenu", (e) =>{
                 e.preventDefault();
 
+                const $row = $(e.target).closest( 'tr' );
+
+                if ($row?.length){
+                    const row = this.constructor.getItem( $row );
+                    const selected = this.getSelected();
+
+                    if(!selected.includes(row)){
+                        for(const r of selected){
+                            if(row !== r) r.set({selected: false});
+                        }
+                        row.set({selected: true});
+                    }
+                }
+
                 this._contextmenu = new ContextMenu({
                     $container: this._options.$container,
                     items: this._options.contextmenu,
