@@ -24,8 +24,10 @@
 //------------------------------------------------------------------------------------
 import {Pager} from "./pager";
 import {Breadcrumbs} from "./breadcrumbs";
+import { ContextMenu } from "./contextMenu";
 
 export const widgets = {
     Pager,
-    Breadcrumbs
+    Breadcrumbs,
+    ContextMenu
 };

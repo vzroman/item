@@ -91,7 +91,15 @@ export function run( $container ){
             numerated:true,
             multiselect:true,
             checkbox:true,
-            pager:{  }
+            pager:{  },
+            contextmenu: [
+                { caption: "Copy", enable: () => true, handler: () => {
+                    console.log("Copy action triggered");
+                } },
+                { caption: "Delete", enable: () => true, handler: () => {
+                    console.log("Delete action triggered");
+                } }
+            ]
             // isFolder:{type:types.primitives.Any},
             // getIcon:{type:types.primitives.Any},
             // getSubitems:{type:types.primitives.Any}

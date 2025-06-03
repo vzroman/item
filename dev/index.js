@@ -21,6 +21,6 @@ $(function () {
 
 
 
-    item_list_test( $container );
+    grid_test( $container );
 
 });

@@ -34,6 +34,7 @@ import {Selection} from "../../utilities/selection";
 import {types} from "../../types";
 import style from "./grid.css";
 import {waiting} from "../../utilities/waiting.js";
+import { ContextMenu } from "../widgets/contextMenu.js";
 
 export class Grid extends Collection{
 
@@ -51,7 +52,8 @@ export class Grid extends Collection{
         checkbox:{type:types.primitives.Bool},
         multiselect:{type:types.primitives.Bool, default:false},
         pager:{type:types.primitives.Set},
-        row:{type: types.primitives.Set }
+        row:{type: types.primitives.Set },
+        contextmenu:{type: types.primitives.Array,default:[]}
     };
 
     constructor( options ) {
@@ -120,6 +122,24 @@ export class Grid extends Collection{
             const item = this.constructor.getItem( $row );
             this._trigger("rowDblClick", [item]);
         })
+
+        if(this._options.contextmenu?.length){
+            this.$markup.on("contextmenu", (e) =>{
+                e.preventDefault();
+
+                this._contextmenu = new ContextMenu({
+                    $container: this._options.$container,
+                    items: this._options.contextmenu,
+                    x: e.clientX,
+                    y: e.clientY,
+                    events: {
+                        destroy: () => {                            
+                            this._contextmenu = undefined;
+                        }
+                    }
+                });
+            });
+        }
 
         this._selection = new Selection({
             $container: this.$tbody,
@@ -295,6 +315,7 @@ export class Grid extends Collection{
 
     _destroy() {
         this.heightObserver?.disconnect();
+        this._contextmenu?.destroy();
         this._selection?.destroy();
         super._destroy();
     }
