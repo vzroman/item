@@ -153,7 +153,7 @@ export class Row extends Item{
     refresh(){
         this._options.children?.refresh();
         if (this.#children){
-            for (const [key, [row, _controller]] of Object.entries( this.#children.getItems() )){
+            for (const [row, _controller] of Object.values( this.#children.getItems() )){
                 row?.refresh();
             }
         }
