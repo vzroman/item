@@ -16,7 +16,7 @@ export class DatePicker extends Control {
         value: { type: types.primitives.Any },
         min: { type: types.primitives.Integer },
         max: { type: types.primitives.Integer },
-        interval: { type: types.primitives.Integer , default: 10},
+        interval: { type: types.primitives.Integer , default: 1},
         disabled: { type: types.primitives.Bool},
         placeholder: { type: types.primitives.String }
     };
@@ -70,15 +70,15 @@ export class DatePicker extends Control {
     }
 
     updateValue(value) {
-        if (this._widget) {
+        if (this._widget && value) {
             const date = Array.isArray(value)
                 ? value.map(ts => new Date(ts))
-                : date;
-
+                : new Date(value);
+            
             this._suppressOnChange = true;
-            if(date){
-                this._widget.setDate(new Date(date), true);
-            }
+
+            this._widget.setDate(date, false);
+
             this._suppressOnChange = false;
         }
     }
