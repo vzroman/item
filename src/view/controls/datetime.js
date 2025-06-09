@@ -4,7 +4,10 @@ import styles from "./datetime.css";
 
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
-import { Russian, English } from "flatpickr/dist/l10n/ru.js";
+
+import { Russian } from "flatpickr/dist/l10n/ru.js";
+import { Kazakh } from "flatpickr/dist/l10n/kz.js";
+
 
 export class DatePicker extends Control {
     
@@ -18,14 +21,22 @@ export class DatePicker extends Control {
         max: { type: types.primitives.Integer },
         interval: { type: types.primitives.Integer , default: 1},
         disabled: { type: types.primitives.Bool},
-        placeholder: { type: types.primitives.String }
+        placeholder: { type: types.primitives.String },
+        localization: { type: types.primitives.String }
     };
+
 
     static markup = `<input class="${styles.datepicker}"/>`;
 
     constructor(options) {
         super(options);
         this._suppressOnChange = false;
+
+        const {value, timepicker, range, format,  selectedDates, min, max, interval, localization } = this._options;
+        const locMap = {
+            "loc_ru": Russian,
+            "loc_kz": Kazakh
+        }
 
         this.bind("placeholder", value => {
             if (value) {
@@ -39,25 +50,19 @@ export class DatePicker extends Control {
             this.$markup.prop("disabled", value);
         });
 
-        this.$markup.on("input", ({ target }) => {
-            if (!target?.value) {
-                this.set({ value: [] });
-            }
-        });
-
         const flatpickrOptions = {
-            locale:Russian,
-            defaultDate:this._options.value,
-            enableTime: this._options.timepicker,
-            noCalendar: !this._options.timepicker && !this._options.range,
+            locale:locMap[localization],
+            defaultDate: value,
+            enableTime: timepicker,
+            noCalendar: !timepicker && !range,
             time_24hr: true,
             enableSeconds: true,
-            dateFormat: this._options.format,
-            defaultDate: this._options.selectedDates,
-            minDate: this._options.min,
-            maxDate: this._options.max,
-            minuteIncrement: this._options.interval,
-            mode: this._options.range ? "range" : "single",
+            dateFormat: format,
+            defaultDate: selectedDates,
+            minDate: min,
+            maxDate: max,
+            minuteIncrement: interval,
+            mode: range ? "range" : "single",
             onChange: (selectedDates) => {
                 if (this._suppressOnChange) return; 
 
