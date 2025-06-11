@@ -57,23 +57,19 @@ export class Panel extends Item{
     
     widgets(){
         const $content = this.$markup.find(`.${ styles.content }`);
-
+        const $header = this.$markup.find(`.${styles.header}`)
+        $header.on("click", ()=>{
+                const isOpen = this.get("isOpen")
+                this.set({isOpen:!isOpen})
+                this.expandPanel(isOpen, $content)
+        })
         return {
             panel_title: {
                 view: primitives.Label,
                 options: {
                     links: { 
-                        text: "parent@title",
-                        isOpen:{
-                            source:"parent@isOpen", handler:(isOpen) =>{
-                            this.expandPanel(isOpen, $content)
-                        }
-                        } 
-                    },
-                    events: { click: () =>  {
-                        const isOpen = this.get("isOpen")
-                        this.set({isOpen:!isOpen})
-                    }}
+                        text: "parent@title"
+                    }
                 }
             }
         }
