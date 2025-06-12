@@ -58,10 +58,10 @@ export class Panel extends Item{
     widgets(){
         const $content = this.$markup.find(`.${ styles.content }`);
         const $header = this.$markup.find(`.${styles.header}`)
+        this.bind("isOpen", isOpen=>this.expandPanel(isOpen, $content))
         $header.on("click", ()=>{
                 const isOpen = this.get("isOpen")
                 this.set({isOpen:!isOpen})
-                this.expandPanel(isOpen, $content)
         })
         return {
             panel_title: {
