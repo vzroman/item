@@ -60,7 +60,7 @@ export class TabStrip extends ItemView {
     }
 
     widgets() {
-        const _menuController = new controllers.Collection({
+         this._menuController = new controllers.Collection({
             id:"id",
             schema:{
                 text:{type: types.primitives.String },
@@ -80,14 +80,14 @@ export class TabStrip extends ItemView {
         });
 
         this.bind("active", active=>{
-            for (const id of Object.keys(_menuController.get())) {
-                _menuController.set({[id]:{isActive: Number(id) ===active}})
+            for (const id of Object.keys(this._menuController.get())) {
+                this._menuController.set({[id]:{isActive: Number(id) ===active}})
             }
         });
 
         this.bind("disabledTabs", tabs=>{
-            for (const id of Object.keys(_menuController.get())) {
-                _menuController.set({[id]:{ disabled:tabs.includes( Number(id) ) }});
+            for (const id of Object.keys(this._menuController.get())) {
+                this._menuController.set({[id]:{ disabled:tabs.includes( Number(id) ) }});
             }
         });
 
@@ -95,7 +95,7 @@ export class TabStrip extends ItemView {
             menu: {
                 view: Flex,
                 options:{
-                    data: _menuController,
+                    data: this._menuController,
                     direction: this._options.horizontal ? "horizontal" : "vertical",
                     item:{
                         view: Tab,
@@ -120,6 +120,12 @@ export class TabStrip extends ItemView {
                 }
             }
         }
+    }
+
+    _destroy(){
+        this._tab.destroy();
+        this._menuController.destroy()
+        super._destroy();
     }
 }
 TabStrip.extend();
