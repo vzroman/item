@@ -138,6 +138,38 @@ export class Grid extends Collection{
                 });
             }
         });
+        
+        $container.attr("tabindex", 0);
+        $container.on("keydown", (e) => {
+            if (e.ctrlKey && e.keyCode === 67) {
+                const selected = this.getSelected?.() || [];
+                if (selected.length > 0) {
+                    const rows = selected.map(item => {
+                        return $(item.$markup).find("td").map(function () {
+                            const $cell = $(this);
+                            const $imgs = $cell.find("img");
+
+                            const imgSources = $imgs.map(function () {
+                                return $(this).attr("src") || "";
+                            }).get();
+
+                            const $clone = $cell.clone();
+                            $clone.find("img").remove();
+
+                            const text = $clone.text().trim().replace(/\s+/g, " ");
+
+                            const parts = [...imgSources];
+                            if (text) parts.push(text);
+
+                            return parts.join(", ");
+                        }).get().join("\t");
+                    });
+
+                    const clipboardText = rows.join("\n");
+                    navigator.clipboard.writeText(clipboardText)
+                }
+            }
+        });
     }
 
     getContext(){
