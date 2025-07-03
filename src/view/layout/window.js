@@ -87,14 +87,18 @@ export class Window extends ItemView {
             this._resizeObserver.observe(this.$markup[0]);
 
         }
-        this.bind("position",position=> {
-
-            if (!position) return;
-            if ( this._options.isMaximized ) return;
-
+        this.bind("position", position => {
+            if (!position || this._options.isMaximized) return;
+        
+            const maxTop = $(window).height() - this.$markup.outerHeight();
+            const maxLeft = $(window).width() - this.$markup.outerWidth();
+        
+            const top = Math.max(0, Math.min(position.top, maxTop));
+            const left = Math.max(0, Math.min(position.left, maxLeft));
+        
             this.$markup.css({
-                top: position.top + "px",
-                left: position.left + "px"
+                top: top + "px",
+                left: left + "px"
             });
         });
 
