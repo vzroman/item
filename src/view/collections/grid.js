@@ -165,11 +165,35 @@ export class Grid extends Collection{
                         }).get().join("\t");
                     });
 
-                    const clipboardText = rows.join("\n");
-                    navigator.clipboard.writeText(clipboardText)
+                    const GridContentText = rows.join("\n");
+
+                    if (location.protocol === 'https:') {
+                        navigator.clipboard.writeText(GridContentText)
+                    } else {
+                        this.copyToClipboard(GridContentText);
+                    }
+                    
                 }
             }
         });
+    }
+
+    copyToClipboard(text) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.top = "-9999px";
+
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+            document.execCommand("copy");
+        } catch (err) {
+            console.error("Unable to copy", err);
+        }
+        document.body.removeChild(textarea);
     }
 
     getContext(){
