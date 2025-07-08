@@ -14,6 +14,7 @@ export class DatePicker extends Control {
     static options = {
         selectedDates: { type: types.primitives.Array, default: [] },
         timepicker: { type: types.primitives.Bool, default: true },
+        noCalendar: { type: types.primitives.Bool, default: false },
         range: { type: types.primitives.Bool, default: false },
         format: { type: types.primitives.String, default: "d.m.Y H:i:S" },
         value: { type: types.primitives.Any },
@@ -26,13 +27,13 @@ export class DatePicker extends Control {
     };
 
 
-    static markup = `<input class="${styles.datepicker}"/>`;
+    static markup = <input class="${styles.datepicker}"/>;
 
     constructor(options) {
         super(options);
         this._suppressOnChange = false;
 
-        const {value, timepicker, range, format,  selectedDates, min, max, interval, localization } = this._options;
+        const {value, timepicker, noCalendar, range, format, selectedDates, min, max, interval, localization } = this._options;
         const locMap = {
             "loc_ru": Russian,
             "loc_kz": Kazakh
@@ -54,7 +55,7 @@ export class DatePicker extends Control {
             locale:locMap[localization],
             defaultDate: value,
             enableTime: timepicker,
-            noCalendar: !timepicker && !range,
+            noCalendar: noCalendar,
             time_24hr: true,
             enableSeconds: true,
             dateFormat: format,
@@ -66,7 +67,15 @@ export class DatePicker extends Control {
             onChange: (selectedDates) => {
                 if (this._suppressOnChange) return; 
 
-                const timestamps = selectedDates.map(d => d.getTime());
+                let timestamps = selectedDates.map(d => d.getTime());
+
+                // If timepicker ONLY mode
+                if (this._options.noCalendar && this._options.timepicker) {
+                    timestamps = selectedDates.map(d => flatpickr.formatDate(new Date(d), "H:i"));
+                    this.set({ value: timestamps[0] });
+                    return;
+                }
+
                 this.set({ value: timestamps });
             }
         };
@@ -76,10 +85,14 @@ export class DatePicker extends Control {
 
     updateValue(value) {
         if (this._widget && value) {
-            const date = Array.isArray(value)
+            let date = Array.isArray(value)
                 ? value.map(ts => new Date(ts))
                 : new Date(value);
-            
+
+            if (this._options.noCalendar && this._options.timepicker) {
+                date = value;
+            }
+
             this._suppressOnChange = true;
 
             this._widget.setDate(date, false);
