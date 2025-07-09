@@ -27,7 +27,7 @@ export class DatePicker extends Control {
     };
 
 
-    static markup = <input class="${styles.datepicker}"/>;
+    static markup = `<input class="${styles.datepicker}"/>`;
 
     constructor(options) {
         super(options);
