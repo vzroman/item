@@ -87,18 +87,13 @@ export class Window extends ItemView {
             this._resizeObserver.observe(this.$markup[0]);
 
         }
-        this.bind("position", position => {
-            if (!position || this._options.isMaximized) return;
-        
-            const maxTop = $(window).height() - this.$markup.outerHeight();
-            const maxLeft = $(window).width() - this.$markup.outerWidth();
-        
-            const top = Math.max(0, Math.min(position.top, maxTop));
-            const left = Math.max(0, Math.min(position.left, maxLeft));
-        
+        this.bind("position",position=> {
+            if (!position) return;
+            if ( this._options.isMaximized ) return;
+
             this.$markup.css({
-                top: top + "px",
-                left: left + "px"
+                top: position.top + "px",
+                left: position.left + "px"
             });
         });
 
@@ -224,10 +219,21 @@ export class Window extends ItemView {
             const shiftX = e.clientX - dragPoint.x;
             const shiftY = e.clientY - dragPoint.y;
 
-            this.set({position:{
-                top: position.y + shiftY,
-                left: position.x + shiftX
-             }});
+            let clampTop = position.y + shiftY;
+            let clampLeft = position.x + shiftX;
+
+            const winWidth = $(window).width();
+            const winHeight = $(window).height();
+
+            clampTop = Math.max(0, Math.min(clampTop, winHeight - this.$markup.outerHeight()));
+            clampLeft = Math.max(0, Math.min(clampLeft, winWidth - this.$markup.outerWidth()));
+
+            this.set({
+                position: {
+                    top: clampTop,
+                    left: clampLeft
+                }
+            });
         };
         $titlebar.on("mousedown", e =>{
 
