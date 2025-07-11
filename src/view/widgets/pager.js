@@ -78,7 +78,6 @@ export class Pager extends ItemView{
 
         super( options );
 
-        debugger;
         if(this._options.simple){
             this.$markup.addClass(style.simple)
             this.$markup.find('[name="pageSize"]').css({
