@@ -43,13 +43,14 @@ export class Pager extends ItemView{
         page:{type:types.primitives.Integer, default: 1},
         totalCount:{type:types.primitives.Integer},
         pageSize:{type:types.primitives.Integer},
-        pageSizeValues:{type:types.primitives.Array, default: [30, 100, 10000]},
-        maxVisible:{type:types.primitives.Integer, default: 10}
+        pageSizeValues:{type:types.primitives.Array, defasult: [30, 100, 10000]},
+        maxVisible:{type:types.primitives.Integer, default: 10},
+        simple:{type: types.primitives.Bool, default: false}
     };
 
     static markup = `
     <div class="${style.pager_wrapper}" style="display:flex">
-        <div style="display:flex;flex-grow:1;gap:20px; align-items: stretch;">
+        <div name="pagination_wrapper" style="display:flex;flex-grow:1;gap:20px; align-items: stretch;">
             <div class="${ style.pagination }">
                 <div name="first"></div>
                 <div name="prev"></div>
@@ -76,7 +77,21 @@ export class Pager extends ItemView{
         }, options );
 
         super( options );
+
+        debugger;
+        if(this._options.simple){
+            this.$markup.addClass(style.simple)
+            this.$markup.find('[name="pageSize"]').css({
+                display:"none"
+            })
+        }
     }
+    
+    _togglePager(pages, simple) {
+        const count = Object.values(pages).filter(v => v !== null).length;
+        return !simple || count >= 2;
+    }
+    
 
     widgets(){
 
@@ -96,7 +111,7 @@ export class Pager extends ItemView{
             data:[{page:1}]
         });
 
-        this.bind(["page","totalCount","pageSize","maxVisible"],({page,totalCount,pageSize,maxVisible})=>{
+        this.bind(["page","totalCount","pageSize","maxVisible","simple"],({page,totalCount,pageSize,maxVisible,simple})=>{
             const pages = this._pages.get();
             for (let p in pages){
                 pages[p] = null;
@@ -120,15 +135,22 @@ export class Pager extends ItemView{
                     pages[i]={page:i, isActive: i===page}
                 }
             }
-            this._pages.set( pages )
+
+            const show = this._togglePager(pages,simple);
+            this.$markup.toggle(show);
+
+            this._pages.set( pages );
         });
 
+        
+        
         return {
             first: {
                 view: controls.Button,
                 options: {
                     title:"first",
                     links: {
+                        visible:{source: "parent", event: "simple", handler: s => !s },
                         enable:{source:"parent", event:"page", handler:p =>p > 1},
                         icon:{ source:"self", event:"enable", handler:val=>{
                             if (val){
@@ -148,6 +170,7 @@ export class Pager extends ItemView{
                 options: {
                     title:"previous",
                     links: {
+                        visible:{source: "parent", event: "simple", handler: s => !s },
                         enable:{source:"parent", event:"page", handler:p => p > 1},
                         icon:{ source:"self", event:"enable", handler:val=>{
                             if (val){
@@ -180,7 +203,7 @@ export class Pager extends ItemView{
                                 this.set({page:+button.get("text")})
                             }}}
                         }
-                    }
+                    },
                 }
             },
             next: {
@@ -188,6 +211,7 @@ export class Pager extends ItemView{
                 options: {
                     title:"next",
                     links: {
+                        visible:{source: "parent", event: "simple", handler: s => !s },
                         enable:{source:"parent", event:["page","totalCount","pageSize"], handler:({page,totalCount,pageSize})=>{
                             return page < ( Math.ceil( totalCount / pageSize ) );
                         }},
@@ -209,6 +233,7 @@ export class Pager extends ItemView{
                 options: {
                     title:"next",
                     links: {
+                        visible:{source: "parent", event: "simple", handler: s => !s },
                         enable:{source:"parent", event:["page","totalCount","pageSize"], handler:({page,totalCount,pageSize})=>{
                             return page < ( Math.ceil( totalCount / pageSize ) );
                         }},
@@ -225,19 +250,35 @@ export class Pager extends ItemView{
                     }
                 }
             },
-            pageSize: {view: controls.Dropdown, options: {
-                hideClear:true,
-                items:  this.get("pageSizeValues"),
-                links: { value: "parent@pageSize" },
-                events: { value: "parent@pageSize" }
-            }},
+            pageSize: {
+                view: controls.Dropdown, 
+                options: {
+                    hideClear:true,
+                    items:  this.get("pageSizeValues"),
+                    links: { 
+                        value: "parent@pageSize",
+                        css:{source: "parent", event: "simple", handler: s => {
+                            if(s) return {display: 'none'};
+                            return {};
+                        } },
+                    },
+                    events: { value: "parent@pageSize" },
+                },
+            },
             total:{view: primitives.Label, options: {
-                links: { text: {source:"parent", event:["page","totalCount","pageSize"], handler:({page,totalCount,pageSize})=>{
-                    pageSize = pageSize ?? totalCount;
-                    const first = (page -1) * pageSize + 1;
-                    const last = first + pageSize - 1;
-                    return `${ first } - ${ last } / ${ totalCount }`
-                }}}
+                links: {
+                    visible:{source: "parent", event: "simple", handler: s => !s },
+                    text: {
+                        source:"parent", 
+                        event:["page","totalCount","pageSize"],
+                        handler:({page,totalCount,pageSize})=>{
+                            pageSize = pageSize ?? totalCount;
+                            const first = (page -1) * pageSize + 1;
+                            const last = first + pageSize - 1;
+                            return `${ first } - ${ last } / ${ totalCount }`
+                        }
+                    }
+                }
             }}
         }
     }
