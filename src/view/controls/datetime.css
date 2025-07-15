@@ -1,0 +1,27 @@
+.datepicker {
+    width: calc(100% - 14px);   /* padding + border */
+    height: calc(100% - 6px);   /* padding + border */
+    flex-grow: 1;
+    border-radius: 3px;
+    padding: 2px 2px 2px 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #CFD7DC;
+    outline: 0;
+    vertical-align: middle;
+    color:inherit;
+    -webkit-appearance: none;
+  }
+  
+  .datepicker:focus {
+    border-color: #409eff;
+    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+  }
+  
+  .datepicker::placeholder {
+    color: #aaa;
+  }
+
+  .air_datepicker{
+    z-index: 100000000;
+  }
