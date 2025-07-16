@@ -17,13 +17,14 @@ export class DatePicker extends Control {
         noCalendar: { type: types.primitives.Bool, default: false },
         range: { type: types.primitives.Bool, default: false },
         format: { type: types.primitives.String, default: "d.m.Y H:i:S" },
-        value: { type: types.primitives.Any },
+        value: { type: types.primitives.Any , default: new Date()},
         min: { type: types.primitives.Integer },
         max: { type: types.primitives.Integer },
         interval: { type: types.primitives.Integer , default: 1},
         disabled: { type: types.primitives.Bool},
         placeholder: { type: types.primitives.String },
-        localization: { type: types.primitives.String }
+        localization: { type: types.primitives.String },
+        localization: { type: types.primitives.String, default:"loc_kz" }
     };
 
 
