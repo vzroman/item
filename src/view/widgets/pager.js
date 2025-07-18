@@ -54,8 +54,10 @@ export class Pager extends ItemView{
             <div class="${ style.pagination }">
                 <div name="first"></div>
                 <div name="prev"></div>
+                <div name="prev_simple"></div>
                 <div name="pages"></div>
                 <div name="next"></div>
+                <div name="next_simple"></div>
                 <div name="last"></div>
             </div>
             <div name="pageSize"></div>
@@ -97,7 +99,7 @@ export class Pager extends ItemView{
         this._pages = new Collection({
             id:"page",
             schema:{
-                page:{type: types.primitives.Integer },
+                page:{ type: types.primitives.Integer },
                 isActive:{ type: types.primitives.Bool, default:false }
             },
             keyCompare:([a],[b])=>{
@@ -169,7 +171,11 @@ export class Pager extends ItemView{
                 options: {
                     title:"previous",
                     links: {
-                        visible:{source: "parent", event: "simple", handler: s => !s },
+                        visible:{
+                            source: "parent",
+                            event: "simple",
+                            handler: s => !s
+                        },
                         enable:{source:"parent", event:"page", handler:p => p > 1},
                         icon:{ source:"self", event:"enable", handler:val=>{
                             if (val){
@@ -184,6 +190,31 @@ export class Pager extends ItemView{
                     }
                 }
             },
+            prev_simple: {
+                view: controls.Button,
+                options: {
+                    title:"previous_simple",
+                    links: {
+                        visible:{
+                            source: "parent",
+                            event: ["simple","page", "maxVisible"],
+                            handler: ({simple, page, maxVisible}) => {
+                                return simple && page > maxVisible;
+                            }
+                        },
+                        text:{ source:"self", event:"visible", handler:val=>{
+                            if (val){
+                                return `...`;
+                            }else{
+                                return ``;
+                            }
+                        }}
+                    },
+                    events:{
+                        click:{target:"parent@page", handler:()=> (this._options.page??0) - 1 }
+                    }
+                }
+            },
             pages:{
                 view: collections.Flex,
                 options:{
@@ -193,7 +224,9 @@ export class Pager extends ItemView{
                         view:controls.Button,
                         options:{
                             links:{
-                                text:"data@page", 
+                                text: { source : "data@page", handler: page => {
+                                    return page
+                                }}, 
                                 classes: { source: "data@isActive", handler: isActive => {
                                     return isActive ? [style.activePage] : [];
                                 } } 
@@ -219,6 +252,31 @@ export class Pager extends ItemView{
                                 return `url("${ previousBlue }")`;
                             }else{
                                 return `url("${ previous }")`;
+                            }
+                        }}
+                    },
+                    events:{
+                        click:{target:"parent@page", handler:()=> (this._options.page??0) + 1  }
+                    }
+                }
+            },
+            next_simple: {
+                view: controls.Button,
+                options: {
+                    title:"next_simple",
+                    links: {
+                        visible:{
+                            source: "parent",
+                            event: ["simple","page", "totalCount", "pageSize", "maxVisible"],
+                            handler: ({simple, page, totalCount,pageSize ,maxVisible}) => {
+                                return simple && page < ( Math.ceil( totalCount / pageSize ) - maxVisible );
+                            }
+                        },
+                        text:{ source:"self", event:"visible", handler:val=>{
+                            if (val){
+                                return `...`;
+                            }else{
+                                return ``;
                             }
                         }}
                     },
