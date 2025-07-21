@@ -65,7 +65,7 @@ export class Controller extends Item{
         });
 
         this.bind("$.filter", (filter, prevFilter)=>{
-            if(!this._filter) return;
+            if(!this.filterCheckouts()) return;
             if (filter === prevFilter) return;
             this.filter( filter, prevFilter );
         });
@@ -132,6 +132,11 @@ export class Controller extends Item{
             this._filter = undefined;
         }
         this.updatePage();
+    }
+
+    filterCheckouts(){
+        //this method need to constist filter binding in descedants
+        return true
     }
 
     fork( {id, params, isSource, isConsumer, onCommit} ){

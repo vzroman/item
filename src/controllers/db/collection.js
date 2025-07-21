@@ -75,10 +75,7 @@ export class Controller extends Collection{
         this.bind("$.subscribe",value => this.setSubscribe( value ) );
 
         this.bind("$.filter",(value, prev) => {
-            if (!this._filter) return;
-            if (!this._options.subscribe) return;
-            if (deepEqual(value, prev)) return;
-
+            if(!this.filterCheckouts()) return
             this.setSubscribe( false );
             this.setSubscribe( this._options.subscribe );
         });
@@ -170,6 +167,13 @@ export class Controller extends Collection{
 
     filter(){
         this.refresh();
+    }
+
+    filterCheckouts(){
+        if (!this._filter) return false;
+        if (!this._options.subscribe) return false;
+        if (deepEqual(value, prev)) return false;
+        return true
     }
 
     query(){
