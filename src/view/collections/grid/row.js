@@ -152,6 +152,7 @@ export class Row extends Item{
 
     refresh(){
         this._options.children?.refresh();
+        this.#children?.refresh();
     }
 
     _destroy() {
@@ -235,6 +236,11 @@ class RowsCollection extends Collection{
         super._destroy();
     }
 
+    refresh() {
+        for (const [item] of Object.values( this._items )){
+            item?.refresh();
+        }
+    }
 
 }
 RowsCollection.extend();
