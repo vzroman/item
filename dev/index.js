@@ -21,6 +21,6 @@ $(function () {
 
 
 
-    collection_filter_test( $container );
+    treeGrid_test( $container );
 
 });

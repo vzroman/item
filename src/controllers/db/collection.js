@@ -136,22 +136,21 @@ export class Controller extends Collection{
     }
 
     onReorder(){
-        super.onReorder();
 
         const {
             serverPaging,
             page,
-            pageSize,
-            orderBy
+            pageSize
         } = this._options;
         const pagination = serverPaging && page !== undefined && pageSize !== undefined;
 
-        if (orderBy === undefined || pagination || this._subscription !== undefined){
+        if ( pagination !== true || this._subscription !== undefined){
             // We don't need to query the server if we already have the whole data
-            return;
+            return super.onReorder();
         }
-
-        this.refresh();
+        this.refresh().then(()=>{
+            super.onReorder()
+        });
     }
 
     forEach( callback ){
@@ -255,6 +254,7 @@ export class Controller extends Collection{
             }
 
             connection().query(`get ${ fields } from ${ DBs } where ${ filter } ${ orderBy } format $to_json ${pagination}`, result => {
+                if (this.isDestroyed()) return;
                 if (pagination !== ""){
                     this._totalCount = result.count;
                     result = result.result;
@@ -300,6 +300,7 @@ export class Controller extends Collection{
             this._subscription = this._options.connection().subscribe(`get ${ queryFields } from * where ${ filter } format $to_json`,
                 //------------create--------------------------
                 ({oid, fields})=>{
+                    if (this.isDestroyed()) return;
                     if (!this.get(oid)) this._totalCount++;
 
                     const update = {};
@@ -310,6 +311,7 @@ export class Controller extends Collection{
                 },
                 //------------update--------------------------
                 ({oid, fields})=>{
+                    if (this.isDestroyed()) return;
                     const update = this.get(oid) ?? {};
                     for (const f in fields){
                         update[ ItemController.fromSafeFieldName(f) ] = fields[f];
@@ -318,6 +320,7 @@ export class Controller extends Collection{
                 },
                 //------------delete--------------------------
                 ({oid})=>{
+                    if (this.isDestroyed()) return;
                     if (this.get(oid)) this._totalCount--;
                     this.refreshItem(oid, null);
                 },
@@ -362,6 +365,8 @@ export class Controller extends Collection{
 
                 this.constructor.transaction(DBs, this._changes,  this._options.connection(), this._options.timeout)
                     .then(()=>{
+
+                        if(this.isDestroyed()) return;
 
                         // The changes settled to the database
                         super.commit().then(resolve, reject);

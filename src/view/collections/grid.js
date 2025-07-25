@@ -33,7 +33,6 @@ import {Pager} from "../widgets/pager";
 import {Selection} from "../../utilities/selection";
 import {types} from "../../types";
 import style from "./grid.css";
-import {waiting} from "../../utilities/waiting.js";
 
 export class Grid extends Collection{
 
@@ -119,7 +118,7 @@ export class Grid extends Collection{
             if (!$row) return;
             const item = this.constructor.getItem( $row );
             this._trigger("rowDblClick", [item]);
-        })
+        });
 
         this._selection = new Selection({
             $container: this.$tbody,
@@ -235,7 +234,8 @@ export class Grid extends Collection{
             columns: this._options.columns,
             numerated:this._options.numerated,
             parentRow:undefined,
-            previousRow:previousRow
+            previousRow:previousRow,
+            links:{ orderBy:{ source:this._options.data, event:"$.orderBy" }}
         }});
     }
 

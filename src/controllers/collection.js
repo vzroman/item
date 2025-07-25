@@ -74,8 +74,6 @@ export class Controller extends Item{
 
         this.bind("$.orderBy", (orderBy, prevOrderBy)=>{
             if(!this._view) return;
-            console.log(this._options.orderBy);
-
             if (orderBy === prevOrderBy) return;
             this.onReorder();
         });
@@ -228,7 +226,11 @@ export class Controller extends Item{
 
     get( id ){
         if ( !id ){
-            return this.get( Object.keys({...this._data, ...this._changes}) );
+            const allItems = this.get( Object.keys({...this._data, ...this._changes}) );
+            for (let i in allItems){
+                if (!allItems[i]) delete allItems[i];
+            }
+            return allItems;
         } else if (Array.isArray( id )) {
             const items = Linkable.prototype.get.call(this, id);
             for (const i in items){
