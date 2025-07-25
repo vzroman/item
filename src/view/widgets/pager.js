@@ -95,6 +95,7 @@ export class Pager extends ItemView{
     
 
     widgets(){
+        this.$markup.on("click", (event) => event.stopPropagation());
 
         this._pages = new Collection({
             id:"page",
@@ -211,7 +212,7 @@ export class Pager extends ItemView{
                         }}
                     },
                     events:{
-                        click:{target:"parent@page", handler:()=> (this._options.page??0) - 1 }
+                        click:{target:"parent@page", handler:()=> (this._options.page??0) - 5 }
                     }
                 }
             },
@@ -281,7 +282,7 @@ export class Pager extends ItemView{
                         }}
                     },
                     events:{
-                        click:{target:"parent@page", handler:()=> (this._options.page??0) + 1  }
+                        click:{target:"parent@page", handler:()=> (this._options.page??0) + 5  }
                     }
                 }
             },
