@@ -503,11 +503,14 @@ export class Controller extends Item{
 
     _orderKey(id, item) {
         let key = id;
-    
-        if (Array.isArray(this._options.orderBy) && this._options.orderBy.length > 0) {
+
+        let orderBy = this._options.orderBy;
+        if (typeof orderBy==="string") orderBy = [[orderBy,"asc"]];
+
+        if (Array.isArray(orderBy) && orderBy.length > 0) {
             key = {};
-    
-            this._options.orderBy.forEach(field => {
+
+            orderBy.forEach(field => {
                 const fieldName = Array.isArray(field) ? field[0] : field;
                 if (item && item.hasOwnProperty(fieldName)) {
                     key[fieldName] = item[fieldName];
