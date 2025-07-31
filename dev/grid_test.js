@@ -35,7 +35,11 @@ export function run( $container ){
             schema:{
                 ".name":{ type:item.types.primitives.String },
                 ".pattern":{type:item.types.primitives.String}
-            }
+            },
+            serverPaging:true,
+            page:1,
+            pageSize:40
+            //orderBy:[[".name","asc"]]
         });
 
         
@@ -91,7 +95,8 @@ export function run( $container ){
             numerated:true,
             multiselect:true,
             checkbox:true,
-            pager:{  }
+            pager:{page:1,
+                pageSize:40,pageSizeValues:[40, 100]}
             // isFolder:{type:types.primitives.Any},
             // getIcon:{type:types.primitives.Any},
             // getSubitems:{type:types.primitives.Any}
@@ -101,6 +106,10 @@ export function run( $container ){
         let $to = +new Date() + 86400000;
 
         controller.init([".folder","=","$oid('/root/FP/PROJECT')"]);
+
+        setTimeout(()=>controller.set({"$.orderBy":[[".name","asc"]]}), 10000 );
+
+        setTimeout(()=>controller.set({"$.orderBy":[[".name","desc"]]}), 20000 );
 
         // controller.init(["or",[
         //     ["dt_on","[]",[$from, $to]],
