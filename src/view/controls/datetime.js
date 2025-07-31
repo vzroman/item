@@ -20,6 +20,8 @@ export class DatePicker extends Control {
         value: { type: types.primitives.Any , default: new Date()},
         min: { type: types.primitives.Integer },
         max: { type: types.primitives.Integer },
+        minTime: { type: types.primitives.String },
+        maxTime: { type: types.primitives.String },
         interval: { type: types.primitives.Integer , default: 1},
         disabled: { type: types.primitives.Bool},
         placeholder: { type: types.primitives.String },
@@ -33,7 +35,7 @@ export class DatePicker extends Control {
         super(options);
         this._suppressOnChange = false;
 
-        const {value, timepicker, noCalendar, range, format, min, max, interval, localization } = this._options;
+        const {value, timepicker, noCalendar, range, format, min, max, minTime, maxTime, interval, localization } = this._options;
         const locale = flatpickrLocales[localization] || flatpickrLocales["loc_en"];
         
         this.bind("placeholder", value => {
@@ -48,6 +50,14 @@ export class DatePicker extends Control {
             this.$markup.prop("disabled", value);
         });
 
+        this.bind("minTime", value => {
+            this._widget?.set("minTime", value || null);
+        });
+
+        this.bind("maxTime", value => {
+            this._widget?.set("maxTime", value || null);
+        });
+
         const flatpickrOptions = {
             locale,
             defaultDate: value,
@@ -58,6 +68,8 @@ export class DatePicker extends Control {
             dateFormat: format,
             minDate: min,
             maxDate: max,
+            minTime: minTime,
+            maxTime: maxTime,
             minuteIncrement: interval,
             mode: range ? "range" : "single",
             onChange: (selectedDates) => {
