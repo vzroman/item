@@ -5,8 +5,8 @@ import styles from "./datetime.css";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 
-import { Russian } from "flatpickr/dist/l10n/ru.js";
-import { Kazakh } from "flatpickr/dist/l10n/kz.js";
+import { flatpickrLocales } from "./datePicker/localizationMap.js";
+
 
 
 export class DatePicker extends Control {
@@ -23,7 +23,6 @@ export class DatePicker extends Control {
         interval: { type: types.primitives.Integer , default: 1},
         disabled: { type: types.primitives.Bool},
         placeholder: { type: types.primitives.String },
-        localization: { type: types.primitives.String },
         localization: { type: types.primitives.String, default:"loc_kz" }
     };
 
@@ -34,12 +33,9 @@ export class DatePicker extends Control {
         super(options);
         this._suppressOnChange = false;
 
-        const {value, timepicker, noCalendar, range, format, selectedDates, min, max, interval, localization } = this._options;
-        const locMap = {
-            "loc_ru": Russian,
-            "loc_kz": Kazakh
-        }
-
+        const {value, timepicker, noCalendar, range, format, min, max, interval, localization } = this._options;
+        const locale = flatpickrLocales[localization] || flatpickrLocales["loc_en"];
+        
         this.bind("placeholder", value => {
             if (value) {
                 this.$markup.prop("placeholder", value);
@@ -53,14 +49,13 @@ export class DatePicker extends Control {
         });
 
         const flatpickrOptions = {
-            locale:locMap[localization],
+            locale,
             defaultDate: value,
             enableTime: timepicker,
             noCalendar: noCalendar,
             time_24hr: true,
             enableSeconds: true,
             dateFormat: format,
-            defaultDate: selectedDates,
             minDate: min,
             maxDate: max,
             minuteIncrement: interval,
