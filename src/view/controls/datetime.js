@@ -24,6 +24,7 @@ export class DatePicker extends Control {
         maxTime: { type: types.primitives.String },
         interval: { type: types.primitives.Integer , default: 1},
         disabled: { type: types.primitives.Bool},
+        enableSeconds: { type: types.primitives.Bool},
         placeholder: { type: types.primitives.String },
         localization: { type: types.primitives.String, default:"loc_kz" }
     };
@@ -35,7 +36,7 @@ export class DatePicker extends Control {
         super(options);
         this._suppressOnChange = false;
 
-        const {value, timepicker, noCalendar, range, format, min, max, minTime, maxTime, interval, localization } = this._options;
+        const {value, timepicker, noCalendar, range, format, min, max, minTime, maxTime, interval, localization, enableSeconds } = this._options;
         const locale = flatpickrLocales[localization] || flatpickrLocales["loc_en"];
         
         this.bind("placeholder", value => {
@@ -64,7 +65,7 @@ export class DatePicker extends Control {
             enableTime: timepicker,
             noCalendar: noCalendar,
             time_24hr: true,
-            enableSeconds: true,
+            enableSeconds: enableSeconds ?? true,
             dateFormat: format,
             minDate: min,
             maxDate: max,
