@@ -20,8 +20,11 @@ export class DatePicker extends Control {
         value: { type: types.primitives.Any , default: new Date()},
         min: { type: types.primitives.Integer },
         max: { type: types.primitives.Integer },
+        minTime: { type: types.primitives.String },
+        maxTime: { type: types.primitives.String },
         interval: { type: types.primitives.Integer , default: 1},
         disabled: { type: types.primitives.Bool},
+        enableSeconds: { type: types.primitives.Bool},
         placeholder: { type: types.primitives.String },
         localization: { type: types.primitives.String, default:"loc_kz" }
     };
@@ -33,7 +36,20 @@ export class DatePicker extends Control {
         super(options);
         this._suppressOnChange = false;
 
-        const {value, timepicker, noCalendar, range, format, min, max, interval, localization } = this._options;
+        const {
+            value,
+            timepicker,
+            noCalendar,
+            range,
+            format,
+            min,
+            max,
+            minTime,
+            maxTime,
+            interval,
+            localization,
+            enableSeconds
+        } = this._options;
         const locale = flatpickrLocales[localization] || flatpickrLocales["loc_en"];
         
         this.bind("placeholder", value => {
@@ -48,16 +64,26 @@ export class DatePicker extends Control {
             this.$markup.prop("disabled", value);
         });
 
+        this.bind("minTime", value => {
+            this._widget?.set("minTime", value || null);
+        });
+
+        this.bind("maxTime", value => {
+            this._widget?.set("maxTime", value || null);
+        });
+
         const flatpickrOptions = {
             locale,
             defaultDate: value,
             enableTime: timepicker,
             noCalendar: noCalendar,
             time_24hr: true,
-            enableSeconds: true,
+            enableSeconds: enableSeconds ?? true,
             dateFormat: format,
             minDate: min,
             maxDate: max,
+            minTime: minTime,
+            maxTime: maxTime,
             minuteIncrement: interval,
             mode: range ? "range" : "single",
             onChange: (selectedDates) => {
