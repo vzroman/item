@@ -90,13 +90,7 @@ export class ItemList extends Control{
                 isUp:{type: types.primitives.Bool, default: true},
                 isDown:{type: types.primitives.Bool, default: true},
             },
-            keyCompare:([a],[b])=>{
-                a = +a;
-                b = +b;
-                if ( a > b ) return 1;
-                if ( a < b ) return -1;
-                return 0;
-            },
+            orderBy:[["index","asc"]],
             autoCommit:false,
             data:[]
         });
