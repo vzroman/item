@@ -226,7 +226,8 @@ class RowsCollection extends Collection{
     };
 
     newItem( id, previousRow ){
-        return new Row({...this._options.parent.get(), ...{
+        const parentOptions = this._options.parent.get();
+        return new Row({...parentOptions, ...{
             data:undefined,
             id:id,
             parentRow:this._options.parent,
@@ -237,7 +238,10 @@ class RowsCollection extends Collection{
             index:undefined,
             level: this._options.parent.get("level") + 1,
             children:undefined,
-            links:{ orderBy:{ source:this._options.data, event:"$.orderBy" }}
+            links:{
+                ...parentOptions.links,
+                ...{ orderBy:{ source:this._options.data, event:"$.orderBy" }}
+            }
         }});
     }
 
