@@ -99,13 +99,7 @@ export class TreeGrid extends ItemView{
                 id:{ type: types.primitives.Integer }, 
                 caption:{type: types.primitives.String}
             },
-            keyCompare:([a],[b])=>{
-                a = +a;
-                b = +b;
-                if ( a > b ) return 1;
-                if ( a < b ) return -1;
-                return 0;
-            },
+            orderBy:[["id","asc"]],
             data:[{id:0, caption:""}]
         });
 
