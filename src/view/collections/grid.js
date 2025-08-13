@@ -236,7 +236,7 @@ export class Grid extends Collection{
             parentRow:undefined,
             previousRow:previousRow,
             links:{
-                ...this._options.row.links,
+                ...this._options.row?.links,
                 ...{ orderBy:{ source:this._options.data, event:"$.orderBy" }}
             }
         }});
