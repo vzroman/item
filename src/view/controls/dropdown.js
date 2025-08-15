@@ -38,12 +38,15 @@ export class Control extends Parent{
         itemValue:{type: types.primitives.Any},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
-        hideClear:{type: types.primitives.Bool, default: false}
+        hideClear:{type: types.primitives.Bool, default: false},
+        placeholder:{type: types.primitives.String}
     };
 
     static markup = `<div class="${ styles.dropdown }">
         <select></select>
         <span class="${ styles.clear }">x</span>
+        <span class="${ styles.clear }" name="clear">x</span>
+        <span name="placeholder" style="position:absolute; top:8px; left:10px; color:#9B9B9B"></span>
     </div>`;
 
     constructor( options ){
@@ -51,6 +54,9 @@ export class Control extends Parent{
 
         this.$select = this.$markup.find("select");
         this.$reset = this.$markup.find("span");
+
+        this.$reset = this.$markup.find('[name="clear"]');
+        this.$placeholder = this.$markup.find('[name="placeholder"]');
 
         this._itemsController = undefined;
         this._subscription = undefined;
@@ -86,6 +92,7 @@ export class Control extends Parent{
         this.$select.on("change",() => this.set({ value:this.$select.val() }));
 
         this.$reset.on("click", () => {this.set({ value: null }); } );
+
         this.bind("hideClear", val=>{
             if (val) {
                 this.$reset.css({display: "none"});
@@ -93,6 +100,14 @@ export class Control extends Parent{
                 this.$reset.on("click", () => {this.set({ value: null }); } );
             }
         });
+
+        this.bind("value", v =>{
+            if(!v && this._options.placeholder){
+                this.$placeholder.css("display","inline").text(this._options.placeholder);
+            }else{
+                this.$placeholder.css("display","none");
+            }
+        })
     }
 
     updateValue( value, prev ){
