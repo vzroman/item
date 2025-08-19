@@ -33,12 +33,15 @@ import {Pager} from "../widgets/pager";
 import {Selection} from "../../utilities/selection";
 import {types} from "../../types";
 import style from "./grid.css";
+import {waiting} from "../../utilities/waiting.js";
+import {dialogs} from "../../dialogs/index.js";
 
 export class Grid extends Collection{
 
     static events = {
         onSelect: true,
-        rowDblClick: true
+        rowDblClick: true,
+        contextClick: true
     }
 
     static options = {
@@ -50,7 +53,8 @@ export class Grid extends Collection{
         checkbox:{type:types.primitives.Bool},
         multiselect:{type:types.primitives.Bool, default:false},
         pager:{type:types.primitives.Set},
-        row:{type: types.primitives.Set }
+        row:{type: types.primitives.Set },
+        contextmenu:{type:types.primitives.Array}
     };
 
     constructor( options ) {
@@ -119,6 +123,40 @@ export class Grid extends Collection{
             const item = this.constructor.getItem( $row );
             this._trigger("rowDblClick", [item]);
         });
+
+        if(this._options.contextmenu?.length){
+            this.$markup.on("contextmenu", (e) =>{
+                e.preventDefault();
+
+                const $row = $(e.target).closest( 'tr' );
+
+                if ($row?.length){
+                    const row = this.constructor.getItem( $row );
+                    const selected = this.getSelected();
+
+                    if(!selected.includes(row)){
+                        for(const r of selected){
+                            if(row !== r) r.set({selected: false});
+                        }
+                        row.set({selected: true});
+                    }
+                }
+
+                dialogs.contextMenu({
+                    items: this._options.contextmenu,
+                    x: e.clientX,
+                    y: e.clientY,
+                    $container: this._options.$container,
+                    onSelect: (selectedItem) => {
+                        const handler = selectedItem.get("handler");
+                        if (handler) {
+                            const selected = this.getSelected();
+                            handler(selected, this);
+                        }
+                    },
+                });
+            });
+        }
 
         this._selection = new Selection({
             $container: this.$tbody,

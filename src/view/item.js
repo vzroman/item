@@ -45,7 +45,8 @@ export class View extends Item{
 
     static events = {
         click:true,
-        dblClick:true
+        dblClick:true,
+        contextClick:true
     };
 
     static markup = undefined;
@@ -194,6 +195,12 @@ export class View extends Item{
                    this._trigger("click", event);
                 },200);
             }
+        });
+
+        // Context menu event
+        this.$markup.on("contextmenu", event => {
+            event.preventDefault();
+            this._trigger("contextClick", event);
         });
 
         const dependControllers = {};
