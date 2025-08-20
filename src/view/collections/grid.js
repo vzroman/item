@@ -101,10 +101,10 @@ export class Grid extends Collection{
                 }
                 
             };
-            if (!timer) timer = setTimeout(()=>{
-                timer = undefined;
-                if (!this._options) return;
-                let selected = this.getSelected();
+                if (!timer) timer = setTimeout(()=>{
+                    timer = undefined;
+                    if (!this._options) return;
+                    let selected = this.getSelected();
                 if (!this._options.multiselect){
                     for (const r of selected){
                         if (r !== selectedRow) r.set({selected:false});
@@ -112,9 +112,9 @@ export class Grid extends Collection{
                     selected = selectedRow ? [selectedRow] : [];
                 }
 
-                this._selection.selected( $( selected.map( r => r.$markup[0] )) );
-                this._trigger("onSelect",[selected]);
-            });
+                    this._selection.selected( $( selected.map( r => r.$markup[0] )) );
+                    this._trigger("onSelect",[selected]);
+                });
         });
 
         this.bind("dblClick", e=>{

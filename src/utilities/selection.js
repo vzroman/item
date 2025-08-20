@@ -120,6 +120,8 @@ function multiSelect( options ){
     };
 
     const startSelection = (e) => {
+        if (e.button === 2) return;
+        
         const $item = $(e.target).closest( $selector );
         if (!$item.length) return;
 
