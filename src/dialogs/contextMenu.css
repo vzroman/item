@@ -4,7 +4,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 1000;
 }
 
 .menu{
@@ -16,27 +15,12 @@
 }
 
 .menuitem{
-    display: grid;
-    grid-template-columns: 24px 1fr;
+    display: flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
     padding: 4px 8px;
     margin-bottom: 4px;
-}
-
-.icon {
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.caption {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .menuitem:last-of-type{
