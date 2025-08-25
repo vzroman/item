@@ -40,8 +40,7 @@ export class Grid extends Collection{
 
     static events = {
         onSelect: true,
-        rowDblClick: true,
-        contextClick: true
+        rowDblClick: true
     }
 
     static options = {
@@ -126,11 +125,10 @@ export class Grid extends Collection{
 
         if(this._options.contextmenu?.length){
             this.$markup.on("contextmenu", (e) =>{
-                e.preventDefault();
+                const $row = $(e.target).closest('tr');
 
-                const $row = $(e.target).closest( 'tr' );
-
-                if ($row?.length){
+                if ($row?.length && $row.parent().is('tbody')){
+                    e.preventDefault();
                     const row = this.constructor.getItem( $row );
                     const selected = this.getSelected();
 
@@ -140,21 +138,18 @@ export class Grid extends Collection{
                         }
                         row.set({selected: true});
                     }
-                }
 
-                dialogs.contextMenu({
-                    items: this._options.contextmenu,
-                    x: e.clientX,
-                    y: e.clientY,
-                    $container: this._options.$container,
-                    onSelect: (selectedItem) => {
-                        const handler = selectedItem.get("handler");
-                        if (handler) {
+                    dialogs.contextMenu({
+                        items: this._options.contextmenu,
+                        x: e.clientX,
+                        y: e.clientY
+                    }).then(selectedItem => {
+                        if (selectedItem && selectedItem.handler) {
                             const selected = this.getSelected();
-                            handler(selected, this);
+                            selectedItem.handler(selected, this);
                         }
-                    },
-                });
+                    });
+                }
             });
         }
 

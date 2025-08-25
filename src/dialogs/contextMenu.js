@@ -5,7 +5,21 @@ import {Controller as Collection} from "../controllers/collection";
 import {view as views} from "../view/index.js";
 import {types} from "../types";
 
+let _activeMenu = null;
+
+const destroyExisting = () => {
+    if (_activeMenu) {
+        _activeMenu.destroy();
+        _activeMenu = null;
+    }
+};
+
 /**
+ * 
+ * // Subscribe on events using standard jQuery `contextmenu`
+ * @example
+ * this.$markup.on("contextmenu", (e) =>{
+ * 
  * @example
  * dialogs.contextMenu({
  *   items: [
@@ -14,52 +28,41 @@ import {types} from "../types";
  *   ],
  *   x: e.clientX,
  *   y: e.clientY
+ * }).then(selectedItem => {
+ *   if (selectedItem) {
+ *     console.log('Selected:', selectedItem.caption);
+ *   }
  * });
+ * 
  */
 export function contextMenu(options) {
-    // Support legacy format: contextMenu(items, x, y, $container)
     if (Array.isArray(options)) {
-        const [items, x, y, $container] = arguments;
-        options = { items, x, y, $container };
+        const [items, x, y] = arguments;
+        options = { items, x, y };
     }
 
     const {
         items = [],
         x = 0,
-        y = 0,
-        $container,
-        onSelect,
-        onCancel
+        y = 0
     } = options;
 
-    return new Promise((resolve, reject) => {
-        const destroyExisting = () => {
-            if (window._activeContextMenu) {
-                window._activeContextMenu.destroy();
-                window._activeContextMenu = null;
-            }
-        };
-
+    return new Promise((resolve) => {
         destroyExisting();
 
         const menu = new ContextMenuDialog({
-            $container: $container || $('body'),
+            $container: $('body'),
             items,
             x,
             y,
-            onSelect: (item) => {
-                destroyExisting();
-                if (onSelect) onSelect(item);
-                resolve(item);
-            },
-            onCancel: () => {
-                destroyExisting();
-                if (onCancel) onCancel();
-                reject();
+            onResult: (result) => {
+                _activeMenu = null;
+                menu.destroy();
+                resolve(result);
             }
         });
 
-        window._activeContextMenu = menu;
+        _activeMenu = menu;
     });
 }
 
@@ -68,12 +71,32 @@ class ContextMenuDialog extends ItemView {
         items: {type: types.primitives.Array, default: []},
         x: {type: types.primitives.Float},
         y: {type: types.primitives.Float},
-        onSelect: {type: types.primitives.Fun},
-        onCancel: {type: types.primitives.Fun}
+        onResult: {type: types.primitives.Fun}
     };
 
     constructor(options) {
         super(options);
+        
+        this._preventBrowserMenu = (e) => {
+            e.preventDefault();
+            return false;
+        };
+        
+        $(document).on('contextmenu', this._preventBrowserMenu);
+        
+        const escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                this._handleCancel();
+            }
+        };
+        
+        $(document).on('keydown', escapeHandler);
+        
+        this._cleanupHandlers = () => {
+            $(document).off('contextmenu', this._preventBrowserMenu);
+            $(document).off('keydown', escapeHandler);
+        };
+        
         setTimeout(() => {
             this.checkOverflow();
         });
@@ -88,7 +111,7 @@ class ContextMenuDialog extends ItemView {
                 </div>`);
         
         $markup.on("click mousedown", () => {
-            this._options.onCancel?.();
+            this._handleCancel();
         });
         
         this.$contextmenu = $markup.find('[name="context_menu"]');
@@ -128,10 +151,22 @@ class ContextMenuDialog extends ItemView {
                             },
                             events: {
                                 click: (e, item) => {
-                                    const handler = item.get("data").get("handler");
                                     const itemData = item.get("data");
-                                    handler?.();
-                                    this._options.onSelect?.(itemData);
+                                    const enable = itemData.get("enable");
+                                    
+                                    if (enable && !enable()) return;
+                                    
+                                    const handler = itemData.get("handler");
+                                    const result = itemData.get();
+                                    const onResult = this._options.onResult;
+                                    
+                                    destroyExisting();
+                                    
+                                    if (handler) {
+                                        handler();
+                                    }
+                                    
+                                    onResult?.(result);
                                 }
                             }
                         }
@@ -141,18 +176,32 @@ class ContextMenuDialog extends ItemView {
         };
     }
 
+    _handleCancel() {
+        this._options.onResult?.(null);
+    }
+    
     checkOverflow() {
-        const total_width = this._options.$container.offset().left + this._options.$container.width();
-        const total_height = this._options.$container.offset().top + this._options.$container.height();
-        const if_overflow_x = (this._options.x + this.$contextmenu.width()) > total_width;
-        const if_overflow_y = (this._options.y + this.$contextmenu.height()) > total_height;
+        const windowWidth = $(window).width();
+        const windowHeight = $(window).height();
+        const menuWidth = this.$contextmenu.outerWidth();
+        const menuHeight = this.$contextmenu.outerHeight();
+        
+        const overflowX = (this._options.x + menuWidth) > windowWidth;
+        const overflowY = (this._options.y + menuHeight) > windowHeight;
 
-        if (if_overflow_x) {
-            this.$contextmenu.css({"left": this._options.x - this.$contextmenu.width()});
+        if (overflowX) {
+            this.$contextmenu.css({"left": this._options.x - menuWidth});
         }
-        if (if_overflow_y) {
-            this.$contextmenu.css({"top": this._options.y - this.$contextmenu.height()});
+        if (overflowY) {
+            this.$contextmenu.css({"top": this._options.y - menuHeight});
         }
+    }
+    
+    _destroy() {
+        if (this._cleanupHandlers) {
+            this._cleanupHandlers();
+        }
+        super._destroy();
     }
 }
 
@@ -162,8 +211,8 @@ ContextMenuDialog.extend();
 class MenuItem extends ItemView {
     
     static markup = `<div class="${styles.menuitem}">
-        <div name="icon" style="width:20px; height:20px;display:flex;align-items:center;justify-content:center;"></div>
-        <div name="caption"></div>
+        <div name="icon" class="${styles.icon}"></div>
+        <div name="caption" class="${styles.caption}"></div>
     </div>`
 
     widgets() {
@@ -174,11 +223,7 @@ class MenuItem extends ItemView {
                     links: {
                         html: {
                             source: "data@icon", 
-                            handler: icon => icon ? `<img width="18" src="${icon}">` : '',
-                        },
-                        css: {
-                            source: "data@icon",
-                            handler: icon => icon ? {} : {display: 'none'}
+                            handler: icon => icon ? `<img width="18" height="18" src="${icon}">` : ''
                         }
                     }
                 }
@@ -188,10 +233,6 @@ class MenuItem extends ItemView {
                 options: {
                     links: {
                         text: {source: "data@caption"},
-                        css: {
-                            source: "data@icon",
-                            handler: icon => icon ? {} : {'margin-left': '-28px'}
-                        }
                     }
                 }
             }
