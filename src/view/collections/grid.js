@@ -34,7 +34,6 @@ import {Selection} from "../../utilities/selection";
 import {types} from "../../types";
 import style from "./grid.css";
 import {waiting} from "../../utilities/waiting.js";
-import {dialogs} from "../../dialogs/index.js";
 
 export class Grid extends Collection{
 
@@ -52,8 +51,7 @@ export class Grid extends Collection{
         checkbox:{type:types.primitives.Bool},
         multiselect:{type:types.primitives.Bool, default:false},
         pager:{type:types.primitives.Set},
-        row:{type: types.primitives.Set },
-        contextmenu:{type:types.primitives.Array}
+        row:{type: types.primitives.Set }
     };
 
     constructor( options ) {
@@ -122,36 +120,6 @@ export class Grid extends Collection{
             const item = this.constructor.getItem( $row );
             this._trigger("rowDblClick", [item]);
         });
-
-        if(this._options.contextmenu?.length){
-            this.$markup.on("contextmenu", (e) =>{
-                const $row = $(e.target).closest('tr');
-
-                if ($row?.length && $row.parent().is('tbody')){
-                    e.preventDefault();
-                    const row = this.constructor.getItem( $row );
-                    const selected = this.getSelected();
-
-                    if(!selected.includes(row)){
-                        for(const r of selected){
-                            if(row !== r) r.set({selected: false});
-                        }
-                        row.set({selected: true});
-                    }
-
-                    dialogs.contextMenu({
-                        items: this._options.contextmenu,
-                        x: e.clientX,
-                        y: e.clientY
-                    }).then(selectedItem => {
-                        if (selectedItem && selectedItem.handler) {
-                            const selected = this.getSelected();
-                            selectedItem.handler(selected, this);
-                        }
-                    });
-                }
-            });
-        }
 
         this._selection = new Selection({
             $container: this.$tbody,

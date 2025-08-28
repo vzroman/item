@@ -5,64 +5,46 @@ import {Controller as Collection} from "../controllers/collection";
 import {view as views} from "../view/index.js";
 import {types} from "../types";
 
-let _activeMenu = null;
-
-const destroyExisting = () => {
-    if (_activeMenu) {
-        _activeMenu.destroy();
-        _activeMenu = null;
-    }
-};
-
 /**
+ * Context menu dialog
+ * Promise always Resolves - returns selected item data or null if cancelled.
  * 
- * // Subscribe on events using standard jQuery `contextmenu`
- * @example
- * this.$markup.on("contextmenu", (e) =>{
+ * @param {Array} items - Array of menu items with { caption, handler, icon?, enable? }
+ * @param {number} x - X coordinate
+ * @param {number} y - Y coordinate
+ * @returns {Promise} - Resolves with selected item data or null if cancelled
  * 
  * @example
- * dialogs.contextMenu({
- *   items: [
- *     { caption: "Copy", handler: () => copy() },
- *     { caption: "Paste", handler: () => paste(), enable: () => hasClipboard() }
- *   ],
- *   x: e.clientX,
- *   y: e.clientY
- * }).then(selectedItem => {
- *   if (selectedItem) {
- *     console.log('Selected:', selectedItem.caption);
+ * // Manual usage 
+ * this.bind("contextmenu", async (e) => {
+ *   e.preventDefault();
+ *   
+ *   const items = [
+ *     { caption: "New Item", handler: () => this.createNew() },
+ *     { caption: "Refresh", handler: () => this.refresh() }
+ *   ];
+ *   
+ *   const selected = await dialogs.contextMenu(items, e.clientX, e.clientY);
+ *   if (selected) {
+ *     selected.handler();
  *   }
  * });
  * 
  */
-export function contextMenu(options) {
-    if (Array.isArray(options)) {
-        const [items, x, y] = arguments;
-        options = { items, x, y };
-    }
-
-    const {
-        items = [],
-        x = 0,
-        y = 0
-    } = options;
-
+export function contextMenu(items, x, y) {
     return new Promise((resolve) => {
-        destroyExisting();
+        $(document).trigger('contextmenu:destroy');
 
         const menu = new ContextMenuDialog({
             $container: $('body'),
-            items,
-            x,
-            y,
+            items: items || [],
+            x: x || 0,
+            y: y || 0,
             onResult: (result) => {
-                _activeMenu = null;
                 menu.destroy();
                 resolve(result);
             }
         });
-
-        _activeMenu = menu;
     });
 }
 
@@ -82,19 +64,24 @@ class ContextMenuDialog extends ItemView {
             return false;
         };
         
-        $(document).on('contextmenu', this._preventBrowserMenu);
-        
         const escapeHandler = (e) => {
             if (e.key === 'Escape') {
                 this._handleCancel();
             }
         };
+
+        const destroyHandler = () => {
+            this._handleCancel();
+        };
         
+        $(document).on('contextmenu', this._preventBrowserMenu);
         $(document).on('keydown', escapeHandler);
+        $(document).on('contextmenu:destroy', destroyHandler);
         
         this._cleanupHandlers = () => {
             $(document).off('contextmenu', this._preventBrowserMenu);
             $(document).off('keydown', escapeHandler);
+            $(document).off('contextmenu:destroy', destroyHandler);
         };
         
         setTimeout(() => {
@@ -159,8 +146,6 @@ class ContextMenuDialog extends ItemView {
                                     const handler = itemData.get("handler");
                                     const result = itemData.get();
                                     const onResult = this._options.onResult;
-                                    
-                                    destroyExisting();
                                     
                                     if (handler) {
                                         handler();
