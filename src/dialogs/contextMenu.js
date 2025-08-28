@@ -116,7 +116,7 @@ class ContextMenuDialog extends ItemView {
                 icon: {type: types.primitives.String},
                 caption: {type: types.primitives.String},
                 handler: {type: types.primitives.Fun},
-                enable: {type: types.primitives.Fun},
+                enable: {type: types.primitives.Bool},
             },
             data: this._options.items
         });
@@ -131,8 +131,8 @@ class ContextMenuDialog extends ItemView {
                         options: {
                             links: {
                                 classes: {
-                                    source: "data@enable", handler: (enable = () => {}) => {
-                                        return enable() ? [] : [styles.disabled];
+                                    source: "data@enable", handler: (enable = false) => {
+                                        return enable ? [] : [styles.disabled];
                                     }
                                 }
                             },
@@ -141,7 +141,7 @@ class ContextMenuDialog extends ItemView {
                                     const itemData = item.get("data");
                                     const enable = itemData.get("enable");
                                     
-                                    if (enable && !enable()) return;
+                                    if (enable) return;
                                     
                                     const handler = itemData.get("handler");
                                     const result = itemData.get();
