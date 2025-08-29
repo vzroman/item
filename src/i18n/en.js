@@ -23,5 +23,9 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 export const lang = {
-
+    "Search":"Search",
+    "yes":"Yes",
+    "no":"No",
+    "save":"Save",
+    "cancel":"Cancel"
 };
