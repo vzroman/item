@@ -26,10 +26,12 @@ import {error} from "./error.js";
 import {yes_no} from "./yes_no";
 import {notify} from "./notify";
 import {selectList} from "./selectListDialog";
+import {contextMenu} from "./contextMenu";
 
 export const dialogs = {
     error,
     yes_no,
     notify,
-    selectList
+    selectList,
+    contextMenu
 };
