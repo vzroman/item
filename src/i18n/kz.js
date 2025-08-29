@@ -28,5 +28,5 @@ export const lang = {
     "no":"Жоқ",
     "save":"Сақтау",
     "cancel":"Болдырмау",
-    "ERROR":"ОШИБКА"
+    "ERROR":"ҚАТЕ"
 };
