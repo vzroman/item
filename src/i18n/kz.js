@@ -27,5 +27,6 @@ export const lang = {
     "yes":"Иә",
     "no":"Жоқ",
     "save":"Сақтау",
-    "cancel":"Болдырмау"
+    "cancel":"Болдырмау",
+    "ERROR":"ОШИБКА"
 };

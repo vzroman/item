@@ -27,5 +27,6 @@ export const lang = {
     "yes":"Yes",
     "no":"No",
     "save":"Save",
-    "cancel":"Cancel"
+    "cancel":"Cancel",
+    "ERROR":"ERROR"
 };
