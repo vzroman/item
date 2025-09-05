@@ -119,7 +119,11 @@ function multiSelect( options ){
         remove:[]
     };
 
+    const isNotLeftClick = e => e.button !== 0 && e.buttons !== 1;
+
     const startSelection = (e) => {
+        if (isNotLeftClick(e)) return;
+
         const $item = $(e.target).closest( $selector );
         if (!$item.length) return;
 
@@ -148,9 +152,12 @@ function multiSelect( options ){
     }
 
     const endSelection = (e)=>{
+        window.removeEventListener('mousemove', onDraw);
+        window.removeEventListener('mouseup', endSelection);
+        
+        if (isNotLeftClick(e)) return;
 
         $lasso.css({display:"none",width:0, height:0});
-        window.removeEventListener('mousemove', onDraw);
 
         const $item = $(e.target).closest( $selector );
 
@@ -187,7 +194,6 @@ function multiSelect( options ){
             left: (width < 0 ? e.pageX : start.x) + "px",
             top: (height < 0 ? e.pageY : start.y) + "px"
         });
-
     }
 
     $container.on("mousedown", startSelection);
@@ -200,5 +206,4 @@ function multiSelect( options ){
     };
 
 }
-
 

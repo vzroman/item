@@ -69,6 +69,7 @@ export class Controller extends Item{
         this.bind("$.filter", (filter, prevFilter)=>{
             if(!this._filter) return;
             if (filter === prevFilter) return;
+            this.option("page", 1);
             this.filter( filter, prevFilter );
         });
 

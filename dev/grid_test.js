@@ -35,11 +35,7 @@ export function run( $container ){
             schema:{
                 ".name":{ type:item.types.primitives.String },
                 ".pattern":{type:item.types.primitives.String}
-            },
-            serverPaging:true,
-            page:1,
-            pageSize:40
-            //orderBy:[[".name","asc"]]
+            }
         });
 
         
@@ -88,18 +84,58 @@ export function run( $container ){
         const grid = new item.view.collections.Grid({
             $container,
             data:controller,
-            columns:[".name",".pattern"],    // string | { fields, handler } | Item }
-            header:["name", "pattern"],                    // string | Item | function -> string | $markup
-            //header:["dt_on", "text"],
+            columns:[".name",".pattern"],
+            header:["name", "pattern"],
             resizable:true,
             numerated:true,
             multiselect:true,
             checkbox:true,
-            pager:{page:1,
-                pageSize:40,pageSizeValues:[40, 100]}
-            // isFolder:{type:types.primitives.Any},
-            // getIcon:{type:types.primitives.Any},
-            // getSubitems:{type:types.primitives.Any}
+            pager:{},
+            contextmenu: [
+                { 
+                    caption: "Copy", 
+                    icon: "",
+                    enable: () => true, 
+                    handler: (selectedRows, grid) => {
+                        console.log("Copy action triggered for rows:", selectedRows);
+                        const data = selectedRows.map(row => row.get("data").get()).map(item => item[".name"]).join(", ");
+                        console.log("Selected items:", data);
+                    }
+                },
+                { 
+                    caption: "Delete", 
+                    icon: "",
+                    enable: () => grid.getSelected().length > 0, 
+                    handler: (selectedRows, grid) => {
+                        console.log("Delete action triggered for rows:", selectedRows);
+                        const names = selectedRows.map(row => row.get("data").get()[".name"]);
+                        console.log("Deleting items:", names);
+                        
+                        if(confirm(`Are you sure you want to delete ${names.length} item(s)?`)) {
+                            console.log("Delete confirmed");
+                        }
+                    }
+                },
+                { 
+                    caption: "Edit", 
+                    icon: "",
+                    enable: () => grid.getSelected().length === 1, 
+                    handler: (selectedRows, grid) => {
+                        const row = selectedRows[0];
+                        const data = row.get("data").get();
+                        console.log("Edit action triggered for:", data[".name"]);
+                    }
+                },
+                { 
+                    caption: "Refresh", 
+                    icon: "",
+                    enable: () => true, 
+                    handler: (selectedRows, grid) => {
+                        console.log("Refresh action triggered");
+                        grid.refresh();
+                    }
+                }
+            ]
         });
 
         let $from = +new Date();
@@ -107,9 +143,7 @@ export function run( $container ){
 
         controller.init([".folder","=","$oid('/root/FP/PROJECT')"]);
 
-        setTimeout(()=>controller.set({"$.orderBy":[[".name","asc"]]}), 10000 );
-
-        setTimeout(()=>controller.set({"$.orderBy":[[".name","desc"]]}), 20000 );
+        console.log("Grid test initialized with controller and context menu");
 
         // controller.init(["or",[
         //     ["dt_on","[]",[$from, $to]],
