@@ -46,7 +46,7 @@ export class Control extends Parent{
         <select></select>
         <span class="${ styles.clear }">x</span>
         <span class="${ styles.clear }" name="clear">x</span>
-        <span name="placeholder" style="position:absolute; top:8px; left:10px; color:#9B9B9B"></span>
+        <span name="placeholder" style="position:absolute; top:4px; left:10px; color:#9B9B9B"></span>
     </div>`;
 
     constructor( options ){
@@ -176,6 +176,8 @@ export class Control extends Parent{
 
     _updateItems(){
         this.$select.empty();
+
+        $(`<option value="" hidden disabled selected></option>`).appendTo(this.$select);
 
         const itemValue = this._options.itemValue || "value";
         const itemText = this._options.itemText || itemValue;
