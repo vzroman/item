@@ -40,7 +40,7 @@ import styles from "./multiSelect.css";
 export class MultiSelect extends Control{
     static markup = `<div class="${ styles.multiselect }">
         <div class="${styles.selected_items}">
-            <span name="placeholder" style="position:absolute; top:6px; left:8px; color:#9B9B9B"></span>
+            <span name="placeholder" style="position:absolute; top:6px; left:8px; color:#9B9B9B; user-select: none;"></span>
             <div name="selected"></div>
             <div name="items"></div>
         </div>
@@ -61,7 +61,7 @@ export class MultiSelect extends Control{
     constructor( options ){
         super( options );
 
-        this.$placeholder = this.$markup.find('[name="placeholder"]')
+        this.$placeholder = this.$markup.find('[name="placeholder"]');
 
         const _items = new Map();
 
@@ -128,6 +128,11 @@ export class MultiSelect extends Control{
             if (isDeleteBtn) return;
             const isExpanded = !this.get("isExpanded");
             this.set({isExpanded});
+        });
+
+        this.$placeholder.on("click", () => {
+            const isExpanded = !this.get("isExpanded");
+            this.set({ isExpanded });
         });
 
         this._closeDropdown = (e) => {

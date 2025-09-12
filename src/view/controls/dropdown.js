@@ -46,7 +46,7 @@ export class Control extends Parent{
         <select></select>
         <span class="${ styles.clear }">x</span>
         <span class="${ styles.clear }" name="clear">x</span>
-        <span name="placeholder" style="position:absolute; top:4px; left:10px; color:#9B9B9B"></span>
+        <span name="placeholder" style="position:absolute; top:4px; left:10px; color:#9B9B9B; pointer-events: none; user-select: none;"></span>
     </div>`;
 
     constructor( options ){
