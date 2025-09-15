@@ -40,7 +40,7 @@ import styles from "./multiSelect.css";
 export class MultiSelect extends Control{
     static markup = `<div class="${ styles.multiselect }">
         <div class="${styles.selected_items}">
-            <span name="placeholder" style="position:absolute; top:6px; left:8px; color:#9B9B9B; user-select: none;"></span>
+            <span name="placeholder" class="${styles.placeholder}"></span>
             <div name="selected"></div>
             <div name="items"></div>
         </div>
@@ -102,15 +102,22 @@ export class MultiSelect extends Control{
             updateSelectedController();
         }
 
+        const togglePlaceholder = (value) => {
+            if(value.length === 0 && this._options.placeholder){
+                this.$placeholder.removeClass(styles.open);
+            }else{
+                this.$placeholder.addClass(styles.open);
+            }
+        };
+
         this.bind("value", (value)=>{
             updateSelectedController();
-            if(value.length === 0 && this._options.placeholder){
-                this.$placeholder.css("display","inline").text(this._options.placeholder)
-            }else{
-                this.$placeholder.css("display","none")
-            }
-
+            togglePlaceholder(value);
         });
+
+        this.bind("placeholder", (value)=>{
+            this.$placeholder.text(value || "");
+        }); 
 
         this.bind("items", items=>{
             if (items instanceof controllers.Collection){
@@ -128,11 +135,6 @@ export class MultiSelect extends Control{
             if (isDeleteBtn) return;
             const isExpanded = !this.get("isExpanded");
             this.set({isExpanded});
-        });
-
-        this.$placeholder.on("click", () => {
-            const isExpanded = !this.get("isExpanded");
-            this.set({ isExpanded });
         });
 
         this._closeDropdown = (e) => {

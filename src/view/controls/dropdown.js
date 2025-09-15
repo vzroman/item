@@ -27,7 +27,6 @@ import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
 import {Controller} from "../../controllers/collection.js";
 import styles from "./dropdown.css"
-//import $ from "jquery";
 
 export class Control extends Parent{
 
@@ -43,20 +42,18 @@ export class Control extends Parent{
     };
 
     static markup = `<div class="${ styles.dropdown }">
-        <select></select>
+        <select required name="select"></select>
         <span class="${ styles.clear }">x</span>
         <span class="${ styles.clear }" name="clear">x</span>
-        <span name="placeholder" style="position:absolute; top:4px; left:10px; color:#9B9B9B; pointer-events: none; user-select: none;"></span>
     </div>`;
 
     constructor( options ){
         super( options );
 
-        this.$select = this.$markup.find("select");
+        this.$select = this.$markup.find("[name='select']");
         this.$reset = this.$markup.find("span");
 
         this.$reset = this.$markup.find('[name="clear"]');
-        this.$placeholder = this.$markup.find('[name="placeholder"]');
 
         this._itemsController = undefined;
         this._subscription = undefined;
@@ -100,14 +97,6 @@ export class Control extends Parent{
                 this.$reset.on("click", () => {this.set({ value: null }); } );
             }
         });
-
-        this.bind("value", v =>{
-            if(!v && this._options.placeholder){
-                this.$placeholder.css("display","inline").text(this._options.placeholder);
-            }else{
-                this.$placeholder.css("display","none");
-            }
-        })
     }
 
     updateValue( value, prev ){
@@ -177,7 +166,7 @@ export class Control extends Parent{
     _updateItems(){
         this.$select.empty();
 
-        $(`<option value="" hidden disabled selected></option>`).appendTo(this.$select);
+        $(`<option value="" disabled selected hidden>${this._options.placeholder}</option>`).appendTo(this.$select);
 
         const itemValue = this._options.itemValue || "value";
         const itemText = this._options.itemText || itemValue;
