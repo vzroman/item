@@ -39,9 +39,10 @@ export function run( $container ){
             },
             page:1,
             pageSize: 30,
+            serverPaging:true
         }
 
-        const controller = new item.controllers.db.Collection({...options,data:[".folder","=","$oid('/root/PROJECT')"]});
+        const controller = new item.controllers.db.Collection({...options,data:[".folder","=","$oid('/root/FP/PROJECT')"]});
 
         const grid = new item.view.collections.TreeGrid({
             $container,
@@ -59,8 +60,8 @@ export function run( $container ){
                 return !item['.path'].startsWith("/root/PROJECT/LOCALIZATION/");
             },
             getIcon:( item ) => false,
-            getSubitems:( folder )=>{
-                return new item.controllers.db.Collection({...options, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
+            getSubitems:( folder, parentOptions )=>{
+                return new item.controllers.db.Collection({...options, ...parentOptions, data:[".folder","=","$oid('"+folder[".path"]+"')"]})
             },
             search:(v)=>{
                 console.log(v);
@@ -84,5 +85,8 @@ export function run( $container ){
             }
         });
 
+        setTimeout(()=>controller.set({"$.orderBy":[[".name","asc"]]}), 10000 );
+
+        setTimeout(()=>controller.set({"$.orderBy":[[".name","desc"]]}), 20000 );
     }
 }
