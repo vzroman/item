@@ -25,7 +25,9 @@
 
 export class Type{
 
-    static options ={};
+    static options ={
+        coerce:undefined
+    };
 
     static extend(){
         if (Type.isPrototypeOf( this ) ){
@@ -58,6 +60,9 @@ export class Type{
     }
 
     coerce( value ){
+        if (typeof this._options.coerce === "function"){
+            value = this._options.coerce( value );
+        }
         return this.constructor.coerce( value );
     }
 

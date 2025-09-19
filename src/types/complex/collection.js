@@ -29,10 +29,13 @@ import {Type as Array} from "../primitives/array.js";
 export class Type extends Item{
 
     coerce( value ){
+        if (typeof this._options.coerce === "function"){
+            value = this._options.coerce( value );
+        }
         value = Array.coerce( value );
         if ( value ){
             return value.map( item => {
-                return super.coerce( item );
+                return this._schema.validate( item || {} ) || undefined;
             });
         }
     }
