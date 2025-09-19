@@ -32,7 +32,7 @@ export class Type extends Item{
         value = Set.coerce( value );
         if ( value ){
             return Object.entries( value ).reduce((acc,[k, item]) =>{
-                acc[k] = super.coerce( item );
+                acc[k] = this._schema.validate( item || {} ) || undefined;
                 return acc;
             }, {});
         }

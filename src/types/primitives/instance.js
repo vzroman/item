@@ -32,6 +32,7 @@ export class Type extends Parent{
     };
 
     coerce( value ){
+        value = super.coerce( value );
         if ( value instanceof this._options.class ){
             return value;
         }else{
