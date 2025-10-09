@@ -35,6 +35,7 @@ import {Toggle} from "./toggle.js";
 import {ColorPicker} from "./colorPicker.js";
 import {Control as PasswordInput} from "./passwordInput.js";
 import {DatePicker} from "./datetime.js";
+import {Control as ProgressBar} from "./progressBar.js"
 
 
 export const controls = {
@@ -50,5 +51,6 @@ export const controls = {
     Toggle,
     ColorPicker,
     PasswordInput,
-    DatePicker
+    DatePicker,
+    ProgressBar
 };
