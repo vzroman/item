@@ -58,16 +58,6 @@ export class Control extends Parent{
         this.$progressBar_value.text(percentage.toFixed(1) + '%');
     }
 
-    // enable( value ){
-    //     this.$markup.prop('disabled', !value);
-
-    //     if (value){
-    //         this.$markup.removeClass(styles.disabled);
-    //     }else{
-    //         this.$markup.addClass(styles.disabled);
-    //     }
-    // }
-
     focus(){
         this.$markup.focus();
     }

@@ -86,7 +86,6 @@ export function run( $container ){
                     data:{value:60}
                 })
 
-                console.log(data.get("value"))
                 new item.view.layout.Window({
                     data,
                     view:{
