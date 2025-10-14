@@ -90,13 +90,7 @@ export class ItemList extends Control{
                 isUp:{type: types.primitives.Bool, default: true},
                 isDown:{type: types.primitives.Bool, default: true},
             },
-            keyCompare:([a],[b])=>{
-                a = +a;
-                b = +b;
-                if ( a > b ) return 1;
-                if ( a < b ) return -1;
-                return 0;
-            },
+            orderBy:[["index","asc"]],
             autoCommit:false,
             data:[]
         });
@@ -245,7 +239,8 @@ function itemsList( itemsSet ){
 }
 
 function mergeValue( items, value ){
-
+    const counts = countItems(value);
+    items = filterCountItems(items, counts);
     // Remove not existent items, but keep undefined
     items = items.filter( item => item === undefined || item === null || indexOf( item, value ) !==-1 );
 
@@ -278,6 +273,40 @@ function mergeValue( items, value ){
     }
 
     return items;
+}
+
+function countItems(array) {
+    const counts = [];
+    for (const item of array) {
+        const found = counts.find(entry => {
+            return deepEqual(entry.value, item)
+        });
+        if (found) {
+            found.count++;
+        } else {
+            counts.push({ value: item, count: 1 });
+        }
+    }
+    return counts;
+}
+
+function filterCountItems(items, counts) {
+    const result = [];
+    for (const item of items) {
+        if (item === undefined || item === null) {
+            result.push(item);
+            continue;
+        }
+
+        const match = counts.find(entry => {
+            return deepEqual(entry.value, item) && entry.count > 0;
+        });
+        if (match) {
+            result.push(item);
+            match.count--;
+        }
+    }
+    return result;
 }
 
 function indexOf( item, value, startFrom =0){

@@ -32,6 +32,7 @@ export class Type extends Parent{
     };
 
     coerce( value ){
+        value = super.coerce( value );
         if ( this._options.class === value || this._options.class.isPrototypeOf(value) ){
             return value;
         }else{

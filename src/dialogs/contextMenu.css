@@ -1,0 +1,39 @@
+.wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.menu{
+    position: absolute;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.25);
+    background: #fff;
+}
+
+.menuitem{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 8px;
+    margin-bottom: 4px;
+}
+
+.menuitem:last-of-type{
+    margin-bottom: 0;
+}
+
+.menuitem:hover{
+    background-color: #e6e6e8;
+    border-radius: 5px;
+}
+
+.disabled{
+    color: #9b9b9b;
+    opacity: .5;
+    pointer-events: none;
+}

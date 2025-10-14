@@ -42,7 +42,8 @@ export class Row extends Item{
         index:{type:types.primitives.String, default:"1"},
         level:{type: types.primitives.Integer, default:0},
         isUnfolded:{type:types.primitives.Bool, default:false},
-        children:{type: types.primitives.Instance, options:{class:CollectionController}}
+        children:{type: types.primitives.Instance, options:{class:CollectionController}},
+        orderBy:{type: types.primitives.Array}
     };
 
     #children;
@@ -72,7 +73,7 @@ export class Row extends Item{
 
                 if (this.isDestroyed()) return;
 
-                this.#reorder();
+                this._reorder();
 
                 this.#unbind.forEach( u => u());
                 this.#unbind = [];
@@ -85,6 +86,13 @@ export class Row extends Item{
                 }
 
             });
+        });
+
+        this.bind("orderBy", () => {
+            setTimeout(()=>{
+                if (this.isDestroyed() || this._options.isUnfolded!==true || !this._options.children) return;
+                this._options.children.set({"$.orderBy":this._options.orderBy});
+            })
         });
     }
 
@@ -115,7 +123,9 @@ export class Row extends Item{
         if (this.#children) this.#children.destroy();
         this._options.children?.destroy();
 
-        const controller = this._options.getSubitems( this._options.data.get() );
+        const controller = this._options.getSubitems( this._options.data.get(),{
+            orderBy: this._options.orderBy
+        });
 
         this.#children = new RowsCollection({
             $container:this._options.$container,
@@ -152,6 +162,7 @@ export class Row extends Item{
 
     refresh(){
         this._options.children?.refresh();
+        this.#children?.refresh();
     }
 
     _destroy() {
@@ -170,28 +181,31 @@ export class Row extends Item{
         super._destroy();
     }
 
-    #reorder(){
-        if(this._options.previousRow){
-            if (this._options.previousRow.get("isUnfolded")){
-                const $previousRow = this._options.previousRow.$markup;
-                const $nextRows = $previousRow.nextAll('tr');
-                let $previous = $previousRow;
-                for (let i=0; i<$nextRows.length; i++){
-                    const $row = $($nextRows[i]);
-                    if (this.constructor.getItem( $row ).get("level") > this._options.level){
-                        $previous = $row
-                    }else{
-                        break
-                    }
+    getRelevantRowsMarkup(){
+        let rows = [this.$markup];
+        if (this._options.isUnfolded){
+            const $nextRows = this.$markup.nextAll('tr');
+            for (let i=0; i<$nextRows.length; i++){
+                const $row = $($nextRows[i]);
+                if (this.constructor.getItem( $row ).get("level") > this._options.level){
+                    rows.push($row);
+                }else{
+                    break
                 }
-                this.$markup.insertAfter( $previous );
-            }else{
-                this.$markup.insertAfter( this._options.previousRow.$markup );
             }
+        }
+        return rows;
+    }
+
+    _reorder(){
+        const $relevantRows = this.getRelevantRowsMarkup().reduce(($acc,$row)=>$acc.add($row),$());
+        if(this._options.previousRow){
+            const $prevLastRelevantRow = this._options.previousRow.getRelevantRowsMarkup().pop();
+            $relevantRows.insertAfter( $prevLastRelevantRow );
         }else if(this._options.parentRow){
-            this.$markup.insertAfter( this._options.parentRow.$markup );
+            $relevantRows.insertAfter( this._options.parentRow.$markup );
         }else{
-            this.$markup.prependTo(this._options.$container);
+            $relevantRows.prependTo(this._options.$container);
         }
     }
 
@@ -212,7 +226,8 @@ class RowsCollection extends Collection{
     };
 
     newItem( id, previousRow ){
-        return new Row({...this._options.parent.get(), ...{
+        const parentOptions = this._options.parent.get();
+        return new Row({...parentOptions, ...{
             data:undefined,
             id:id,
             parentRow:this._options.parent,
@@ -222,7 +237,11 @@ class RowsCollection extends Collection{
             isUnfolded:false,
             index:undefined,
             level: this._options.parent.get("level") + 1,
-            children:undefined
+            children:undefined,
+            links:{
+                ...parentOptions.links,
+                ...{ orderBy:{ source:this._options.data, event:"$.orderBy" }}
+            }
         }});
     }
 
@@ -235,6 +254,11 @@ class RowsCollection extends Collection{
         super._destroy();
     }
 
+    refresh() {
+        for (const [item] of Object.values( this._items )){
+            item?.refresh();
+        }
+    }
 
 }
 RowsCollection.extend();

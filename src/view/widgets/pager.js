@@ -86,13 +86,7 @@ export class Pager extends ItemView{
                 page:{type: types.primitives.Integer },
                 isActive:{ type: types.primitives.Bool, default:false }
             },
-            keyCompare:([a],[b])=>{
-                a = +a;
-                b = +b;
-                if ( a > b ) return 1;
-                if ( a < b ) return -1;
-                return 0;
-            },
+            orderBy:[["page","asc"]],
             data:[{page:1}]
         });
 
