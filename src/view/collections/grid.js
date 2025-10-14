@@ -164,14 +164,14 @@ export class Grid extends Collection{
                         }).get().join("\t");
                     });
 
-                    const GridContentText = rows.join("\n");
-
-                    if (location.protocol === 'https:') {
-                        navigator.clipboard.writeText(GridContentText)
-                    } else {
-                        this.copyToClipboard(GridContentText);
-                    }
+                    const gridContentText = rows.join("\n");
                     
+                    // Use navigator.clipboard on HTTPS; fallback to custom copy method for HTTP
+                    if (location.protocol === 'https:') {
+                        navigator.clipboard.writeText(gridContentText);
+                    } else {
+                        this.copyToClipboard(gridContentText);
+                    }
                 }
             }
         });
