@@ -33,7 +33,8 @@ export class Type extends Parent{
     };
 
     coerce( value ){
-        if (value === undefined || value === null){
+        value = super.coerce( value );
+        if (value === undefined){
             return undefined;
         }else{
             value = Number.parseFloat(value);

@@ -38,6 +38,7 @@ export class Type extends primitives.Any{
     }
 
     coerce( value ){
+        value = super.coerce( value );
         return this._schema.validate( value || {} ) || undefined;
     }
 

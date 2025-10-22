@@ -33,6 +33,7 @@ export class Type extends Any{
     };
 
     coerce( value ){
+        value = super.coerce( value );
         if (value === undefined || value === null){
             return undefined;
         }else {
