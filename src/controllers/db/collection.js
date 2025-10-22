@@ -25,19 +25,26 @@
 import {Controller as Collection} from "../collection.js";
 import {Controller as ItemController} from "./item.js";
 import {deepEqual, diff, patch2value} from "../../utilities/data.js";
-import * as util from "../../utilities/data";
 
-function oidCompare(a, b) {
-    a = a.split(",");
+function oidCompare(aOid, bOid) {
+
+    if (!(aOid.startsWith("{") && bOid.startsWith("{"))){
+        return aOid > bOid ? 1 : aOid < bOid ? -1 : 0;
+    }
+
+    let a = aOid.split(",");
     a = [
         parseInt( a[0].substring(1) ),
         parseInt( a[1] )
     ];
-    b = b.split(",");
+    let b = bOid.split(",");
     b = [
         parseInt( b[0].substring(1) ),
         parseInt( b[1] )
     ];
+    for (let i of [...a, ...b]){
+        if (isNaN(i)) return aOid > bOid ? 1 : aOid < bOid ? -1 : 0;
+    }
 
     if (a[0] > b[0]) return 1;
     if (a[0] < b[0]) return -1;
