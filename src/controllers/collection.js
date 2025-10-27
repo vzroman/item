@@ -52,7 +52,7 @@ export class Controller extends Item{
     constructor( options ) {
         super( options );
 
-        this._pageItems = new Map();
+        this._updateView();
     }
 
     //-------------------------------------------------------------------
