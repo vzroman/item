@@ -53,38 +53,41 @@ export class Controller extends Item{
         super( options );
 
         this._pageItems = new Map();
+    }
 
-        this.bind("$.pageSize",()=>{
-            if (this.option("page") === 1){
-                this.updatePage();
-            }else{
-                this.option("page", 1);
-            }
-        });
-
-        this.bind("$.page",()=>{
+    //-------------------------------------------------------------------
+    // Option Handlers
+    //-------------------------------------------------------------------
+    $on_pageSize(){
+        if (this.option("page") === 1){
             this.updatePage();
-        });
-
-        this.bind("$.filter", (filter, prevFilter)=>{
-            if(!this._filter) return;
-            if (filter === prevFilter) return;
+        }else{
             this.option("page", 1);
-            this.filter( filter, prevFilter );
-        });
+        }
+    }
 
-        this.bind("$.orderBy", (orderBy, prevOrderBy)=>{
-            if(!this._view) return;
-            if (orderBy === prevOrderBy) return;
-            this.onReorder();
-        });
+    $on_page(){
+        this.updatePage();
+    }
 
-        this.bind("$.keyCompare", (keyCompare, prevKeyCompare)=>{
-            if(!this._view) return;
+    $on_filter(filter, prevFilter){
+        if(!this._filter) return;
+        if (filter === prevFilter) return;
+        this.option("page", 1);
+        this.filter( filter, prevFilter );
+    }
 
-            if (keyCompare === prevKeyCompare) return;
-            this.onReorder();
-        });
+    $on_orderBy(orderBy, prevOrderBy){
+        if(!this._view) return;
+        if (orderBy === prevOrderBy) return;
+        this.onReorder();
+    }
+
+    $on_keyCompare(keyCompare, prevKeyCompare){
+        if(!this._view) return;
+
+        if (keyCompare === prevKeyCompare) return;
+        this.onReorder();
     }
 
     #operatorAction = {

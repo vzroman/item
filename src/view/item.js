@@ -68,6 +68,8 @@ export class View extends Item{
     #lockControllers;
     #pendingRequests;
     #unlock;
+    #css;
+    #displayBackup;
 
     constructor( options ){
         super( options );
@@ -114,72 +116,12 @@ export class View extends Item{
             return acc;
         },{});
 
-        this._controller.bind("focus", value=>{
-            if (value){
-                this.focus();
-                this.set({focus:false});
-            }
-        });
+        // accumulate controlled css
+        this.#css = this._options.css || {};
 
-        this._controller.bind("enable", value=>{
-            if (typeof value === "boolean") this.enable( value );
-        });
+        // keep the original display settings
+        this.#displayBackup = this.$markup.css("display");
 
-        //-------------------dynamic classes-----------------------------------------
-        this.bind("classes",(actual = [], previous = [])=>{
-
-            for (const c of previous){
-                if (!actual.includes(c)) this.$markup.removeClass( c );
-            }
-
-            for (const c of actual){
-                if (!previous.includes(c)) this.$markup.addClass( c );
-            }
-        });
-
-        //-------------------handle css properties-----------------------------------
-        const _css = this._options.css || {}; // accumulate controlled css
-        this._controller.bind("beforeChange", changes =>{
-            if (!changes.hasOwnProperty("css")) return;
-            const css = changes.css || {};
-            for (const [prop, val] of Object.entries( css ) ){
-                if (val === null || val === undefined){
-                    delete _css[prop];
-                    delete css[prop]
-                }else{
-                    _css[prop] = val;
-                }
-            }
-            // Add accumulated properties
-            for (const [prop, val] of Object.entries( _css ) ){
-                if (!css.hasOwnProperty(prop)) css[prop] = val;
-            }
-        });
-        this.bind("css", (actual={}, previous={}) =>{
-            const updates = {};
-            for (const [prop, val] of Object.entries( actual ) ){
-                if (previous[prop] !== val) updates[prop] = val;
-            }
-            for (const prop of Object.keys( previous ) ){
-                if ( !actual.hasOwnProperty(prop) ) updates[prop] = '';
-            }
-            this.$markup.css(updates);
-        });
-
-
-        let _displayBackup = this.$markup.css("display");
-        this._controller.bind("visible", value=>{
-            // TODO. Or use visibility instead?
-            // const visibility = value ? "inherit" : "hidden";
-            // this.$markup.css({visibility});
-
-            if (!value){
-                _displayBackup = this.$markup.css("display");
-                this.$markup.css({display:"none"});
-            }else{
-                this.$markup.css({display:_displayBackup});
-            }
-        });
 
         // Click and double click events
         let timer = undefined;
@@ -245,6 +187,12 @@ export class View extends Item{
     }
 
 
+    $on_focus( value ){
+        if (value){
+            this.focus();
+            this.set({focus:false});
+        }
+    }
     focus(){
         const options = this.constructor.options;
         for (let p in options){
@@ -259,11 +207,67 @@ export class View extends Item{
         }
     }
 
+    $on_enable( value ){
+        if (typeof value === "boolean") this.enable( value );
+    }
+
     enable( value ){
         if ( this._widgets){
             Object.values(this._widgets).forEach(widget =>{
                 widget.set({enable:value});
             });
+        }
+    }
+
+    $on_classes(actual = [], previous = []){
+        //-------------------dynamic classes-----------------------------------------
+        for (const c of previous){
+            if (!actual.includes(c)) this.$markup.removeClass( c );
+        }
+
+        for (const c of actual){
+            if (!previous.includes(c)) this.$markup.addClass( c );
+        }
+    }
+
+    $before_css( css ={}){
+        //-------------------handle css properties-----------------------------------
+        for (const [prop, val] of Object.entries( css ) ){
+            if (val === null || val === undefined){
+                delete this.#css[prop];
+                delete css[prop]
+            }else{
+                this.#css[prop] = val;
+            }
+        }
+        // Add accumulated properties
+        for (const [prop, val] of Object.entries( this.#css ) ){
+            if (!css.hasOwnProperty(prop)) css[prop] = val;
+        }
+        return css;
+    }
+
+    $on_css(actual={}, previous={}){
+        const updates = {};
+        for (const [prop, val] of Object.entries( actual ) ){
+            if (previous[prop] !== val) updates[prop] = val;
+        }
+        for (const prop of Object.keys( previous ) ){
+            if ( !actual.hasOwnProperty(prop) ) updates[prop] = '';
+        }
+        this.$markup.css(updates);
+    }
+
+    $on_visible( value ){
+        // TODO. Or use visibility instead?
+        // const visibility = value ? "inherit" : "hidden";
+        // this.$markup.css({visibility});
+
+        if (!value){
+            this.#displayBackup = this.$markup.css("display");
+            this.$markup.css({display:"none"});
+        }else{
+            this.$markup.css({display:this.#displayBackup});
         }
     }
 

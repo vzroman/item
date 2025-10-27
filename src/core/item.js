@@ -56,7 +56,8 @@ export class Item extends Linkable{
             throw new errors.InvalidOptions(this.constructor, options);
         }
 
-        this._controller.bind("change", changes => this._update( changes ));
+        this._controller.bind("beforeChange", properties => this.$beforeChange( properties ));
+        this._controller.bind("change", changes => this.$onChange( changes ));
 
         setTimeout(()=>{
             // If the options are undefined then the item is already destroyed
@@ -76,6 +77,37 @@ export class Item extends Linkable{
 
     validate( properties ){
         return this._controller.validate( properties );
+    }
+
+    $beforeChange( properties ){
+        //---------------run the handlers---------------------------
+        for (let p in properties){
+            const handler = this[`$before_${p}`];
+            if (typeof handler === "function"){
+                try{
+                    properties[p] = handler(properties[p])
+                }catch(e){
+                    console.error(`invalid property handler $before_${p}`, properties[p], e);
+                }
+            }
+        }
+    }
+
+    $onChange( changes ){
+        this._update( changes );
+
+        //---------------run the handlers---------------------------
+        for (let p in changes){
+            const handler = this[`$on_${p}`];
+            if (typeof handler === "function"){
+                try{
+                    const pChanges = changes[p];
+                    handler(...pChanges)
+                }catch(e){
+                    console.error(`invalid property handler $on_${p}`, changes[p], e);
+                }
+            }
+        }
     }
 
     //-------------------------------------------------------------------

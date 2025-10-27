@@ -51,36 +51,33 @@ export class Control extends View{
             ? new this.constructor.options.value.type( this._options.validate )
             : undefined;
 
-        // Validate the value
-        if ( this._validator ){
-            this._controller.bind("beforeChange",(changes) => {
-                if (!changes?.hasOwnProperty("value")) return;
-
-                // No validation if it's a value reset
-                if (changes.value === null) return;
-
-                const value = deepCopy(changes.value);
-
-                changes.value = this._validator.coerce( changes.value );
-                this.setValid(changes.value!==undefined, value);
-                if (changes.value===undefined) delete changes.value;
-            });
-        }
         // We do it asynchronously because descendants should be
         // able to init their widget
         setTimeout(()=>{
-            if (!this._controller) return;
-
+            if (!this.isDestroyed()) return;
             this.updateValue( this.value(), undefined );
-            this.bind("beforeChange",(changes) => {
-                if (changes.hasOwnProperty("value")){
-                    const prev = this.value();
-                    setTimeout(()=> {
-                        if (this._controller) this.updateValue( this.value(), prev )
-                    });
-                }
-            });
         });
+    }
+
+    //-------------------------------------------------------------------
+    // Option Handlers
+    //-------------------------------------------------------------------
+    $before_value( value ){
+
+        const _originalValue = deepCopy( value );
+        const _valueBackup = this.value();
+
+        // Validate the value
+        if ( this._validator && value !== null){
+            value = this._validator.coerce( value );
+            this.setValid(value!==undefined, _originalValue);
+        }
+
+        setTimeout(()=> {
+            if (!this.isDestroyed()) this.updateValue( this.value(), _valueBackup )
+        });
+
+        return value;
     }
 
     // The same method for getting or setting value.

@@ -77,7 +77,6 @@ export class Controller extends Collection{
             throw new Error("invalid connection: " + this._options.connection);
 
         this._subscription = undefined;
-        this.bind("$.subscribe",value => this.setSubscribe( value ) );
 
         this.bind("$.filter",(value, prev) => {
             if (!this._filter) return;
@@ -87,6 +86,26 @@ export class Controller extends Collection{
             this.setSubscribe( false );
             this.setSubscribe( this._options.subscribe );
         });
+    }
+
+    //-------------------------------------------------------------------
+    // Option Handlers
+    //-------------------------------------------------------------------
+    $on_subscribe( value ){
+        this.setSubscribe( value )
+    }
+
+    $on_filter(filter, prevFilter){
+        if(!this._filter) return;
+        if (deepEqual(filter, prevFilter)) return;
+
+        if (this._options.subscribe === true){
+            this.setSubscribe( false );
+            this.setSubscribe( true );
+        }else{
+            this.option("page", 1);
+            this.filter( filter, prevFilter );
+        }
     }
 
     //-------------------------------------------------------------------
