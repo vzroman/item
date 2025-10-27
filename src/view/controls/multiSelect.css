@@ -19,6 +19,7 @@
     align-items: stretch;
     flex-grow: 1;
     max-width: calc(100% - 41px);
+    position:relative;
 }
 
 .selected_items>[name="selected"]{
@@ -34,6 +35,21 @@
 .multiselect>div[name="toggle"]>button{
     border: none;
     background: transparent;
+}
+
+.placeholder{
+    position: absolute;
+    top: 50%;
+    color: rgb(155, 155, 155);
+    user-select: none;
+    display: inline;
+    transform: translateY(-50%);
+    inset-inline-start: 8px;
+    z-index: -1;
+}
+
+.open{
+    display: none;
 }
 
 .selectButton{
