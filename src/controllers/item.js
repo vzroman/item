@@ -104,6 +104,7 @@ export class Controller extends Linkable{
         }
 
         const prevValue = this._options[option];
+        this._options[option] = value;
 
         const handler = this[`$on_${option}`];
         if (typeof handler === "function"){
@@ -114,7 +115,6 @@ export class Controller extends Linkable{
             }
         }
 
-        this._options[option] = value;
         this._trigger("$."+option, [value, prevValue]);
     }
 
