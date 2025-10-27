@@ -85,7 +85,7 @@ export class Item extends Linkable{
             const handler = this[`$before_${p}`];
             if (typeof handler === "function"){
                 try{
-                    properties[p] = handler(properties[p])
+                    properties[p] = handler.apply(this, [properties[p]])
                 }catch(e){
                     console.error(`invalid property handler $before_${p}`, properties[p], e);
                 }
@@ -102,7 +102,7 @@ export class Item extends Linkable{
             if (typeof handler === "function"){
                 try{
                     const pChanges = changes[p];
-                    handler(...pChanges)
+                    handler.apply(this, pChanges);
                 }catch(e){
                     console.error(`invalid property handler $on_${p}`, changes[p], e);
                 }

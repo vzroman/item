@@ -122,6 +122,13 @@ export class View extends Item{
         // keep the original display settings
         this.#displayBackup = this.$markup.css("display");
 
+        // init handlers
+        this.$on_focus( this.get("focus") );
+        this.$on_enable( this.get("enable") );
+        this.$on_visible( this.get("visible") );
+        this.$on_classes( this.get("classes") );
+        this.$on_css( this.get("css") );
+
 
         // Click and double click events
         let timer = undefined;
