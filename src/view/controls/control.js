@@ -54,8 +54,8 @@ export class Control extends View{
         // We do it asynchronously because descendants should be
         // able to init their widget
         setTimeout(()=>{
-            if (!this.isDestroyed()) return;
-            this.updateValue( this.value(), undefined );
+            if (!this.isDestroyed()) this.updateValue( this.value(), undefined );
+
         });
     }
 
