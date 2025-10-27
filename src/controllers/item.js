@@ -104,8 +104,17 @@ export class Controller extends Linkable{
         }
 
         const prevValue = this._options[option];
-
         this._options[option] = value;
+
+        const handler = this[`$on_${option}`];
+        if (typeof handler === "function"){
+            try{
+                handler.apply(this, [value, prevValue] );
+            }catch(e){
+                console.error(`invalid option handler $on_${option}`, value, prevValue, e);
+            }
+        }
+
         this._trigger("$."+option, [value, prevValue]);
     }
 
