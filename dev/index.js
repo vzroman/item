@@ -17,22 +17,12 @@ import { run as datepicker_test } from "./datepicker_test.js";
 
 
 $(function () {
-
-    const $container = $(`
-        <div name="container" style="width: 80vw; height: 80vh">
-            <div name="list"></div>
-            <div name="multi_list" style="margin-top: 10px;"></div>
-        </div>`)
+    const $container = $(`<div name="container" style="width: 80vw; height: 80vh"></div>`)
         .appendTo( $(`<div style="width: 100%; height: 100%; display: flex; justify-content: center;align-items: center"></div>`)
-        .appendTo( $('body').css({width:"100%",height:"100%"})));
-    
-    // console.log($container)
-    const $itemSelect = $container.find("[name=list]");
-    const $multiSelect = $container.find("[name=multi_list]");
+            .appendTo( $('body').css({width:"100%",height:"100%"})));
 
-    dropdown_test($itemSelect);
 
-    multiselect_test( $multiSelect );
-    
+
+    collection_filter_test( $container );    
 
 });
