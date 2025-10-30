@@ -40,6 +40,7 @@ import styles from "./multiSelect.css";
 export class MultiSelect extends Control{
     static markup = `<div class="${ styles.multiselect }">
         <div class="${styles.selected_items}">
+            <span name="placeholder" class="${styles.placeholder}"></span>
             <div name="selected"></div>
             <div name="items"></div>
         </div>
@@ -53,11 +54,14 @@ export class MultiSelect extends Control{
         itemValue:{type: types.primitives.String},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
-        isExpanded:{type: types.primitives.Bool, default: false}
+        isExpanded:{type: types.primitives.Bool, default: false},
+        placeholder:{type: types.primitives.String}
     }
 
     constructor( options ){
         super( options );
+
+        this.$placeholder = this.$markup.find('[name="placeholder"]');
 
         const _items = new Map();
 
@@ -98,7 +102,22 @@ export class MultiSelect extends Control{
             updateSelectedController();
         }
 
-        this.bind("value", updateSelectedController);
+        const togglePlaceholder = (value) => {
+            if(value.length === 0 && this._options.placeholder){
+                this.$placeholder.removeClass(styles.open);
+            }else{
+                this.$placeholder.addClass(styles.open);
+            }
+        };
+
+        this.bind("value", (value)=>{
+            updateSelectedController();
+            togglePlaceholder(value);
+        });
+
+        this.bind("placeholder", (value)=>{
+            this.$placeholder.text(value || "");
+        }); 
 
         this.bind("items", items=>{
             if (items instanceof controllers.Collection){
