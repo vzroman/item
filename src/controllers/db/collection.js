@@ -25,19 +25,26 @@
 import {Controller as Collection} from "../collection.js";
 import {Controller as ItemController} from "./item.js";
 import {deepEqual, diff, patch2value} from "../../utilities/data.js";
-import * as util from "../../utilities/data";
 
-function oidCompare(a, b) {
-    a = a.split(",");
+function oidCompare(aOid, bOid) {
+
+    if (!(aOid.startsWith("{") && bOid.startsWith("{"))){
+        return aOid > bOid ? 1 : aOid < bOid ? -1 : 0;
+    }
+
+    let a = aOid.split(",");
     a = [
         parseInt( a[0].substring(1) ),
         parseInt( a[1] )
     ];
-    b = b.split(",");
+    let b = bOid.split(",");
     b = [
         parseInt( b[0].substring(1) ),
         parseInt( b[1] )
     ];
+    for (let i of [...a, ...b]){
+        if (isNaN(i)) return aOid > bOid ? 1 : aOid < bOid ? -1 : 0;
+    }
 
     if (a[0] > b[0]) return 1;
     if (a[0] < b[0]) return -1;
@@ -70,7 +77,6 @@ export class Controller extends Collection{
             throw new Error("invalid connection: " + this._options.connection);
 
         this._subscription = undefined;
-        this.bind("$.subscribe",value => this.setSubscribe( value ) );
 
         this.bind("$.filter",(value, prev) => {
             if (!this._filter) return;
@@ -80,6 +86,26 @@ export class Controller extends Collection{
             this.setSubscribe( false );
             this.setSubscribe( this._options.subscribe );
         });
+    }
+
+    //-------------------------------------------------------------------
+    // Option Handlers
+    //-------------------------------------------------------------------
+    $on_subscribe( value ){
+        this.setSubscribe( value )
+    }
+
+    $on_filter(filter, prevFilter){
+        if(!this._filter) return;
+        if (deepEqual(filter, prevFilter)) return;
+
+        if (this._options.subscribe === true){
+            this.setSubscribe( false );
+            this.setSubscribe( true );
+        }else{
+            this.option("page", 1);
+            this.filter( filter, prevFilter );
+        }
     }
 
     //-------------------------------------------------------------------

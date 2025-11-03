@@ -1,10 +1,10 @@
-import {Ecomet} from "./ecomet.js";
 import {item} from "../dist/item.js";
+import {Ecomet} from "./ecomet.js";
 
 export function run( $container ){
 
     const connection = new Ecomet();
-
+    
     function connect(){
         console.debug("connecting...");
         connection.connect("127.0.0.1", 8000, "http:", ()=>{
@@ -27,10 +27,9 @@ export function run( $container ){
 
     connect();
 
-
     function doTest(){
-        new item.view.controls.MultiSelect({
-            $container:$(`<div></div>`).appendTo($container),
+        new item.view.controls.Dropdown({
+            $container,
             items: new item.controllers.db.Collection({
                 connection:()=>connection,
                 schema:{
@@ -42,7 +41,14 @@ export function run( $container ){
             }),
             itemText: ".name",
             itemValue: ".path",
-            placeholder: "Placeholder..."
+            hideClear: false,
+            placeholder: "Placeholder...",
+            links: {
+                value: ".name"
+            },
+            events: {value : (v) => {
+                return v;
+            }}
         });
     }
 }

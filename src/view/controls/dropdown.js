@@ -27,7 +27,6 @@ import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
 import {Controller} from "../../controllers/collection.js";
 import styles from "./dropdown.css"
-//import $ from "jquery";
 
 export class Control extends Parent{
 
@@ -38,19 +37,23 @@ export class Control extends Parent{
         itemValue:{type: types.primitives.Any},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
-        hideClear:{type: types.primitives.Bool, default: false}
+        hideClear:{type: types.primitives.Bool, default: false},
+        placeholder:{type: types.primitives.String}
     };
 
     static markup = `<div class="${ styles.dropdown }">
-        <select></select>
+        <select required name="select"></select>
         <span class="${ styles.clear }">x</span>
+        <span class="${ styles.clear }" name="clear">x</span>
     </div>`;
 
     constructor( options ){
         super( options );
 
-        this.$select = this.$markup.find("select");
+        this.$select = this.$markup.find("[name='select']");
         this.$reset = this.$markup.find("span");
+
+        this.$reset = this.$markup.find('[name="clear"]');
 
         this._itemsController = undefined;
         this._subscription = undefined;
@@ -86,6 +89,7 @@ export class Control extends Parent{
         this.$select.on("change",() => this.set({ value:this.$select.val() }));
 
         this.$reset.on("click", () => {this.set({ value: null }); } );
+
         this.bind("hideClear", val=>{
             if (val) {
                 this.$reset.css({display: "none"});
@@ -161,6 +165,8 @@ export class Control extends Parent{
 
     _updateItems(){
         this.$select.empty();
+
+        $(`<option value="" disabled selected hidden>${this._options.placeholder}</option>`).appendTo(this.$select);
 
         const itemValue = this._options.itemValue || "value";
         const itemText = this._options.itemText || itemValue;

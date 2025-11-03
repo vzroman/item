@@ -43,8 +43,15 @@ export class Controller extends Item{
             throw new Error("invalid connection: " + this._options.connection);
 
         this._subscription = undefined;
-        this.bind("$.subscribe",value => this.setSubscribe( value ) );
     }
+
+    //-------------------------------------------------------------------
+    // Option Handlers
+    //-------------------------------------------------------------------
+    $on_subscribe( value ){
+        this.setSubscribe( value )
+    }
+
     //-------------------------------------------------------------------
     // Data access API
     //-------------------------------------------------------------------
