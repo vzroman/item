@@ -27,10 +27,12 @@ import * as css from "./css.js";
 import * as data from "./data.js";
 import * as errors from "./errors.js";
 import {waiting} from "./waiting.js";
+import {progressBar} from "./progressBar.js";
 
 export const util = {
     css,
     data,
     errors,
-    waiting
+    waiting,
+    progressBar
 };
