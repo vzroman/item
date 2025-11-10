@@ -55,6 +55,7 @@ export class MultiSelect extends Control{
         itemGroup:{type: types.primitives.Any},
         isExpanded:{type: types.primitives.Bool, default: false},
         placeholder: { type: types.primitives.String, default: "" },
+        direction:{ type: types.primitives.String, default: "down" },
     }
 
     constructor( options ){
@@ -199,11 +200,13 @@ export class MultiSelect extends Control{
                     items:this._options.items,
                     itemValue:this._options.itemValue,
                     itemText:this._options.itemText,
+                    direction: this._options.direction,
                     links:{
                         value:"parent@value",
                         items:"parent@items",
                         itemValue:"parent@itemValue",
                         itemText:"parent@itemText",
+                        direction: "parent@direction", 
                         classes: { source: "parent@isExpanded", handler: isExpanded => {
                             return isExpanded ? [styles.show] : [];
                         } }
@@ -265,11 +268,19 @@ class Dropdown extends Parent {
 
     static options = {
         value:{type: types.primitives.Array},
-        multiselect:{type: types.primitives.Bool, default:true}
+        multiselect:{type: types.primitives.Bool, default:true},
+        direction: { type: types.primitives.String, default: "down" } 
     };
 
     constructor( options ){
         super( options );
+
+        const applyDir = dir => {
+        this.$markup.toggleClass(styles.up, dir === "up");
+        this.$markup.toggleClass(styles.down, dir !== "up");
+        };
+        applyDir(this._options.direction);
+        this.bind("direction", applyDir);
 
         this.$markup.on("click", (event) => {
             if (!this._options.multiselect && event.target?.checked){
