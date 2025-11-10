@@ -42,7 +42,10 @@ export class Window extends ItemView {
         isFocused:{type: types.primitives.Bool, default:true},
         z_index:{type: types.primitives.Integer, default:11002},
         isMinimized:{type: types.primitives.Bool, default:false},
-        isMaximized:{type: types.primitives.Bool, default:false}
+        isMaximized:{type: types.primitives.Bool, default:false},
+
+        borderRadius: { type: types.primitives.Float, default: 0 },
+        backgroundColor: { type: types.primitives.String, default: "#FFF" },
     };
 
     static markup = `<div class="${style.window}" style="z-index: 11002">
@@ -204,6 +207,44 @@ export class Window extends ItemView {
         //---------z_index------------------------------
         this.bind("z_index",z_index=> {
             this.$markup.css({"z-index":z_index});
+        });
+
+        //---------borderRadius------------------------------
+        this.bind("borderRadius", borderRadius => {
+            const $titlebar = this.$markup.find(`.${style.titlebar}`);
+            const $view = this.$markup.find('[name="view"]');
+
+            if (typeof borderRadius === "number") {
+                this.$markup.css({ "border-radius": `${borderRadius}px` });
+                $titlebar.css({
+                    "border-top-left-radius": `${borderRadius}px`,
+                    "border-top-right-radius": `${borderRadius}px`
+                });
+                $view.css({
+                    "border-bottom-left-radius": `${borderRadius}px`,
+                    "border-bottom-right-radius": `${borderRadius}px`
+                });
+            } else {
+                this.$markup.css({ "border-radius": "" });
+                $titlebar.css({
+                    "border-top-left-radius": "",
+                    "border-top-right-radius": ""
+                });
+                $view.css({
+                    "border-bottom-left-radius": "",
+                    "border-bottom-right-radius": ""
+                });
+            }
+        });
+
+        //---------backgroundColor------------------------------
+        this.bind("backgroundColor", backgroundColor => {
+            const $view = this.$markup.find('[name="view"]');
+            if (typeof backgroundColor === "string" && backgroundColor.trim() !== "") {
+                $view.css({ "background-color": backgroundColor });
+            } else {
+                $view.css({ "background-color": "" });
+            }
         });
 
 
