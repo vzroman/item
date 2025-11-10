@@ -53,7 +53,8 @@ export class MultiSelect extends Control{
         itemValue:{type: types.primitives.String},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
-        isExpanded:{type: types.primitives.Bool, default: false}
+        isExpanded:{type: types.primitives.Bool, default: false},
+        placeholder: { type: types.primitives.String, default: "" },
     }
 
     constructor( options ){
@@ -109,6 +110,24 @@ export class MultiSelect extends Control{
         });
 
         const $selectedWrapper = this.$markup.find('[name="selected"]');
+
+        // Создаём placeholder
+        const $placeholder = $(`<div class="${styles.placeholder}"></div>`).text(this._options.placeholder);
+        $selectedWrapper.append($placeholder);
+
+        this.bind("value", value => {
+            if (Array.isArray(value) && value.length > 0) {
+                $placeholder.hide();
+            } else {
+                $placeholder.show();
+            }
+        });
+
+        // Следим за изменением placeholder
+        this.bind("placeholder", text => {
+            $placeholder.text(text || "");
+        });
+
 
         $selectedWrapper.on("click", (e) => {
             // todo. there might be more consistent way of knowing if element is close btn

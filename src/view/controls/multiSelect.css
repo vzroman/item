@@ -31,6 +31,20 @@
     gap: 2px;
 }
 
+.placeholder {
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    transform: translateY(-50%);
+    color: #9B9B9B;
+    user-select: none;
+    cursor: text;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .multiselect>div[name="toggle"]>button{
     border: none;
     background: transparent;
