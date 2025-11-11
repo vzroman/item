@@ -166,7 +166,7 @@ export class Control extends Parent{
     _updateItems(){
         this.$select.empty();
 
-        $(`<option value="" disabled selected hidden>${this._options.placeholder}</option>`).appendTo(this.$select);
+        $(`<option value="" disabled selected hidden>${this._options.placeholder || ""}</option>`).appendTo(this.$select);
 
         const itemValue = this._options.itemValue || "value";
         const itemText = this._options.itemText || itemValue;
