@@ -65,3 +65,11 @@
     border-bottom-color: transparent;
     color: #424242;
 }
+
+.tab_menu{
+    display: flex;
+}
+
+.more {
+    position: relative;
+}

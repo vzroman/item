@@ -24,17 +24,33 @@ export class TabStrip extends ItemView {
 
     markup() {
         const $markup= $(`<div class="${style.tab_container} ${ this._options.horizontal ? style.horizontal : style.vertical  } ">
-            <div name="menu"></div>
+            <div class="${style.tab_menu}">
+                <div name="menu"></div>
+                <div class="${style.more}">
+                    <div name="more"></div>
+                    <div name="extraTabs"></div>
+                </div>
+            </div>
             <div name="tab" class="${style.tab_content}"></div>
         </div>`);
 
         this.$tabContainer = $markup.find('[name="tab"]');
+        this.$menu = $markup.find('[name="menu"]');
+        this.$tabs = this.$menu.parent();
+        this.$more = $markup.find('[name="more"]');
         return $markup;
     }
 
     constructor(options){
         super(options);
         this.bind("active", tab => this.changeView(tab));
+
+        this.$tabList = this.$menu.find('.flex-collection');
+
+        this.__resizeObserver = new ResizeObserver(() => {
+            this.__updateTabLayout();
+        });
+        this.__resizeObserver.observe(this.$markup[0]);
     }
 
     changeView(id){
@@ -53,6 +69,31 @@ export class TabStrip extends ItemView {
         }
     }
 
+    __updateTabLayout() {
+
+        // for (const id in this._moreController.get()){
+        //     this._menuController.set({ [id]: this._moreController.get(id) });
+        // }
+
+        // for (const id in this._moreController.get()){
+        //     this._moreController.set({ [id]: null });
+        // }
+
+        const containerRect = this.$tabs[0].getBoundingClientRect();
+        const moreRect = this.$more[0].getBoundingClientRect();
+
+        const $items = this.$tabList.children();
+
+        for (let i = $items.length - 1; i >= 0; i--) {
+            const itemRect = $items[i].getBoundingClientRect();
+            if (itemRect.right > containerRect.right - moreRect.width) {
+                this._moreController.set({ [i]: this._menuController.get(""+i) });
+                this._menuController.set({[i]: null});
+            }
+        }
+
+    }
+
     linkWidgets( context ){
         this._linkContext = {...this._linkContext,...context};
         super.linkWidgets( this._linkContext );
@@ -60,7 +101,7 @@ export class TabStrip extends ItemView {
     }
 
     widgets() {
-        const _menuController = new controllers.Collection({
+        this._menuController = new controllers.Collection({
             id:"id",
             schema:{
                 text:{type: types.primitives.String },
@@ -79,15 +120,27 @@ export class TabStrip extends ItemView {
              } )
         });
 
+        this._moreController = new controllers.Collection({
+            id:"id",
+            schema:{
+                text:{type: types.primitives.String },
+                disabled: {type: types.primitives.Bool, default: false},
+                icon:{type: types.primitives.String },
+                id: {type: types.primitives.Integer },
+                isActive:{type: types.primitives.Bool }
+            },
+            data: []
+        });
+
         this.bind("active", active=>{
-            for (const id of Object.keys(_menuController.get())) {
-                _menuController.set({[id]:{isActive: Number(id) ===active}})
+            for (const id of Object.keys(this._menuController.get())) {
+                this._menuController.set({[id]:{isActive: Number(id) ===active}})
             }
         });
 
         this.bind("disabledTabs", tabs=>{
-            for (const id of Object.keys(_menuController.get())) {
-                _menuController.set({[id]:{ disabled:tabs.includes( Number(id) ) }});
+            for (const id of Object.keys(this._menuController.get())) {
+                this._menuController.set({[id]:{ disabled:tabs.includes( Number(id) ) }});
             }
         });
 
@@ -95,7 +148,7 @@ export class TabStrip extends ItemView {
             menu: {
                 view: Flex,
                 options:{
-                    data: _menuController,
+                    data: this._menuController,
                     direction: this._options.horizontal ? "horizontal" : "vertical",
                     item:{
                         view: Tab,
@@ -115,6 +168,17 @@ export class TabStrip extends ItemView {
                                 this.set({active});
                             } } },
                             classes: [style.button_style],
+                        }
+                    }
+                }
+            },
+            more: {
+                view: Tab,
+                options: {
+                    text: "...",
+                    events:{
+                        click:() => {
+                            // todo
                         }
                     }
                 }
