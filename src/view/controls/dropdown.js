@@ -27,6 +27,7 @@ import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
 import {Controller} from "../../controllers/collection.js";
 import styles from "./dropdown.css"
+//import $ from "jquery";
 
 export class Control extends Parent{
 
@@ -41,18 +42,15 @@ export class Control extends Parent{
     };
 
     static markup = `<div class="${ styles.dropdown }">
-        <select required name="select"></select>
+        <select></select>
         <span class="${ styles.clear }">x</span>
-        <span class="${ styles.clear }" name="clear">x</span>
     </div>`;
 
     constructor( options ){
         super( options );
 
-        this.$select = this.$markup.find("[name='select']");
+        this.$select = this.$markup.find("select");
         this.$reset = this.$markup.find("span");
-
-        this.$reset = this.$markup.find('[name="clear"]');
 
         this._itemsController = undefined;
         this._subscription = undefined;
@@ -88,7 +86,6 @@ export class Control extends Parent{
         this.$select.on("change",() => this.set({ value:this.$select.val() }));
 
         this.$reset.on("click", () => {this.set({ value: null }); } );
-
         this.bind("hideClear", val=>{
             if (val) {
                 this.$reset.css({display: "none"});
