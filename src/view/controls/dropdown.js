@@ -37,8 +37,7 @@ export class Control extends Parent{
         itemValue:{type: types.primitives.Any},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
-        hideClear:{type: types.primitives.Bool, default: false},
-        placeholder:{type: types.primitives.String}
+        hideClear:{type: types.primitives.Bool, default: false}
     };
 
     static markup = `<div class="${ styles.dropdown }">
@@ -165,8 +164,6 @@ export class Control extends Parent{
 
     _updateItems(){
         this.$select.empty();
-
-        $(`<option value="" disabled selected hidden>${this._options.placeholder}</option>`).appendTo(this.$select);
 
         const itemValue = this._options.itemValue || "value";
         const itemText = this._options.itemText || itemValue;

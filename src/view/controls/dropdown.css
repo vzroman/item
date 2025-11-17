@@ -9,7 +9,7 @@
     -webkit-appearance: none;
 }
 
-.dropdown>[name='select']{
+.dropdown>select{
     height:100%;
     width:100%;
     border: none;
@@ -19,10 +19,6 @@
     font-size: 14px;
     padding: 2px 2px 2px 10px;
     outline: 0;
-}
-
-.dropdown > [name='select']:required:invalid{
-    color: gray;
 }
 
 .dropdown>.clear{
