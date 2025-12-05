@@ -121,7 +121,7 @@ class PathItem extends Item{
         const _item = this._options.data.get();
         const items = _item.levelItems;
 
-        const $levelItems = $(`<div class="${ style.expand_level }"></div>`).appendTo( this.$markup );
+        const $levelItems = $(`<div class="${ style.expand_level } item_breadcrumbs_expand_level"></div>`).appendTo( this.$markup );
 
         const levelItems = new LevelItems({
             $container: $levelItems,

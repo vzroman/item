@@ -466,7 +466,8 @@ class TreeCell extends ItemView{
                         }},
                         css:{source:"parent", event:"isExpandable", handler: (val)=>{
                             return {opacity: val ? 1 : 0 };
-                        }}
+                        }},
+                        classes:{source:"parent", event:"isExpanded", handler:(val)=>  val ? ["expanded"] : ["collapsed"]}
                     },
                     events: {
                         click:()=>{
