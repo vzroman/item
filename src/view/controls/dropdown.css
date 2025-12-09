@@ -22,7 +22,7 @@
 }
 
 .dropdown > [name='select']:required:invalid{
-    color: gray;
+    color: #9B9B9B;
 }
 
 .dropdown>.clear{
@@ -30,4 +30,8 @@
     top: calc(50% - 8px);
     right: 20px;
     cursor: pointer;
+}
+
+.disabled {
+    pointer-events: none;
 }

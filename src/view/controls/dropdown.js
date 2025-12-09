@@ -38,21 +38,18 @@ export class Control extends Parent{
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
         hideClear:{type: types.primitives.Bool, default: false},
-        placeholder:{type: types.primitives.String}
+        placeholder:{type: types.primitives.String, default: ""}
     };
 
     static markup = `<div class="${ styles.dropdown }">
         <select required name="select"></select>
-        <span class="${ styles.clear }">x</span>
-        <span class="${ styles.clear }" name="clear">x</span>
+        <span class="${ styles.clear }"name="clear">x</span>
     </div>`;
 
     constructor( options ){
         super( options );
 
         this.$select = this.$markup.find("[name='select']");
-        this.$reset = this.$markup.find("span");
-
         this.$reset = this.$markup.find('[name="clear"]');
 
         this._itemsController = undefined;
@@ -104,7 +101,7 @@ export class Control extends Parent{
     }
 
     enable( value ){
-        this.$select.prop('disabled', !value);
+        this.$select.toggleClass(styles.disabled, !value);
     }
 
     focus(){
