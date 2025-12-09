@@ -30,8 +30,8 @@
     top: calc(50% - 8px);
     right: 20px;
     cursor: pointer;
+    user-select: none;
 }
-
 .disabled {
     pointer-events: none;
 }
