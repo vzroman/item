@@ -187,10 +187,14 @@ class LevelItems extends Item{
                     data: itemsController,
                     direction:"vertical",
                     item:{
-                        view: primitives.Label,
+                        view: primitives.Html,
                         options:{
-                            classes:[style.title],
-                            links:{ text:"title" },
+                            classes:[style.title, "item_breadcrumbs_levelItem_container"],
+                            links:{html:{
+                                source:"title", handler:title=>{
+                                    return `<div title='${title}'>${title}</div>`
+                                }
+                            }},
                             events:{ click:( event, label)=> {
                                 const index = label.get("data").get("index");
                                 this._trigger("activate",[ index ])
