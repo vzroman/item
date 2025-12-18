@@ -50,7 +50,7 @@ export class Pager extends ItemView{
     static markup = `
     <div class="${style.pager_wrapper}" style="display:flex">
         <div style="display:flex;flex-grow:1;gap:20px; align-items: stretch;">
-            <div class="${ style.pagination }">
+            <div class="${ style.pagination } item_pager_pagination">
                 <div name="first"></div>
                 <div name="prev"></div>
                 <div name="pages"></div>
