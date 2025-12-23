@@ -108,6 +108,7 @@ export function progressBar(options = {}) {
             },
             width:450,
             height:60,
+            actions:[],
             ...options.windowOptions
         });
 
