@@ -6,6 +6,8 @@
     flex-direction: column;
     align-items: stretch;
     box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.06);
+    --icon-width: 16px;
+    --icon-height: 16px;
 }
 
 .window.focused{
@@ -30,8 +32,8 @@
 }
 
 .title_icon{
-    width: 20px;
-    height: 20px;
+    width: var(--icon-width);
+    height: var(--icon-height);
     background-size: contain;
     background-repeat: no-repeat;
 }
@@ -144,4 +146,7 @@
     background-color: #000000;
 }
 
-
+.action_icon > [name="icon"]{
+    width: var(--icon-width);
+    height: var(--icon-height);
+}

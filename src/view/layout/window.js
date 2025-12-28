@@ -7,6 +7,7 @@ import close from "../../img/close.svg";
 import minimize from "../../img/minimize.svg";
 import maximize from "../../img/maximize.svg";
 import restore from "../../img/restore.svg";
+import { text } from "../../i18n/i18n.js";
 
 
 export class Window extends ItemView {
@@ -342,6 +343,7 @@ export class Window extends ItemView {
                         if (!actions.includes("minimize")) return false;
                         return ! (isMinimized || isMaximized)
                     } } },
+                    classes: [style.action_icon]
                 }
             },
             maximize:{
@@ -354,7 +356,8 @@ export class Window extends ItemView {
                     links: { visible: { source: "parent", event:["actions","isMaximized","isMinimized"], handler: ({actions,isMaximized,isMinimized}) => {
                         if (!actions.includes("maximize")) return false;
                         return ! (isMinimized || isMaximized)
-                    } } }
+                    } } },
+                    classes: [style.action_icon]
                 }
             },
             restore:{
@@ -367,7 +370,8 @@ export class Window extends ItemView {
                     icon: `url("${ restore }")`,
                     links: { visible: { source: "parent", event:["isMaximized","isMinimized"], handler: ({isMaximized,isMinimized}) => {
                         return (isMinimized || isMaximized)
-                    } } }
+                    } } },
+                    classes: [style.action_icon]
                 }
             },
             close:{
@@ -379,7 +383,8 @@ export class Window extends ItemView {
                     links:{
                         visible: { source: "parent", event:"actions", handler: actions => actions.includes("close") }
                     },
-                    icon: `url("${ close }")`
+                    icon: `url("${ close }")`,
+                    classes: [style.action_icon]
                 }
             },
             view: this._options.view,
