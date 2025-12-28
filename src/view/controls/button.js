@@ -51,8 +51,10 @@ export class Control extends Parent{
             if (!value) {
                 $text = $text.detach();
             } else {
-                this.$markup.append( $text );
-                $text.text( value );
+                $text.text(value);
+                if (!$text.parent().length) {
+                    $text.insertAfter($icon); 
+                }
             }
         });
 
