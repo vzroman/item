@@ -7,7 +7,6 @@ import close from "../../img/close.svg";
 import minimize from "../../img/minimize.svg";
 import maximize from "../../img/maximize.svg";
 import restore from "../../img/restore.svg";
-import { text } from "../../i18n/i18n.js";
 
 
 export class Window extends ItemView {
@@ -43,7 +42,14 @@ export class Window extends ItemView {
         isFocused:{type: types.primitives.Bool, default:true},
         z_index:{type: types.primitives.Integer, default:11002},
         isMinimized:{type: types.primitives.Bool, default:false},
-        isMaximized:{type: types.primitives.Bool, default:false}
+        isMaximized:{type: types.primitives.Bool, default:false},
+        animation:{type: types.primitives.Any, default:{
+            type: 'zoom', 
+            duration: 300,
+            easing: 'ease-out',
+            startScale: 0.8,
+            close: false
+        }}
     };
 
     static markup = `<div class="${style.window}" style="z-index: 11002">
@@ -76,6 +82,8 @@ export class Window extends ItemView {
         this._resizeObserver = undefined;
 
         const $window = $(window);
+
+        this._animate();
 
         //---------position------------------------------
         if (!this._options.position){
@@ -487,9 +495,56 @@ export class Window extends ItemView {
             }
             this._onDestroy = undefined;
         }
-        super._destroy();
+
+        if (this.get("animation")?.close){
+            this._animate(true).then(()=>{
+                super._destroy();
+            });
+        } else {
+            super._destroy();
+        }
     }
 
+    static #animations = {
+        zoom: (opt) => [
+            { opacity: 0, transform: `scale(${opt.startScale || 0.8})` },
+            { opacity: 1, transform: `scale(1)` }
+        ],
+        fade: () => [
+            { opacity: 0 },
+            { opacity: 1 }
+        ]
+    };
+
+    _animate(isClosing = false){
+        return new Promise((resolve) => {
+            let options = this.get("animation");
+            if (options && typeof options === "object") {
+                options = {
+                    type: 'zoom', 
+                    duration: 300,
+                    easing: 'ease-out',
+                    startScale: 0.8,
+                    ...options
+                };
+                const animationKeyframes = Window.#animations[options.type]?.(options);
+    
+                if (isClosing) {
+                    animationKeyframes?.reverse();
+                }
+    
+                if (animationKeyframes) {
+                    this.$markup[0].animate(animationKeyframes,{
+                        duration: options.duration,
+                        easing: options.easing,
+                        fill: 'forwards'
+                    }).finished.then(resolve);
+                }
+            } else {
+                resolve();
+            }
+        });
+    }
 }
 
 Window.extend();
