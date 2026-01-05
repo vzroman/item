@@ -77,15 +77,6 @@ export class Controller extends Collection{
             throw new Error("invalid connection: " + this._options.connection);
 
         this._subscription = undefined;
-
-        this.bind("$.filter",(value, prev) => {
-            if (!this._filter) return;
-            if (!this._options.subscribe) return;
-            if (deepEqual(value, prev)) return;
-
-            this.setSubscribe( false );
-            this.setSubscribe( this._options.subscribe );
-        });
     }
 
     //-------------------------------------------------------------------

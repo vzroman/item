@@ -41,7 +41,7 @@ export function run( $container ){
                 data:[".folder","=","$oid('/root/FP/PROJECT')"]
             }),
             itemText: ".name",
-            itemValue: ".path"
+            itemValue: ".name",
         });
     }
 }
