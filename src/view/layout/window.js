@@ -43,13 +43,16 @@ export class Window extends ItemView {
         z_index:{type: types.primitives.Integer, default:11002},
         isMinimized:{type: types.primitives.Bool, default:false},
         isMaximized:{type: types.primitives.Bool, default:false},
-        animation:{type: types.primitives.Any, default:{
-            type: 'zoom', 
-            duration: 300,
-            easing: 'ease-out',
-            startScale: 0.8,
-            close: false
-        }}
+        animation:{type: types.complex.Item, options: {schema: {
+            open:{type: types.complex.Item, options: {schema: {
+                effects: {type: types.primitives.String, required: true},
+                duration: {type: types.primitives.Integer}
+            }}},
+            close:{type: types.complex.Item, options: {schema: {
+                effects: {type: types.primitives.String, required: true},
+                duration: {type: types.primitives.Integer}
+            }}}
+        }}}
     };
 
     static markup = `<div class="${style.window}" style="z-index: 11002">
@@ -83,7 +86,11 @@ export class Window extends ItemView {
 
         const $window = $(window);
 
-        this._animate();
+        const {open} = this.get("animation");
+
+        if (open) {
+            this._animate(open);
+        }
 
         //---------position------------------------------
         if (!this._options.position){
@@ -386,7 +393,7 @@ export class Window extends ItemView {
                 view: controls.Button,
                 options:{
                     events:{
-                        click:() => this.destroy()
+                        click:() => this.#close()
                     },
                     links:{
                         visible: { source: "parent", event:"actions", handler: actions => actions.includes("close") }
@@ -397,6 +404,17 @@ export class Window extends ItemView {
             },
             view: this._options.view,
         };
+    }
+
+    #close() {
+        const {close} = this.get("animation");
+        if (close) {
+            this._animate(close).then(() => {
+                this.destroy();
+            });
+        } else {
+            this.destroy();
+        }
     }
 
     _initResizer( e ){
@@ -496,50 +514,56 @@ export class Window extends ItemView {
             this._onDestroy = undefined;
         }
 
-        if (this.get("animation")?.close){
-            this._animate(true).then(()=>{
-                super._destroy();
-            });
-        } else {
-            super._destroy();
-        }
+        super._destroy();
     }
 
     static #animations = {
-        zoom: (opt) => [
-            { opacity: 0, transform: `scale(${opt.startScale || 0.8})` },
-            { opacity: 1, transform: `scale(1)` }
-        ],
-        fade: () => [
-            { opacity: 0 },
-            { opacity: 1 }
-        ]
+        zoom: {
+            in: {
+                frames: [
+                    { opacity: 0, transform: 'scale(0.8)' },
+                    { opacity: 1, transform: 'scale(1)' }
+                ],
+                easing: 'ease-in'
+            },
+            out: {
+                frames: [
+                    { opacity: 1, transform: 'scale(1)' },
+                    { opacity: 0, transform: 'scale(0.8)' }
+                ],
+                easing: 'ease-out'
+            }
+        },
+        fade: {
+            in: {
+                frames: [
+                    { opacity: 0 },
+                    { opacity: 1 }
+                ],
+                easing: 'ease-in'
+            },
+            out: {
+                frames: [
+                    { opacity: 1 },
+                    { opacity: 0 }
+                ],
+                easing: 'ease-out'
+            }
+        }
     };
 
-    _animate(isClosing = false){
+    _animate({effects, duration = 300}){
         return new Promise((resolve) => {
-            let options = this.get("animation");
-            if (options && typeof options === "object") {
-                options = {
-                    type: 'zoom', 
-                    duration: 300,
-                    easing: 'ease-out',
-                    startScale: 0.8,
-                    ...options
-                };
-                const animationKeyframes = Window.#animations[options.type]?.(options);
+            const [name, func] = effects?.split(':') ?? [];
+
+            const {frames, easing} = Window.#animations[name]?.[func] ?? {};
     
-                if (isClosing) {
-                    animationKeyframes?.reverse();
-                }
-    
-                if (animationKeyframes) {
-                    this.$markup[0].animate(animationKeyframes,{
-                        duration: options.duration,
-                        easing: options.easing,
-                        fill: 'forwards'
-                    }).finished.then(resolve);
-                }
+            if (frames && easing) {
+                this.$markup[0].animate(frames, {
+                    duration,
+                    easing,
+                    fill: 'forwards'
+                }).finished.then(resolve);
             } else {
                 resolve();
             }
