@@ -44,17 +44,14 @@ export class Control extends Parent{
     constructor( options ){
         super( options );
 
-        let $text = this.$markup.find('[name="text"]');
+        const $text = this.$markup.find('[name="text"]');
         const $icon = this.$markup.find('[name="icon"]');
 
         this.bind("text", value => {
             if (!value) {
-                $text = $text.detach();
+                $text.hide();
             } else {
-                $text.text(value);
-                if (!$text.parent().length) {
-                    $text.insertAfter($icon); 
-                }
+                $text.show().text(value);
             }
         });
 
