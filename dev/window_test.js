@@ -2,7 +2,7 @@ import {item} from "../dist/item.js";
 
 export function run( $container ){
 
-    $container.on('click', function(e){
+    $container.on('dblclick', function(e){
 
         new item.view.layout.Window({
             $container,
@@ -19,7 +19,16 @@ export function run( $container ){
                 left: e.pageX
             },
             width:600,
-            height:450
+            height:450,
+            animation: {
+                close: {
+                    effects: "fade:out"
+                },
+                open: {
+                    effects: "zoom:in",
+                    duration: 300
+                }
+            }
         });
     });
 
