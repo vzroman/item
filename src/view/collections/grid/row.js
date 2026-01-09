@@ -216,6 +216,10 @@ export class Row extends Item{
 
         this.set({index: this.#indexPrefix + index})
     }
+
+    getChildren() {
+        return this.#children;
+    }
 }
 Row.extend();
 

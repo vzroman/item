@@ -417,7 +417,7 @@ class SearchCell extends ItemView{
 }
 SearchCell.extend();
 
-class TreeCell extends ItemView{
+export class TreeCell extends ItemView{
 
     static options = {
         cell: {type: types.primitives.Any},
