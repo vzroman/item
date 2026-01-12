@@ -25,6 +25,10 @@
     color: #9B9B9B;
 }
 
+.dropdown > [name='select'] option{
+    color: #000000;
+}
+
 .dropdown>.clear{
     position:absolute;
     top: calc(50% - 8px);
