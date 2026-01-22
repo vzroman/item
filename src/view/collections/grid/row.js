@@ -68,7 +68,7 @@ export class Row extends Item{
         }
 
         this.bind("previousRow", row=>{
-            
+
             setTimeout(()=>{
 
                 if (this.isDestroyed()) return;
@@ -78,11 +78,14 @@ export class Row extends Item{
                 this.#unbind.forEach( u => u());
                 this.#unbind = [];
 
-                if (this._options.numerated && row){
-                    const id = row.bind("index",()=>{
-                        this.#updateIndex( );
-                    });
-                    this.#unbind.push(()=> row.unbind( id ));
+                if (this._options.numerated){
+                    this.#updateIndex();
+                    if (row){
+                        const id = row.bind("index",()=>{
+                            this.#updateIndex( );
+                        });
+                        this.#unbind.push(()=> row.unbind( id ));
+                    }
                 }
 
             });
