@@ -16,9 +16,6 @@ export class SortButton extends Parent {
         text: { type: types.primitives.String }
     };
 
-    static events = {
-        sort: true
-    };
 
     static markup = `<button class="${styles.sortButton} item_sort_button">
         <span name="text" class="${styles.text}"></span>
@@ -50,7 +47,6 @@ export class SortButton extends Parent {
             const current = this.get("direction");
             const next = current === "asc" ? "desc" : "asc";
             this.set({ direction: next });
-            this._trigger("sort", [this.get("sortField"), next]);
             this.$markup.trigger("item-sort", [this.get("sortField"), next]);
         });
         
