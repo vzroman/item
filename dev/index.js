@@ -25,6 +25,6 @@ $(function () {
 
 
 
-    window_test( $container );
+    grid_test( $container );
 
 });

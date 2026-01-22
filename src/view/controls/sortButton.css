@@ -1,0 +1,40 @@
+.sortButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    font: inherit;
+    color: inherit;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.sortButton:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.text {
+    white-space: nowrap;
+}
+
+.icon {
+    width: 14px;
+    height: 14px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+}
+
+.sortButton:hover .icon {
+    opacity: 0.7;
+}
+
+.sortButton[data-sort] .icon {
+    opacity: 1;
+}

@@ -39,8 +39,8 @@ export function run( $container ){
         });
 
         
-        // let header;
-        //
+        let header;
+        
         // // nested header
         // header = [
         //     {text: "MEN", children: [
@@ -53,19 +53,29 @@ export function run( $container ){
         //         ]},
         //     ]}
         // ];
-        //
+        
         // // header type 2
         // header = ["name", "pattern", "folder", "oid"];
-        //
-        // // header type 3
-        // header = [
-        //     {  view: item.view.controls.TextInput, options:{ value: "name"} },
-        //     {  view: item.view.primitives.Html, options:{ html: "pattern"} },
-        //     {  text: "Folder" },
-        //     {  text: () => "OID" },
-        // ];
-        //
-        // // nested header with different views
+        
+        // header type 3
+        header = [
+            {
+                view: item.view.controls.SortButton,
+                options: {
+                    sortField: ".name",
+                    text: "name",
+                    direction: "asc"
+                }
+            },
+            {  
+                text: "pattern"
+            },
+            {  
+                text: () => "OID" 
+            },
+        ];
+        
+        // nested header with different views
         // header = [
         //     { view: item.view.primitives.Label, options:{ text: "MEN"}, children: [
         //         {text: () => "LIKE", children: [
@@ -80,12 +90,18 @@ export function run( $container ){
 
         $container.css({"height": 500, "overflow": "auto"});
 
+        // Handle sort events from SortButton
+        $container.on("item-sort", (e, field, direction) => {
+            const orderBy = direction ? [field, direction] : undefined;
+            controller.option("orderBy", orderBy);
+        });
+
 
         const grid = new item.view.collections.Grid({
             $container,
             data:controller,
             columns:[".name",".pattern"],
-            header:["name", "pattern"],
+            header:header,
             resizable:true,
             numerated:true,
             multiselect:true,
@@ -137,6 +153,8 @@ export function run( $container ){
                 }
             ]
         });
+
+        console.log("header", grid );
 
         let $from = +new Date();
         let $to = +new Date() + 86400000;
