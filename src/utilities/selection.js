@@ -97,7 +97,7 @@ function multiSelect( options ){
     } = options;
 
 
-    const $lasso = $(`<div></div>`).css({
+    const $lasso = $(`<div class="item_selection_lasso"></div>`).css({
         "display": "none",
         "position": "absolute",
         "z-index": 9999,
@@ -105,7 +105,7 @@ function multiSelect( options ){
         "opacity": 0.3,
         "border": "1px dotted grey",
         "pointer-events":"none"
-    }).appendTo('body');
+    }).appendTo($container);
 
     const start = {
         x:undefined,
