@@ -43,7 +43,7 @@ export class Pager extends ItemView{
         page:{type:types.primitives.Integer, default: 1},
         totalCount:{type:types.primitives.Integer},
         pageSize:{type:types.primitives.Integer},
-        pageSizeValues:{type:types.primitives.Array, default: [5, 10, 30, 100, 10000]},
+        pageSizeValues:{type:types.primitives.Array, default: [30, 100, 500, 1000]},
         maxVisible:{type:types.primitives.Integer, default: 10}
     };
 
