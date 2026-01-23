@@ -2,8 +2,8 @@
 import {Control as Parent} from "./control.js";
 import {types} from "../../types/index.js";
 import styles from "./sortButton.css";
-import UpIcon from "../../../src/img/arrow_up.svg";
-import DownIcon from "../../../src/img/arrow_down.svg";
+import UpIcon from "../../../src/img/triangle_up.svg";
+import DownIcon from "../../../src/img/triangle_down.svg";
 
 const ICON_ASC = `url("${UpIcon}")`;
 const ICON_DESC = `url("${DownIcon}")`;
