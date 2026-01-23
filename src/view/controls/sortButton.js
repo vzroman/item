@@ -10,6 +10,10 @@ const ICON_DESC = `url("${DownIcon}")`;
 
 export class SortButton extends Parent {
 
+    static events= {
+        sort: true
+    }
+
     static options = {
         sortField: { type: types.primitives.String, required: true },
         direction: { type: types.primitives.String },
@@ -47,7 +51,7 @@ export class SortButton extends Parent {
             const current = this.get("direction");
             const next = current === "asc" ? "desc" : "asc";
             this.set({ direction: next });
-            this.$markup.trigger("item-sort", [this.get("sortField"), next]);
+            this._trigger("sort", [this.get("sortField"), next]);
         });
         
     }
