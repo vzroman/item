@@ -99,13 +99,13 @@ function multiSelect( options ){
 
     const $lasso = $(`<div class="item_selection_lasso"></div>`).css({
         "display": "none",
-        "position": "absolute",
+        "position": "fixed",
         "z-index": 9999,
         "background-color": "lightblue",
         "opacity": 0.3,
         "border": "1px dotted grey",
         "pointer-events":"none"
-    }).appendTo($container);
+    }).appendTo('body');
 
     const start = {
         x:undefined,
@@ -142,8 +142,8 @@ function multiSelect( options ){
             selection.clear();
         }
 
-        start.x = e.pageX;
-        start.y = e.pageY;
+        start.x = e.clientX;
+        start.y = e.clientY;
 
         $lasso.css({display:"block"});
 
@@ -185,14 +185,14 @@ function multiSelect( options ){
     const onDraw = e => {
         if (e.buttons !== 1) return endSelection(e);
 
-        const width = e.pageX - start.x;
-        const height = e.pageY - start.y;
+        const width = e.clientX - start.x;
+        const height = e.clientY - start.y
 
         $lasso.css({
-            width: Math.abs(width)+ "px",
-            height: Math.abs(height)+ "px",
-            left: (width < 0 ? e.pageX : start.x) + "px",
-            top: (height < 0 ? e.pageY : start.y) + "px"
+            width: Math.abs(width) + "px",
+            height: Math.abs(height) + "px",
+            left: (width < 0 ? e.clientX : start.x) + "px",
+            top: (height < 0 ? e.clientY : start.y) + "px"
         });
     }
 
