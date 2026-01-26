@@ -148,6 +148,7 @@ export class TreeGrid extends ItemView{
             search_icon:{
                 view: controls.Button,
                 options:{
+                    classes:["item_treegrid_search_icon"],
                     visible: !!(this._options.search && this._options.getItemContext),
                     icon: `url("${icon_search}")`,
                     events:{
