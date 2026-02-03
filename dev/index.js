@@ -13,6 +13,7 @@ import {run as breadcrumbs} from "./breadcrumbs.js"
 import { run as collection_filter_test } from "./collection_filter_test.js";
 import { run as datepicker_test } from "./datepicker_test.js";
 import { run as colorpicker_test } from "./colorpicker_test.js";
+import { run as window_test } from "./window_test.js";
 
 
 
@@ -22,7 +23,8 @@ $(function () {
         .appendTo( $(`<div style="width: 100%; height: 100%; display: flex; justify-content: center;align-items: center"></div>`)
             .appendTo( $('body').css({width:"100%",height:"100%"})));
 
-    colorpicker_test($container);
 
+
+    window_test( $container );
 
 });

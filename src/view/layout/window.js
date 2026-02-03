@@ -42,7 +42,17 @@ export class Window extends ItemView {
         isFocused:{type: types.primitives.Bool, default:true},
         z_index:{type: types.primitives.Integer, default:11002},
         isMinimized:{type: types.primitives.Bool, default:false},
-        isMaximized:{type: types.primitives.Bool, default:false}
+        isMaximized:{type: types.primitives.Bool, default:false},
+        animation:{type: types.complex.Item, options: {schema: {
+            open:{type: types.complex.Item, options: {schema: {
+                effects: {type: types.primitives.String, required: true},
+                duration: {type: types.primitives.Integer}
+            }}},
+            close:{type: types.complex.Item, options: {schema: {
+                effects: {type: types.primitives.String, required: true},
+                duration: {type: types.primitives.Integer}
+            }}}
+        }}}
     };
 
     static markup = `<div class="${style.window}" style="z-index: 11002">
@@ -75,6 +85,12 @@ export class Window extends ItemView {
         this._resizeObserver = undefined;
 
         const $window = $(window);
+
+        const {open} = this.get("animation");
+
+        if (open) {
+            this.#animate(open);
+        }
 
         //---------position------------------------------
         if (!this._options.position){
@@ -342,6 +358,7 @@ export class Window extends ItemView {
                         if (!actions.includes("minimize")) return false;
                         return ! (isMinimized || isMaximized)
                     } } },
+                    classes: [style.action_icon]
                 }
             },
             maximize:{
@@ -354,7 +371,8 @@ export class Window extends ItemView {
                     links: { visible: { source: "parent", event:["actions","isMaximized","isMinimized"], handler: ({actions,isMaximized,isMinimized}) => {
                         if (!actions.includes("maximize")) return false;
                         return ! (isMinimized || isMaximized)
-                    } } }
+                    } } },
+                    classes: [style.action_icon]
                 }
             },
             restore:{
@@ -367,23 +385,36 @@ export class Window extends ItemView {
                     icon: `url("${ restore }")`,
                     links: { visible: { source: "parent", event:["isMaximized","isMinimized"], handler: ({isMaximized,isMinimized}) => {
                         return (isMinimized || isMaximized)
-                    } } }
+                    } } },
+                    classes: [style.action_icon]
                 }
             },
             close:{
                 view: controls.Button,
                 options:{
                     events:{
-                        click:() => this.destroy()
+                        click:() => this.#close()
                     },
                     links:{
                         visible: { source: "parent", event:"actions", handler: actions => actions.includes("close") }
                     },
-                    icon: `url("${ close }")`
+                    icon: `url("${ close }")`,
+                    classes: [style.action_icon]
                 }
             },
             view: this._options.view,
         };
+    }
+
+    #close() {
+        const {close} = this.get("animation");
+        if (close) {
+            this.#animate(close).then(() => {
+                this.destroy();
+            });
+        } else {
+            this.destroy();
+        }
     }
 
     _initResizer( e ){
@@ -482,9 +513,62 @@ export class Window extends ItemView {
             }
             this._onDestroy = undefined;
         }
+
         super._destroy();
     }
 
+    static #animations = {
+        zoom: {
+            in: {
+                frames: [
+                    { opacity: 0, transform: 'scale(0.8)' },
+                    { opacity: 1, transform: 'scale(1)' }
+                ],
+                easing: 'ease-in'
+            },
+            out: {
+                frames: [
+                    { opacity: 1, transform: 'scale(1)' },
+                    { opacity: 0, transform: 'scale(0.8)' }
+                ],
+                easing: 'ease-out'
+            }
+        },
+        fade: {
+            in: {
+                frames: [
+                    { opacity: 0 },
+                    { opacity: 1 }
+                ],
+                easing: 'ease-in'
+            },
+            out: {
+                frames: [
+                    { opacity: 1 },
+                    { opacity: 0 }
+                ],
+                easing: 'ease-out'
+            }
+        }
+    };
+
+    #animate({effects, duration = 300}){
+        return new Promise((resolve) => {
+            const [name, func] = effects?.split(':') ?? [];
+
+            const {frames, easing} = Window.#animations[name]?.[func] ?? {};
+    
+            if (frames && easing) {
+                this.$markup[0].animate(frames, {
+                    duration,
+                    easing,
+                    fill: 'forwards'
+                }).finished.then(resolve);
+            } else {
+                resolve();
+            }
+        });
+    }
 }
 
 Window.extend();

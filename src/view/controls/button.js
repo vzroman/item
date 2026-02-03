@@ -48,7 +48,11 @@ export class Control extends Parent{
         const $icon = this.$markup.find('[name="icon"]');
 
         this.bind("text", value => {
-            $text.text( value );
+            if (!value) {
+                $text.hide();
+            } else {
+                $text.show().text(value);
+            }
         });
 
         this.bind("icon", value => {
