@@ -121,7 +121,7 @@ class PathItem extends Item{
         const _item = this._options.data.get();
         const items = _item.levelItems;
 
-        const $levelItems = $(`<div class="${ style.expand_level }"></div>`).appendTo( this.$markup );
+        const $levelItems = $(`<div class="${ style.expand_level } item_breadcrumbs_expand_level"></div>`).appendTo( this.$markup );
 
         const levelItems = new LevelItems({
             $container: $levelItems,
@@ -187,10 +187,14 @@ class LevelItems extends Item{
                     data: itemsController,
                     direction:"vertical",
                     item:{
-                        view: primitives.Label,
+                        view: primitives.Html,
                         options:{
-                            classes:[style.title],
-                            links:{ text:"title" },
+                            classes:[style.title, "item_breadcrumbs_levelItem_container"],
+                            links:{html:{
+                                source:"title", handler:title=>{
+                                    return `<div title='${title}'>${title}</div>`
+                                }
+                            }},
                             events:{ click:( event, label)=> {
                                 const index = label.get("data").get("index");
                                 this._trigger("activate",[ index ])
