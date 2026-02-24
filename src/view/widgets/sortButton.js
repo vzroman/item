@@ -1,6 +1,7 @@
 
-import {Control as Parent} from "./control.js";
+import {View as ItemView} from "../item.js";
 import {types} from "../../types/index.js";
+import {controls} from "../controls/index.js";
 import styles from "./sortButton.css";
 import UpIcon from "../../../src/img/triangle_up.svg";
 import DownIcon from "../../../src/img/triangle_down.svg";
@@ -8,7 +9,7 @@ import DownIcon from "../../../src/img/triangle_down.svg";
 const ICON_ASC = `url("${UpIcon}")`;
 const ICON_DESC = `url("${DownIcon}")`;
 
-export class SortButton extends Parent {
+export class SortButton extends ItemView {
 
     static events= {
         sort: true
@@ -20,19 +21,28 @@ export class SortButton extends Parent {
         text: { type: types.primitives.String }
     };
 
-
-    static markup = `<button class="${styles.sortButton} item_sort_button">
-        <span name="text" class="${styles.text}"></span>
+    static markup = `<div class="${styles.sortButton} item_sort_button">
+        <div name="button"></div>
         <span name="icon" class="${styles.icon}"></span>
-    </button>`;
+    </div>`;
+
+    widgets() {
+        return {
+            button: {
+                view: controls.Button,
+                options: {
+                    links: {
+                        text: { source: "parent", event: "text" }
+                    }
+                }
+            }
+        };
+    }
 
     constructor(options) {
         super(options);
 
-        const $text = this.$markup.find('[name="text"]');
-        const $icon = this.$markup.find('[name="icon"]');
-
-        this.bind("text", value => $text.text(value));
+        const $icon = this.$markup.children('[name="icon"]');
 
         this.bind("direction", direction => {
             let icon;
@@ -48,20 +58,17 @@ export class SortButton extends Parent {
 
         this.$markup.on("click", (e) => {
             e.stopPropagation();
+            if (this._widgets.button.$markup.prop('disabled')) return;
             const current = this.get("direction");
             const next = current === "asc" ? "desc" : "asc";
             this.set({ direction: next });
             this._trigger("sort", [this.get("sortField"), next]);
         });
-        
-    }
 
-    enable(value) {
-        this.$markup.prop('disabled', !value);
     }
 
     focus() {
-        this.$markup.focus();
+        this._widgets.button.focus();
     }
 }
 SortButton.extend();

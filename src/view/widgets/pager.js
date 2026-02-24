@@ -107,7 +107,7 @@ export class Pager extends ItemView{
                 const first = pack * maxVisible + 1;
                 const last = (pack +1) < totalPacks
                     ? first + maxVisible - 1
-                    : totalPages ;
+                    : totalPages;
 
 
                 for (let i = first; i <= last; i++){

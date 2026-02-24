@@ -4,11 +4,13 @@
     gap: 4px;
     background: transparent;
     border: none;
-    cursor: pointer;
     padding: 2px 4px;
+    box-sizing: border-box;
+    cursor: pointer;
     font: inherit;
     color: inherit;
     width: 100%;
+    overflow: hidden;
     justify-content: space-between;
 }
 
@@ -16,8 +18,30 @@
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-.text {
+.sortButton > [name="button"] {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.sortButton button {
+    background: transparent;
+    background-image: none;
+    border-color: transparent;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    width: 100%;
+    justify-content: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.sortButton button:hover:not([disabled]) {
+    background-color: transparent;
+    background-image: none;
 }
 
 .icon {
