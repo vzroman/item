@@ -2,6 +2,7 @@
 import {View as ItemView} from "../item.js";
 import {types} from "../../types/index.js";
 import {controls} from "../controls/index.js";
+import {waiting} from "../../utilities/waiting.js";
 import styles from "./sortButton.css";
 import UpIcon from "../../../src/img/triangle_up.svg";
 import DownIcon from "../../../src/img/triangle_down.svg";
@@ -59,10 +60,12 @@ export class SortButton extends ItemView {
         this.$markup.on("click", (e) => {
             e.stopPropagation();
             if (this._widgets.button.$markup.prop('disabled')) return;
+            const unlock = waiting(this.$markup, { backgroundSize: "contain" });
             const current = this.get("direction");
             const next = current === "asc" ? "desc" : "asc";
             this.set({ direction: next });
             this._trigger("sort", [this.get("sortField"), next]);
+            unlock();
         });
 
     }
