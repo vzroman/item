@@ -34,9 +34,16 @@ export function run( $container ){
             connection:()=>connection,
             schema:{
                 ".name":{ type:item.types.primitives.String },
-                ".pattern":{type:item.types.primitives.String}
-            }
+                ".pattern":{type:item.types.primitives.String},
+                ".fp_path": {type:item.types.primitives.String}
+            },
+            orderBy: [".fp_path", "asc"]
         });
+
+        const options = {
+            
+            pager:{ type: item.types.primitives.Set, default:{ page:1 , pageSize:10, pageSizeValues:[10, 100, 500, 1000, 10000]}},
+        }
 
         
         let header;
@@ -60,15 +67,35 @@ export function run( $container ){
         // header type 3
         header = [
             {
-                view: item.view.controls.SortButton,
+                view: item.view.widgets.SortButton,
                 options: {
                     sortField: ".name",
                     text: "name",
-                    direction: "asc"
+                    direction: "asc",
+                    events: {
+                        sort: (field, direction) => {
+                            const orderBy = direction ? [field, direction] : undefined;
+                            controller.option("orderBy", orderBy);
+                        }
+                    }
                 }
             },
             {  
                 text: "pattern"
+            },
+            {
+                view: item.view.widgets.SortButton,
+                options: {
+                    sortField: ".fp_path",
+                    text: "fp_pathфывфыв",
+                    direction: "asc",
+                    events: {
+                        sort: (field, direction) => {
+                            const orderBy = direction ? [field, direction] : undefined;
+                            controller.option("orderBy", orderBy);
+                        }
+                    }
+                }
             },
             {  
                 text: () => "OID" 
@@ -90,23 +117,16 @@ export function run( $container ){
 
         $container.css({"height": 500, "overflow": "auto"});
 
-        // Handle sort events from SortButton
-        $container.on("item-sort", (e, field, direction) => {
-            const orderBy = direction ? [field, direction] : undefined;
-            controller.option("orderBy", orderBy);
-        });
-
-
         const grid = new item.view.collections.Grid({
             $container,
             data:controller,
-            columns:[".name",".pattern"],
+            columns:[".name",".pattern", ".fp_path"],
             header:header,
             resizable:true,
             numerated:true,
             multiselect:true,
             checkbox:true,
-            pager:{},
+            pager:options.pager,
             contextmenu: [
                 { 
                     caption: "Copy", 
