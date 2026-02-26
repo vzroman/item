@@ -165,7 +165,7 @@ export class Controller extends Collection{
             // We don't need to query the server if we already have the whole data
             return super.onReorder();
         }
-        this._trigger("loading", true);
+
         this.refresh().then(()=>{
             super.onReorder()
         });

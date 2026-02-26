@@ -6,6 +6,7 @@ import {waiting} from "../../utilities/waiting.js";
 import styles from "./sortButton.css";
 import UpIcon from "../../../src/img/triangle_up.svg";
 import DownIcon from "../../../src/img/triangle_down.svg";
+import { deepMerge } from "../../utilities/data.js";
 
 const ICON_ASC = `url("${UpIcon}")`;
 const ICON_DESC = `url("${DownIcon}")`;
@@ -14,6 +15,10 @@ export class SortButton extends ItemView {
 
     static events= {
         sort: true
+    }
+
+    static links = {
+        "!_onReorder": "data@reorder"
     }
 
     static options = {
@@ -43,6 +48,8 @@ export class SortButton extends ItemView {
     constructor(options) {
         super(options);
 
+        this._unlock = null;
+
         const $icon = this.$markup.children('[name="icon"]');
 
         this.bind("direction", direction => {
@@ -67,25 +74,17 @@ export class SortButton extends ItemView {
 
     }
 
-    focus() {
-        this._widgets.button.focus();
+    _onReorder(isLoading){
+        if(isLoading && !this._unlock){
+            this._unlock = waiting(this.$markup, { backgroundSize: "contain" });
+        } else if (!isLoading && this._unlock) {
+            this._unlock();
+            this._unlock = null;
+        }
     }
 
-
-    link(context){
-        super.link(context);
-        
-        if(context.data){
-            let unlock = null;
-            context.data.bind("loading", (isLoading) => {
-                if(isLoading && !unlock){
-                    unlock = waiting(this.$markup, { backgroundSize: "contain" });
-                }else if(!isLoading && unlock){
-                    unlock();
-                    unlock = null;
-                }
-            })
-        }
+    focus() {
+        this._widgets.button.focus();
     }
 }
 SortButton.extend();

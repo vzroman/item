@@ -47,7 +47,7 @@ export class Controller extends Item{
         remove:true,
         count:true,
         error:true,
-        loading: true
+        reorder: true
     };
 
     constructor( options ) {
@@ -80,6 +80,7 @@ export class Controller extends Item{
     $on_orderBy(orderBy, prevOrderBy){
         if(!this._view) return;
         if (orderBy === prevOrderBy) return;
+        this._trigger("reorder", true);
         this.onReorder();
     }
 
@@ -164,7 +165,7 @@ export class Controller extends Item{
             this._view.insert(this._orderKey(id, item));
         }
         this._updateView();
-        this._trigger("loading", false);
+        this._trigger("reorder", false);
     }
 
     fork( {id, params, isSource, isConsumer, onCommit} ){
