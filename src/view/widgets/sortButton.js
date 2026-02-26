@@ -59,19 +59,33 @@ export class SortButton extends ItemView {
 
         this.$markup.on("click", (e) => {
             e.stopPropagation();
-            if (this._widgets.button.$markup.prop('disabled')) return;
-            const unlock = waiting(this.$markup, { backgroundSize: "contain" });
             const current = this.get("direction");
             const next = current === "asc" ? "desc" : "asc";
             this.set({ direction: next });
             this._trigger("sort", [this.get("sortField"), next]);
-            unlock();
         });
 
     }
 
     focus() {
         this._widgets.button.focus();
+    }
+
+
+    link(context){
+        super.link(context);
+        
+        if(context.data){
+            let unlock = null;
+            context.data.bind("loading", (isLoading) => {
+                if(isLoading && !unlock){
+                    unlock = waiting(this.$markup, { backgroundSize: "contain" });
+                }else if(!isLoading && unlock){
+                    unlock();
+                    unlock = null;
+                }
+            })
+        }
     }
 }
 SortButton.extend();

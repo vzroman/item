@@ -46,7 +46,8 @@ export class Controller extends Item{
         edit:true,
         remove:true,
         count:true,
-        error:true
+        error:true,
+        loading: true
     };
 
     constructor( options ) {
@@ -163,6 +164,7 @@ export class Controller extends Item{
             this._view.insert(this._orderKey(id, item));
         }
         this._updateView();
+        this._trigger("loading", false);
     }
 
     fork( {id, params, isSource, isConsumer, onCommit} ){

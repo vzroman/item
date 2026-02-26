@@ -7,7 +7,7 @@ export function run( $container ){
 
     function connect(){
         console.debug("connecting...");
-        connection.connect("127.0.0.1", 8000, "http:", ()=>{
+        connection.connect("192.168.50.112", 8000, "http:", ()=>{
             console.debug("connected, logging in...");
             connection.login("system", "111111", ()=>{
 
@@ -37,7 +37,8 @@ export function run( $container ){
                 ".pattern":{type:item.types.primitives.String},
                 ".fp_path": {type:item.types.primitives.String}
             },
-            orderBy: [".fp_path", "asc"]
+            orderBy: [".fp_path", "asc"],
+            serverPaging: true 
         });
 
         const options = {
