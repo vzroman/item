@@ -435,6 +435,19 @@ class TreeCell extends ItemView{
 
     #parent;
     #data;
+    #total;
+
+    constructor(options){
+        super(options);
+
+        
+        this.bind("isExpanded", isExpanded => {
+            if (!isExpanded) {
+                this.#total?.destroy();
+                this.#total = undefined;
+            }
+        });
+    }
 
     static markup = `<div class="${style.treeCell}">
         <div name="offset"></div>
@@ -473,12 +486,11 @@ class TreeCell extends ItemView{
                             if (!this._options.isExpandable) return;
                             if (!this.#parent) return;
                             if (this._options.isExpanded){
-                                this._widgets.total?.destroy();
                                 this.#parent.fold();
                             }else if(this.#data){
                                 this.#parent.unfold();
                                 const children = this.#parent.get("children");
-                                this._widgets.total = new Label({ $container: this.$markup.find('[name=total]'), data: children, links:{text: {
+                                this.#total = new Label({ $container: this.$markup.find('[name=total]'), data: children, links:{text: {
                                     source: "$.totalCount",
                                     handler:(totalCount)=>this.formatTotalCount(totalCount)
                                 }}});
@@ -520,13 +532,6 @@ class TreeCell extends ItemView{
             }
             this.$offset.width(level * 20);
 
-            this.#parent.bind("isUnfolded", isUnfolded => {
-                if (!isUnfolded && this._widgets.total) {
-                    this._widgets.total.destroy();
-                    this._widgets.total = undefined;
-                }
-            });
-
             this.#parent.bind("dblClick",()=>{
                 if (this._options.isExpandable){
                     const path = this.#parent.getPath().map(r => r.get("data").get());
@@ -552,6 +557,11 @@ class TreeCell extends ItemView{
             this.#data.bind("change",()=>setIcon());
             setIcon();
         }
+    }
+
+    _destroy() {
+        this.#total?.destroy();
+        super._destroy();
     }
 
     formatTotalCount(value) {
