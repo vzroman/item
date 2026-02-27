@@ -520,6 +520,13 @@ class TreeCell extends ItemView{
             }
             this.$offset.width(level * 20);
 
+            this.#parent.bind("isUnfolded", isUnfolded => {
+                if (!isUnfolded && this._widgets.total) {
+                    this._widgets.total.destroy();
+                    this._widgets.total = undefined;
+                }
+            });
+
             this.#parent.bind("dblClick",()=>{
                 if (this._options.isExpandable){
                     const path = this.#parent.getPath().map(r => r.get("data").get());

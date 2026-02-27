@@ -7,7 +7,7 @@ export function run( $container ){
 
     function connect(){
         console.debug("connecting...");
-        connection.connect("127.0.0.1", 8000, "http:", ()=>{
+        connection.connect("192.168.50.112", 8000, "http:", ()=>{
             console.debug("connected, logging in...");
             connection.login("system", "111111", ()=>{
 
@@ -48,7 +48,23 @@ export function run( $container ){
             $container,
             data:controller,
             columns:[".name",".pattern"],    // string | { fields, handler } | Item }
-            header:["name", "pattern"],                    // string | Item | function -> string | $markup
+            header:[
+                {
+                    view: item.view.widgets.SortButton,
+                    options: {
+                        sortField: ".name",
+                        text: "name",
+                        direction: "asc",
+                        events: {
+                            sort: (field, direction) => {
+                                const orderBy = direction ? [field, direction] : undefined;
+                                controller.option("orderBy", orderBy);
+                            }
+                        }
+                    }
+                },
+                { text: "pattern" }
+            ],
             resizable:true,
             numerated:true,
             multiselect:true,

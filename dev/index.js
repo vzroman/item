@@ -25,6 +25,6 @@ $(function () {
 
 
 
-    grid_test( $container );
+    treeGrid_test( $container );
 
 });
