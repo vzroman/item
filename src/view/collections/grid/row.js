@@ -94,7 +94,7 @@ export class Row extends Item{
         this.bind("orderBy", () => {
             setTimeout(()=>{
                 if (this.isDestroyed() || this._options.isUnfolded!==true || !this._options.children) return;
-                this._options.children.set({"$.orderBy":this._options.orderBy});
+                this.fold();
             })
         });
     }
