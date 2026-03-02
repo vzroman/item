@@ -167,7 +167,7 @@ export class Pager extends ItemView{
                             links:{
                                 text:"data@page", 
                                 classes: { source: "data@isActive", handler: isActive => {
-                                    return isActive ? [style.activePage] : [];
+                                    return isActive ? [style.activePage, "item_pager_pages_active"] : [];
                                 } } 
                             },
                             events:{ click:{ handler:(_,button)=>{
