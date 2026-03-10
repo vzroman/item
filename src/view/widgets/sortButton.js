@@ -6,7 +6,6 @@ import {waiting} from "../../utilities/waiting.js";
 import styles from "./sortButton.css";
 import UpIcon from "../../../src/img/triangle_up.svg";
 import DownIcon from "../../../src/img/triangle_down.svg";
-import { deepMerge } from "../../utilities/data.js";
 
 const ICON_ASC = `url("${UpIcon}")`;
 const ICON_DESC = `url("${DownIcon}")`;
