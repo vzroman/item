@@ -244,6 +244,7 @@ export class TreeGrid extends ItemView{
         this._widgets.search_bar.set({"visible": false, value:""});
         this._widgets.search_icon.set({"visible": true});
         if (!(this._grid.get("columns")[0].view instanceof TreeCell)) {
+            this._options.data?.option("orderBy", undefined);
             this._contextPath( this._options.contextPath );
         }
     }
