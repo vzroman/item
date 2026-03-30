@@ -213,6 +213,8 @@ export class Row extends Item{
     }
 
     #updateIndex(){
+        if (!this._options) return;
+
         const index = this._options.previousRow
             ? (+this._options.previousRow.get("index").split(".").pop()) + 1
             : 0;
