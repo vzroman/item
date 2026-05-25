@@ -37,6 +37,7 @@ import folderIcon from "./grid/img/folder_icon.svg";
 import fileIcon from "./grid/img/file_icon.svg";
 import {deepCopy, deepMerge} from "../../utilities/data";
 import icon_search from "../../img/zoom.png";
+import {text as i18n} from "../../i18n/i18n.js";
 
 export class TreeGrid extends ItemView{
 
@@ -337,13 +338,16 @@ class SearchBar extends ItemView{
         value:{type:types.primitives.String}
     }
 
-    static markup = `<div class="${style.search_bar}">
-        <div name="search_bar_wrapper">
-            <input type="text" placeholder="Search..."/>
-            <div name="close" class="${style.close_search}"></div>
-        </div>
-        <div name="searcher" class="${style.searcher}"></div>
-    </div>`;
+    markup(){
+        const $markup = `<div class="${style.search_bar}">
+            <div name="search_bar_wrapper">
+                <input type="text" placeholder="${i18n('Search...')}"/>
+                <div name="close" class="${style.close_search}"></div>
+            </div>
+            <div name="searcher" class="${style.searcher}"></div>
+        </div>`;
+        return $markup
+    }
 
     constructor( options ){
         super( options );

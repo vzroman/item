@@ -4,6 +4,7 @@ import {controls} from "./index";
 import {layout} from "../layout";
 import {Controller} from "../../controllers/item";
 import style from "./colorPicker.css";
+import {text as i18n} from "../../i18n/i18n.js";
 
 export class ColorPicker extends Control {
     static events = { onChange: true };
@@ -58,7 +59,7 @@ export class ColorPicker extends Control {
             },
             modal:true,
             actions: ["close"],
-            title: "Color select",
+            title: i18n("Color select"),
             events:{
                 destroy:()=> controller.destroy()
             },
