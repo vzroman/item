@@ -145,22 +145,7 @@ export class Grid extends Collection{
 
         const rows = selected.map(item => {
             return $(item.$markup).find("td").map(function () {
-                const $cell = $(this);
-                const $imgs = $cell.find("img");
-
-                const imgSources = $imgs.map(function () {
-                    return $(this).attr("src") || "";
-                }).get();
-
-                const $clone = $cell.clone();
-                $clone.find("img").remove();
-
-                const text = $clone.text().trim().replace(/\s+/g, " ");
-
-                const parts = [...imgSources];
-                if (text) parts.push(text);
-
-                return parts.join(", ");
+                return $(this).text().trim().replace(/\s+/g, " ");
             }).get().join("\t");
         });
 
@@ -331,5 +316,4 @@ export class Grid extends Collection{
     }
 }
 Grid.extend();
-
 
