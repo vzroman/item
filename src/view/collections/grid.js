@@ -137,62 +137,34 @@ export class Grid extends Collection{
                 });
             }
         });
-        
-        $container.attr("tabindex", 0);
-        $container.on("keydown", (e) => {
-            if (e.ctrlKey && e.keyCode === 67) {
-                const selected = this.getSelected?.() || [];
-                if (selected.length > 0) {
-                    const rows = selected.map(item => {
-                        return $(item.$markup).find("td").map(function () {
-                            const $cell = $(this);
-                            const $imgs = $cell.find("img");
-
-                            const imgSources = $imgs.map(function () {
-                                return $(this).attr("src") || "";
-                            }).get();
-
-                            const $clone = $cell.clone();
-                            $clone.find("img").remove();
-
-                            const text = $clone.text().trim().replace(/\s+/g, " ");
-
-                            const parts = [...imgSources];
-                            if (text) parts.push(text);
-
-                            return parts.join(", ");
-                        }).get().join("\t");
-                    });
-
-                    const gridContentText = rows.join("\n");
-                    
-                    // Use navigator.clipboard on HTTPS; fallback to custom copy method for HTTP
-                    if (location.protocol === 'https:') {
-                        navigator.clipboard.writeText(gridContentText);
-                    } else {
-                        this.copyToClipboard(gridContentText);
-                    }
-                }
-            }
-        });
     }
 
-    copyToClipboard(text) {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        textarea.style.position = "fixed";
-        textarea.style.top = "-9999px";
+    exportSelectedText() {
+        const selected = this.getSelected?.() || [];
+        if (selected.length === 0) return "";
 
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
+        const rows = selected.map(item => {
+            return $(item.$markup).find("td").map(function () {
+                const $cell = $(this);
+                const $imgs = $cell.find("img");
 
-        try {
-            document.execCommand("copy");
-        } catch (err) {
-            console.error("Unable to copy", err);
-        }
-        document.body.removeChild(textarea);
+                const imgSources = $imgs.map(function () {
+                    return $(this).attr("src") || "";
+                }).get();
+
+                const $clone = $cell.clone();
+                $clone.find("img").remove();
+
+                const text = $clone.text().trim().replace(/\s+/g, " ");
+
+                const parts = [...imgSources];
+                if (text) parts.push(text);
+
+                return parts.join(", ");
+            }).get().join("\t");
+        });
+
+        return rows.join("\n");
     }
 
     getContext(){
@@ -359,6 +331,5 @@ export class Grid extends Collection{
     }
 }
 Grid.extend();
-
 
 
