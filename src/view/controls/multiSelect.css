@@ -6,7 +6,7 @@
     flex-direction: row;
     align-items: stretch;
     border-radius: 5px;
-    padding: 1px;
+    padding: 2px;
     border-width: 1px;
     border-style: solid;
     border-color: #CFD7DC;
@@ -31,6 +31,20 @@
     gap: 2px;
 }
 
+.placeholder {
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    transform: translateY(-50%);
+    color: #9B9B9B;
+    user-select: none;
+    cursor: text;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .multiselect>div[name="toggle"]>button{
     border: none;
     background: transparent;
@@ -45,9 +59,7 @@
     padding-right: 5px;
     gap: 3px;
     max-width: 100%;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    margin-block: 2px;
+    max-height: 32px;
     border-radius: 4px;
 }
 
@@ -84,6 +96,7 @@
     max-height: 250px;
     top: 100%;
     left: 0;
+    right: 0; 
     overflow: auto;
     box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 10px 0px, rgba(0, 0, 0, 0.1) 0px 0px 0px 1px;
     border-radius: 5px;
@@ -94,6 +107,18 @@
     transform: translateY(0.5rem);
     transition: all 0.1s cubic-bezier(0.16, 1, 0.5, 1);
     z-index: 999;
+}
+
+.dropdown.down {
+  top: 100%;
+  bottom: auto;
+  margin-top: 4px;
+}
+
+.dropdown.up {
+  bottom: 100%;
+  top: auto;
+  margin-bottom: 4px;
 }
 
 .dropdown a {
