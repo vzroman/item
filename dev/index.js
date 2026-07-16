@@ -12,6 +12,8 @@ import {run as validate_input} from "./validate_input.js"
 import {run as breadcrumbs} from "./breadcrumbs.js"
 import { run as collection_filter_test } from "./collection_filter_test.js";
 import { run as datepicker_test } from "./datepicker_test.js";
+import { run as colorpicker_test } from "./colorpicker_test.js";
+import { run as window_test } from "./window_test.js";
 
 
 
@@ -23,6 +25,6 @@ $(function () {
 
 
 
-    datepicker_test( $container );
+    window_test( $container );
 
 });

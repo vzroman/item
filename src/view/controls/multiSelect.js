@@ -53,7 +53,8 @@ export class MultiSelect extends Control{
         itemValue:{type: types.primitives.String},
         itemText:{type: types.primitives.Any},
         itemGroup:{type: types.primitives.Any},
-        isExpanded:{type: types.primitives.Bool, default: false}
+        isExpanded:{type: types.primitives.Bool, default: false},
+        isDropdownVisible:{type: types.primitives.Bool, default: false}
     }
 
     constructor( options ){
@@ -109,6 +110,7 @@ export class MultiSelect extends Control{
         });
 
         const $selectedWrapper = this.$markup.find('[name="selected"]');
+        this.$itemsContainer = this.$markup.find('[name="items"]');
 
         $selectedWrapper.on("click", (e) => {
             // todo. there might be more consistent way of knowing if element is close btn
@@ -123,14 +125,98 @@ export class MultiSelect extends Control{
                 return;
             }
 
-            if (!this.$markup[0].contains(e.target)) {
+            const dropdown = this._widgets?.items?.$markup?.[0];
+            if (!this.$markup[0].contains(e.target) && !dropdown?.contains(e.target)) {
                 this.set({isExpanded: false});
             }
         };
 
+        this._closeOnViewportChange = (e) => {
+            const dropdown = this._widgets?.items?.$markup?.[0];
+            if (e?.type === "scroll" && dropdown?.contains(e.target)) {
+                return;
+            }
+
+            if (this.get("isExpanded")) {
+                this.set({isExpanded: false});
+            }
+        };
+
+        this._scheduleDropdownPosition = () => {
+            if (!this.get("isExpanded") || this._positionFrame) return;
+
+            this._positionFrame = window.requestAnimationFrame(() => {
+                this._positionFrame = undefined;
+                if (this.get("isExpanded")) {
+                    this._positionDropdown();
+                }
+            });
+        };
+
         window.addEventListener("click", this._closeDropdown);
+        window.addEventListener("resize", this._scheduleDropdownPosition);
+        window.addEventListener("mousemove", this._scheduleDropdownPosition);
+        window.addEventListener("pointermove", this._scheduleDropdownPosition);
+        window.addEventListener("scroll", this._closeOnViewportChange, true);
+
+        this.bind("isExpanded", isExpanded => {
+            if (isExpanded) {
+                this._showDropdown();
+            } else {
+                this._hideDropdown();
+            }
+        });
 
         this._widgets.selected.link({data:selectedController});
+    }
+
+    _showDropdown() {
+        const dropdown = this._widgets?.items;
+        if (!dropdown?.$markup?.length) return;
+
+        this.set({isDropdownVisible: false});
+
+        dropdown.$markup
+            .appendTo($("body"))
+            .addClass(styles.portalDropdown);
+
+        this._positionDropdown();
+        this.set({isDropdownVisible: true});
+    }
+
+    _hideDropdown() {
+        const dropdown = this._widgets?.items;
+        if (!dropdown?.$markup?.length || !this.$itemsContainer?.length) return;
+
+        this.set({isDropdownVisible: false});
+
+        dropdown.$markup
+            .removeClass(styles.portalDropdown)
+            .css({left: "", top: "", width: ""})
+            .appendTo(this.$itemsContainer);
+    }
+
+    _positionDropdown() {
+        const dropdown = this._widgets?.items;
+        if (!dropdown?.$markup?.length || !this.$markup?.length) return;
+
+        const rect = this.$markup[0].getBoundingClientRect();
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        const gap = 0;
+
+        dropdown.$markup.css({
+            width: `${rect.width}px`,
+            left: `${rect.left}px`,
+            top: `${rect.bottom + gap}px`
+        });
+
+        const dropdownHeight = dropdown.$markup.outerHeight();
+        const spaceBelow = viewportHeight - rect.bottom - gap;
+        const spaceAbove = rect.top - gap;
+
+        if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+            dropdown.$markup.css({top: `${Math.max(gap, rect.top - dropdownHeight - gap)}px`});
+        }
     }
 
     widgets() {
@@ -185,8 +271,8 @@ export class MultiSelect extends Control{
                         items:"parent@items",
                         itemValue:"parent@itemValue",
                         itemText:"parent@itemText",
-                        classes: { source: "parent@isExpanded", handler: isExpanded => {
-                            return isExpanded ? [styles.show] : [];
+                        classes: { source: "parent@isDropdownVisible", handler: isDropdownVisible => {
+                            return isDropdownVisible ? [styles.show] : [];
                         } }
                     },
                     events:{
@@ -197,9 +283,19 @@ export class MultiSelect extends Control{
         }
     }
 
-    destroy() {
+    _destroy() {
         window.removeEventListener("click", this._closeDropdown);
-        super.destroy();
+        window.removeEventListener("resize", this._scheduleDropdownPosition);
+        window.removeEventListener("mousemove", this._scheduleDropdownPosition);
+        window.removeEventListener("pointermove", this._scheduleDropdownPosition);
+        window.removeEventListener("scroll", this._closeOnViewportChange, true);
+        if (this._positionFrame) {
+            window.cancelAnimationFrame(this._positionFrame);
+            this._positionFrame = undefined;
+        }
+        this._hideDropdown();
+        this.$itemsContainer = undefined;
+        super._destroy();
     }
 }
 MultiSelect.extend();

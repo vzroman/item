@@ -9,7 +9,8 @@ export class ColorPicker extends Control {
     static events = { onChange: true };
 
     static options = {
-        value:{type:types.primitives.String, default: "#000"}
+        value:{type:types.primitives.String, default: "#000"},
+        hideText: {type:types.primitives.Bool, default: false},
     };
 
     static markup = `<button class="${style.colorBtn}">
@@ -23,6 +24,12 @@ export class ColorPicker extends Control {
         
         this.$colorValue = this.$markup.find("[name='color-value']");
         this.$colorPreview = this.$markup.find("[name='color-preview']");
+
+        this.$on_hideText(this._options.hideText);
+    }
+
+    $on_hideText( value ){
+        this.$colorValue.css("display", value ? "none" : "");
     }
 
     updateValue( value, prev ){

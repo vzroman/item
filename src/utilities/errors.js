@@ -27,6 +27,13 @@ export class InvalidOptions extends Error{
     constructor(Type, Options){
 
         super("invalid options");
+        console.error(
+            Type,
+            "invalid options, expected",
+            Type.options,
+            "actual",
+            Options
+        );
 
         this.type = Type;
         this.options = Options;
@@ -38,6 +45,12 @@ export class InvalidEvent extends Error{
     constructor(Type, event){
 
         super("invalid event: " + event);
+        console.error(
+            Type,
+            "invalid event",
+            event,"available",
+            Type.events
+        );
 
         this.type = Type;
         this.event = event;
