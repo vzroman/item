@@ -4,7 +4,7 @@ import lock from "./lock/lock.gif";
 export function waiting( $container ){
     const $body = $('body');
     const $element = $container ?? $body;
-    const z_index = $element.zIndex() + 100;
+    const z_index = $element.css("zIndex") + 100;
     const $lock=$(`
         <div 
             class="${styles.overlay}" 
