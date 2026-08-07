@@ -23,11 +23,12 @@ export class TabStrip extends ItemView {
     };
 
     markup() {
-        const $markup= $(`<div class="${style.tab_container} ${ this._options.horizontal ? style.horizontal : style.vertical  } ">
-            <div name="menu"></div>
+        const $markup = $(`<div class="${style.tab_container} ${this._options.horizontal ? style.horizontal : style.vertical}">
+            <div class="${style.menu_wrapper}" style="position:relative;">
+                <div name="menu"></div>
+            </div>
             <div name="tab" class="${style.tab_content}"></div>
         </div>`);
-
         this.$tabContainer = $markup.find('[name="tab"]');
         return $markup;
     }
@@ -35,6 +36,14 @@ export class TabStrip extends ItemView {
     constructor(options){
         super(options);
         this.bind("active", tab => this.changeView(tab));
+        this._resizeHandler = this._debounce(() => this._renderOverflowMenu(), 150);
+        this._isResizing = false; // флаг активности пересчёта
+
+        // TODO: решить проблему с гонкой ResizeObserver и setTimeout при первой инициализации
+        this._menuResizeObserver = new ResizeObserver(() => {
+            if(this._isResizing) return;
+            this._resizeHandler();
+        });
     }
 
     changeView(id){
@@ -57,7 +66,107 @@ export class TabStrip extends ItemView {
         this._linkContext = {...this._linkContext,...context};
         super.linkWidgets( this._linkContext );
         this._tab?.link( this._linkContext );
+
+        const $menu = this.$markup.find('[name="menu"]');
+            if ($menu.length) {
+                this._menuResizeObserver.observe($menu[0]);
+            }
+
+        setTimeout(() => this._renderOverflowMenu(), 0);
     }
+
+    destroy() {
+        if (this._menuResizeObserver) {
+            this._menuResizeObserver.disconnect();
+            this._menuResizeObserver = null;
+        }
+
+        super.destroy();
+    }
+
+    _debounce(fn, delay) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    _renderOverflowMenu() {
+        if (!this.$markup) return;
+        this._isResizing = true; 
+
+        try {
+            const reserveWidth = 40;
+            const $menu = this.$markup.find('[name="menu"]');
+            const $flex = $menu.children().first('.flex-collection');
+            const $tabs = $flex.children(':not(.overflow-tab-menu)');
+            const containerWidth = $menu.width();
+
+            // Если раньше был создан список скрытых вкладок — восстановим их
+            if (this._hiddenTabs && this._hiddenTabs.length) {
+                for (const $el of this._hiddenTabs) {
+                    $flex.find('.overflow-tab-menu').before($el);
+                }
+                this._hiddenTabs = [];
+            }
+
+            $flex.find('.overflow-tab-menu').remove();
+
+            let total = 0;
+            let hiddenFrom = -1;
+
+            $tabs.each((i, el) => {
+                total += $(el).outerWidth(true);
+                if (total + reserveWidth > containerWidth && hiddenFrom === -1) {
+                    hiddenFrom = i;
+                }
+            });
+
+            if (hiddenFrom === -1) return;
+
+            // Отделяем скрытые элементы
+            const hidden = $tabs.slice(hiddenFrom).toArray();
+            this._hiddenTabs = hidden; 
+
+            const $more = $(`
+                <div 
+                    class="${style.tab_nav} overflow-tab-menu" 
+                    style="cursor:pointer; position:relative; display:flex; align-items:center; justify-content:center; flex-shrink:0; max-height:16px; text-align:center; margin-left:auto;">
+                    ⋯
+                    <div class="tabdrop-menu" style="display:none; position:absolute; top:100%; right:0; background:#fff; border:1px solid #ccc; z-index:10000;"></div>
+                </div>
+            `);
+
+            const $dropdown = $more.find('.tabdrop-menu');
+
+            hidden.forEach((el, i) => {
+                const $el = $(el);
+                const index = hiddenFrom + i;
+                $el.on('click', () => {
+                    this.set({ active: index });
+                    $dropdown.hide();
+                });
+                $dropdown.append($el);
+            });
+
+            $more.on('click', e => {
+                e.stopPropagation();
+                console.log('toggle dropdown');
+
+                $('.tabdrop-menu').not($dropdown).hide();
+                $dropdown.toggle();
+            });
+
+            $(document).off('click.tabdrop').on('click.tabdrop', () => $dropdown.hide());
+
+            $flex.append($more);
+        } finally {
+            setTimeout(() => this._isResizing = false, 30);
+        }
+        
+    }
+
 
     widgets() {
         const _menuController = new controllers.Collection({
